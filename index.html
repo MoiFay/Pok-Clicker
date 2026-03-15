@@ -67,6 +67,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .pbar-label{display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-bottom:3px;font-weight:700}
 .pbar-track{height:7px;background:var(--card);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
 .pbar-fill{height:100%;background:linear-gradient(90deg,var(--purp-d),var(--gold));border-radius:4px;transition:width .4s ease}
+.pbar-fill.ready{background:linear-gradient(90deg,var(--gold),#fff176,var(--gold));animation:pbarPulse 1.2s ease-in-out infinite;}
+@keyframes pbarPulse{0%,100%{opacity:.7;filter:brightness(1)} 50%{opacity:1;filter:brightness(1.4)}}
 #qty-btn{padding:5px 12px;background:var(--card);border:1px solid var(--border-b);border-radius:7px;color:var(--gold);font-family:var(--fn-px);font-size:9px;cursor:pointer;transition:var(--ease);}
 #qty-btn:hover{background:var(--card-h);box-shadow:var(--glow-g)}
 #right{display:flex;flex-direction:column;overflow:hidden;background:rgba(13,14,27,.8)}
@@ -1131,9 +1133,11 @@ function doPrestige(){
     pd:0, evMult:1, evEnd:0, lastSave:Date.now(), startTime:Date.now(),
   };
   G = keep;
+  saveGame(); // Sauvegarde immédiate après prestige pour persister tl:0
   closeModal('md-pres');
-  notif('🍬 Prestige effectué ! Bonus: ×'+Math.pow(1.02,G.rc).toFixed(2),'ev');
+  notif('🍬 Prestige #'+G.pc+' ! +1 bonbon — Bonus total : ×'+Math.pow(1.02,G.rc).toFixed(3),'ev');
   renderShop();
+  updateUI();
 }
 
 // ============================================================
@@ -1327,11 +1331,21 @@ function updateUI(){
   document.getElementById('click-display').textContent = 'Clic = '+fmtP(cv);
   document.getElementById('b-totb').textContent = totB();
   document.getElementById('b-nach').textContent = G.ach.size;
-  // Prestige bar — basée sur tl (gains légitimes)
+  // Prestige bar — cycle par cycle, reset à chaque prestige
   const tl = G.tl || 0;
-  const pct = Math.min(100, (tl / PRES_THRESHOLD) * 100);
-  document.getElementById('pbar-fill').style.width = pct + '%';
-  document.getElementById('pbar-txt').textContent = fmtP(tl) + ' / ' + fmtP(PRES_THRESHOLD);
+  const fill = document.getElementById('pbar-fill');
+  if(tl >= PRES_THRESHOLD){
+    // Prêt à prestige : barre pleine + animation dorée
+    fill.style.width = '100%';
+    fill.classList.add('ready');
+    document.getElementById('pbar-txt').innerHTML =
+      '<span style="color:var(--gold);font-weight:900;animation:pbarPulse 1.2s ease-in-out infinite;display:inline-block">✨ PRÊT À PRESTIGE !</span>';
+  } else {
+    // En cours : barre normale 0 → 4M
+    fill.style.width = Math.min(100, (tl / PRES_THRESHOLD) * 100) + '%';
+    fill.classList.remove('ready');
+    document.getElementById('pbar-txt').textContent = fmtP(tl) + ' / ' + fmtP(PRES_THRESHOLD);
+  }
   if(G.rc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=Math.pow(1.02,G.rc).toFixed(2);}
   // Upgrade / achievement badge counts
   const avail = UPGRADES.filter(u=>!G.bu.has(u.id)&&u.cond&&u.cond(G)&&G.pd>=u.cost).length;
