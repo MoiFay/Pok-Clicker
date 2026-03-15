@@ -191,17 +191,24 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="badge gold">🏆 <span id="b-nach">0</span></div>
     </div>
     <div id="pbar-wrap" style="max-width:290px;width:100%">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span style="font-size:9px;color:var(--dim);font-weight:800">Prochain Prestige</span>
-        <span style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:9px;color:var(--purple);font-weight:800">🍬 <span id="pbar-candy">0</span> bonbons</span>
-          <span style="font-size:9px;color:var(--gold);font-weight:800" id="pbar-mult"></span>
-        </span>
+      <!-- Ligne bonbons -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <span style="font-size:9px;color:var(--purple);font-weight:800">🍬 <span id="pbar-candy">0</span> bonbons</span>
+        <span style="font-size:9px;color:var(--gold);font-weight:800" id="pbar-mult"></span>
       </div>
-      <div class="pbar-track"><div class="pbar-fill" id="pbar-fill" style="width:0%"></div></div>
-      <div style="display:flex;justify-content:space-between;margin-top:3px">
-        <span style="font-size:9px;color:var(--dim)" id="pbar-txt">0 / ?</span>
-        <span style="font-size:9px;color:var(--dim)" id="pbar-pct">0%</span>
+      <!-- Barre 1 : prestiges disponibles (cachée si 0) -->
+      <div id="pbar-avail-wrap" style="display:none;margin-bottom:6px">
+        <div style="font-size:9px;color:var(--gold);font-weight:800;margin-bottom:3px" id="pbar-avail-lbl">✨ 0 PRESTIGES DISPO !</div>
+        <div class="pbar-track"><div class="pbar-fill ready" id="pbar-fill-avail" style="width:100%"></div></div>
+      </div>
+      <!-- Barre 2 : progression vers le prochain prestige -->
+      <div>
+        <div style="font-size:9px;color:var(--dim);font-weight:800;margin-bottom:3px" id="pbar-next-lbl">Prochain Prestige #1</div>
+        <div class="pbar-track"><div class="pbar-fill" id="pbar-fill" style="width:0%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          <span style="font-size:9px;color:var(--dim)" id="pbar-txt">0 / ?</span>
+          <span style="font-size:9px;color:var(--dim)" id="pbar-pct">0%</span>
+        </div>
       </div>
     </div>
     <button id="qty-btn" onclick="cycleQty()">Acheter × <span id="qty-lbl">1</span></button>
@@ -1406,27 +1413,33 @@ function updateUI(){
   document.getElementById('click-display').textContent = 'Clic = '+fmtP(cv);
   document.getElementById('b-totb').textContent = totB();
   document.getElementById('b-nach').textContent = G.ach.size;
-  // Prestige bar — x4 scalé
+  // Prestige bar — x4 scalé, 2 barres séparées
   const fill = document.getElementById('pbar-fill');
   const available = presAvailable(G);
-  const prog = presProgressInCycle(G);
-  const nextN = (G.pc||0) + available + 1;
+  const prog = presProgressInCycle(G);  // progression vers le PROCHAIN non atteint
+  const nextN = (G.pc||0) + available + 1; // numéro du prochain prestige pas encore dispo
   const pct = Math.min(100, (prog.current / prog.goal) * 100);
+
   // Bonbons + multiplicateur
   document.getElementById('pbar-candy').textContent = G.rc;
   document.getElementById('pbar-mult').textContent = G.rc > 0 ? 'x'+Math.pow(1.02,G.rc).toFixed(2) : '';
+
+  // Barre 1 : prestiges disponibles
+  const availWrap = document.getElementById('pbar-avail-wrap');
   if(available > 0){
-    fill.style.width = '100%';
-    fill.classList.add('ready');
-    const label = available > 1 ? '✨ '+available+' PRESTIGES DISPO !' : '✨ PRÊT À PRESTIGE !';
-    document.getElementById('pbar-txt').innerHTML = '<span style="color:var(--gold);font-weight:900;animation:pbarPulse 1.2s infinite;display:inline-block">'+label+'</span>';
-    document.getElementById('pbar-pct').textContent = '';
+    availWrap.style.display = 'block';
+    const label = available > 1 ? '✨ '+available+' PRESTIGES DISPO !' : '✨ 1 PRESTIGE DISPO !';
+    document.getElementById('pbar-avail-lbl').textContent = label;
   } else {
-    fill.style.width = pct + '%';
-    fill.classList.remove('ready');
-    document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal) + ' (#'+nextN+')';
-    document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
+    availWrap.style.display = 'none';
   }
+
+  // Barre 2 : progression vers le prochain prestige pas encore atteint
+  fill.style.width = pct + '%';
+  fill.classList.remove('ready');
+  document.getElementById('pbar-next-lbl').textContent = 'Prestige #' + nextN + ' ('+fmtP(presThreshold(nextN))+')';
+  document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal);
+  document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
   if(G.rc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=Math.pow(1.02,G.rc).toFixed(2);}
   // Upgrade / achievement badge counts
   const avail = UPGRADES.filter(u=>!G.bu.has(u.id)&&u.cond&&u.cond(G)&&G.pd>=u.cost).length;
