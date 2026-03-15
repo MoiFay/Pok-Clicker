@@ -236,7 +236,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <textarea class="stx" id="tx-imp" placeholder="Collez votre sauvegarde ici..."></textarea>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="sbtn" onclick="importSave()">⬆️ Importer</button>
-      <button class="sbtn danger" onclick="if(confirm('Effacer TOUTE la progression?'))resetAll()">🗑️ Reset Total</button>
+      <button class="sbtn danger" onclick="openResetConfirm()">🗑️ Reset Total</button>
     </div>
   </div>
 </div>
@@ -244,6 +244,33 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="modal">
     <div class="modal-title">📊 STATISTIQUES<button class="mcls" onclick="closeModal('md-stats')">✕</button></div>
     <div id="stats-tbl"></div>
+  </div>
+</div>
+
+<!-- Reset confirmation modal -->
+<div class="overlay" id="md-reset">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div class="modal-title" style="justify-content:center;color:var(--red-l)">⚠️ RESET TOTAL ⚠️</div>
+    <p style="font-size:11px;color:var(--dim);margin-bottom:14px;line-height:1.7">
+      Cette action est <strong style="color:var(--red-l)">IRRÉVERSIBLE</strong>.<br>
+      Toute votre progression sera effacée.<br><br>
+      Tapez <strong style="color:var(--gold);font-family:var(--fn-px);font-size:10px">DELETE</strong> pour confirmer :
+    </p>
+    <input id="reset-input" type="text" placeholder="Tapez DELETE ici..."
+      style="width:100%;padding:9px 12px;background:var(--bg);border:2px solid var(--border);border-radius:8px;
+             color:var(--text);font-family:var(--fn-px);font-size:10px;text-align:center;outline:none;margin-bottom:12px"
+      oninput="const btn=document.getElementById('reset-confirm-btn');btn.disabled=this.value!=='DELETE';btn.style.opacity=this.value==='DELETE'?'1':'.4'"
+      onkeydown="if(event.key==='Enter'&&this.value==='DELETE')doReset()">
+    <div style="display:flex;gap:8px">
+      <button class="sbtn" style="flex:1" onclick="closeModal('md-reset');document.getElementById('reset-input').value='';document.getElementById('reset-confirm-btn').disabled=true">Annuler</button>
+      <button id="reset-confirm-btn" disabled onclick="doReset()"
+        style="flex:1;padding:8px;background:var(--red);border:none;border-radius:7px;color:#fff;
+               font-family:var(--fn);font-weight:800;font-size:11px;cursor:pointer;opacity:.4;transition:opacity .2s"
+        onmouseenter="if(!this.disabled)this.style.opacity=1"
+        onmouseleave="if(!this.disabled)this.style.opacity='.85'">
+        🗑️ Effacer
+      </button>
+    </div>
   </div>
 </div>
 <script>
@@ -438,6 +465,13 @@ const UPGRADES=[
   {id:'bm_nx',em:'🌀',name:'Eternatus',      cost:3e36,   type:'bldg_mult',bId:'nexus',     val:2,cond:g=>g.b.nexus>=15,   desc:'x2 Nexus Cosmiques'},
   {id:'bm_om',em:'🔮',name:'Necrozma',       cost:20e36,  type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=15,   desc:'x2 Omega Pokemon'},
   {id:'bm_gi',em:'👼',name:'Arceus Alpha',   cost:150e36, type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=15,desc:'x2 DIEU ARCEUS'},
+  // --- Upgrades taux d'événements rares ---
+  {id:'er01',em:'🍀',name:'Encens Pokémon',      cost:200e3,  type:'ev_rate', val:.002, desc:'+0.2% chance événement',   cond:g=>g.ec>=1},
+  {id:'er02',em:'🌸',name:'Fleur Safran',         cost:2e6,    type:'ev_rate', val:.003, desc:'+0.3% chance événement',   cond:g=>g.bu.has('er01')&&g.ec>=5},
+  {id:'er03',em:'🔮',name:'Orbe Mystérieuse',     cost:20e6,   type:'ev_rate', val:.004, desc:'+0.4% chance événement',   cond:g=>g.bu.has('er02')&&g.ec>=15},
+  {id:'er04',em:'⭐',name:'Fragment Etoile',      cost:200e6,  type:'ev_rate', val:.005, desc:'+0.5% chance evenement',   cond:g=>g.bu.has('er03')&&g.ec>=30},
+  {id:'er05',em:'💫',name:'Poudre de Comète',     cost:2e9,    type:'ev_rate', val:.006, desc:'+0.6% chance événement',   cond:g=>g.bu.has('er04')&&g.ec>=60},
+  {id:'er06',em:'🌟',name:'Cristal Légendaire',   cost:20e9,   type:'ev_rate', val:.007, desc:'+0.7% chance événement',   cond:g=>g.bu.has('er05')&&g.ec>=100},
   // --- Upgrades Prestige ---
   {id:'pm01',em:'🍬',name:'Bonbon Rare+ x2', cost:20e6,   type:'prestige_mult',val:2, desc:'Double le bonus Prestige',   cond:g=>g.rc>=5},
   {id:'pm02',em:'🍭',name:'Bonbon Max x3',   cost:200e6,  type:'prestige_mult',val:3, desc:'Triple le bonus Prestige',   cond:g=>g.rc>=20},
@@ -592,6 +626,7 @@ function newGame(){
   return {
     pd:0,        // Current PokeCoins
     te:0,        // Total earned ever
+    tl:0,        // Earned legitimately (CPS + clics, pas events)
     tc:0,        // Total clicks
     tt:0,        // Total time played (s)
     pc:0,        // Prestige count
@@ -697,6 +732,17 @@ function calcClickValue(g){
   return Math.max(1, base);
 }
 
+
+// Taux d'apparition des événements rares
+// Base : 0.5% toutes les 3s  |  Max absolu : 4%
+function getEventRate(){
+  let rate = 0.005; // 0.5% base
+  for(const up of UPGRADES){
+    if(up.type==='ev_rate' && G.bu.has(up.id)) rate += up.val;
+  }
+  return Math.min(rate, 0.04); // Plafonné à 4%
+}
+
 function bldgCost(bd, owned, qty){
   // Returns cost to buy `qty` of building from `owned` state
   let total = 0;
@@ -724,7 +770,9 @@ function maxBuy(bd){
 function totB(g){ g=g||G; return BLDGS.reduce((s,b)=>s+(g.b[b.id]||0),0); }
 function uniqB(g){ g=g||G; return BLDGS.filter(b=>(g.b[b.id]||0)>0).length; }
 
-function prestigeGain(g){ g=g||G; return Math.floor(Math.sqrt(g.te/1e6)*7); }
+// Seuil de prestige : 1e9 ₽ gagnés légitimement (CPS + clics)
+const PRES_THRESHOLD = 4e6;  // 4 millions légitimes = 1 bonbon
+function prestigeGain(g){ g=g||G; return (g.tl||0) >= PRES_THRESHOLD ? 1 : 0; }
 
 // ============================================================
 // GAME LOOP
@@ -742,6 +790,7 @@ function gameTick(){
   const earned = cps * dt;
   G.pd += earned;
   G.te += earned;
+  G.tl += earned; // Comptabilise pour prestige
   G.tt += dt;
   if(cps > G.maxCps) G.maxCps = cps;
 
@@ -756,7 +805,7 @@ function gameTick(){
   tickAcc += dt;
   if(tickAcc >= 3){
     tickAcc = 0;
-    if(!activeEventId && Math.random() < 0.02){
+    if(!activeEventId && Math.random() < getEventRate()){
       triggerEvent();
     }
   }
@@ -786,6 +835,7 @@ function doClick(cx, cy){
   const val = calcClickValue(G);
   G.pd += val;
   G.te += val;
+  G.tl += val; // Clic légitime
   G.tc++;
   if(G.pd < 0.01) G.wentBroke++;
 
@@ -836,23 +886,30 @@ function buyUpgrade(id){
 function openPrestige(){
   const gain = prestigeGain(G);
   const newTotal = G.rc + gain;
-  document.getElementById('pres-gain').textContent = gain + ' 🍬';
+  const tl = G.tl || 0;
+  const pct = Math.min(100,(tl/PRES_THRESHOLD)*100).toFixed(1);
+  document.getElementById('pres-gain').textContent = gain > 0 ? '1 🍬' : '0 🍬 (pas encore éligible)';
   document.getElementById('pres-cur').textContent = G.rc;
-  document.getElementById('pres-cmult').textContent = 'x' + Math.pow(1.02, G.rc).toFixed(2);
-  document.getElementById('pres-amult').textContent = 'x' + Math.pow(1.02, newTotal).toFixed(2);
-  const btn = document.getElementById('pres-btn');
-  btn.disabled = gain <= 0;
+  document.getElementById('pres-cmult').textContent = 'x' + Math.pow(1.02, G.rc).toFixed(3);
+  document.getElementById('pres-amult').textContent = 'x' + Math.pow(1.02, newTotal).toFixed(3);
+  // Afficher la progression légitime
+  const infoEl = document.getElementById('pres-cur').parentElement;
+  infoEl.innerHTML = 'Gains légitimes : <strong>' + fmtP(tl) + '</strong> / <strong>' + fmtP(PRES_THRESHOLD) + '</strong> (' + pct + '%)<br>'
+    + 'Bonbons actuels : <strong>' + G.rc + '</strong> — Bonus : <strong>x' + Math.pow(1.02,G.rc).toFixed(3) + '</strong><br>'
+    + 'Après prestige : <strong>x' + Math.pow(1.02,newTotal).toFixed(3) + '</strong>'
+    + (gain<=0?'<br><em style="color:var(--red-l)">⚠️ Gagnez encore ' + fmtP(PRES_THRESHOLD - tl) + ' légitimement</em>':'');
+  document.getElementById('pres-btn').disabled = gain <= 0;
   document.getElementById('md-pres').classList.add('on');
 }
 function doPrestige(){
   const gain = prestigeGain(G);
   if(gain <= 0) return;
-  if(gain > G.bestPrestige) G.bestPrestige = gain;
-  G.rc += gain;
+  G.bestPrestige = Math.max(G.bestPrestige||0, 1);
+  G.rc += 1; // Toujours 1 bonbon par prestige
   G.pc++;
   // Reset but keep upgrades, candies, achievements
   const keep = {
-    te:0, tc:G.tc, tt:G.tt, pc:G.pc, rc:G.rc, ec:G.ec,
+    te:0, tl:0, tc:G.tc, tt:G.tt, pc:G.pc, rc:G.rc, ec:G.ec,
     maxCps:0, maxCombo:G.maxCombo, wentBroke:G.wentBroke,
     imported:G.imported, sessions:G.sessions, bestPrestige:G.bestPrestige,
     offlineEarned:G.offlineEarned,
@@ -892,7 +949,7 @@ function clickEvent(){
   if(G.capturés[ev.id] !== undefined) G.capturés[ev.id]++;
   else G.capturés[ev.id] = 1;
   // Bonus: 2s worth of CPS instantly
-  const bonus = calcCPS(G) * 30;
+  const bonus = calcCPS(G) * 8; // Bonus réduit : 8s de prod (pas 30)
   G.pd += bonus;
   G.te += bonus;
   spawnParticle(window.innerWidth/2, window.innerHeight/2, '✨ +'+fmtP(bonus));
@@ -949,6 +1006,7 @@ function loadGame(){
       const gained = offCPS * offlineSecs * 0.5; // 50% while offline
       G.pd += gained;
       G.te += gained;
+      G.tl += gained;
       G.offlineEarned = (G.offlineEarned||0) + gained;
       if(gained > 0) notif('💤 Gains hors-ligne : +'+fmtP(gained)+' ('+Math.floor(offlineSecs)+'s)','buy');
     }
@@ -983,11 +1041,24 @@ function importSave(){
     renderShop();
   } catch(e){ notif('❌ Sauvegarde invalide !','ev'); }
 }
-function resetAll(){
-  localStorage.removeItem('pokeclicker_v2');
-  G=newGame(); closeModal('md-save');
-  notif('🗑️ Progression effacée','ev'); renderShop();
+function openResetConfirm(){
+  closeModal('md-save');
+  document.getElementById('reset-input').value = '';
+  document.getElementById('reset-confirm-btn').disabled = true;
+  document.getElementById('reset-confirm-btn').style.opacity = '.4';
+  document.getElementById('md-reset').classList.add('on');
+  setTimeout(()=>document.getElementById('reset-input').focus(), 100);
 }
+function doReset(){
+  if(document.getElementById('reset-input').value !== 'DELETE') return;
+  localStorage.removeItem('pokeclicker_v2');
+  G = newGame();
+  closeModal('md-reset');
+  notif('🗑️ Progression effacée. Bonne chance !','ev');
+  renderShop();
+  updateUI();
+}
+function resetAll(){ openResetConfirm(); }
 function openStats(){
   const cps=calcCPS(G), cv=calcClickValue(G);
   document.getElementById('stats-tbl').innerHTML=`
@@ -1044,12 +1115,11 @@ function updateUI(){
   document.getElementById('click-display').textContent = 'Clic = '+fmtP(cv);
   document.getElementById('b-totb').textContent = totB();
   document.getElementById('b-nach').textContent = G.ach.size;
-  // Prestige bar
-  const pg = prestigeGain(G);
-  const nextPres = Math.pow(Math.ceil(pg/7)+1,2) * 1e6;
-  const pct = Math.min(100, (G.te/nextPres)*100);
-  document.getElementById('pbar-fill').style.width=pct+'%';
-  document.getElementById('pbar-txt').textContent=fmtP(G.te)+' / '+fmtP(nextPres);
+  // Prestige bar — basée sur tl (gains légitimes)
+  const tl = G.tl || 0;
+  const pct = Math.min(100, (tl / PRES_THRESHOLD) * 100);
+  document.getElementById('pbar-fill').style.width = pct + '%';
+  document.getElementById('pbar-txt').textContent = fmtP(tl) + ' / ' + fmtP(PRES_THRESHOLD);
   if(G.rc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=Math.pow(1.02,G.rc).toFixed(2);}
   // Upgrade / achievement badge counts
   const avail = UPGRADES.filter(u=>!G.bu.has(u.id)&&u.cond&&u.cond(G)&&G.pd>=u.cost).length;
