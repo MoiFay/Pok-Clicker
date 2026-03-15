@@ -1288,7 +1288,10 @@ function saveGame(){
 
 function loadGame(){
   try{
-    const raw = localStorage.getItem('pokeclicker_v3');
+    // Essaie v3 d'abord, puis v2, puis v1 comme fallback
+    const raw = localStorage.getItem('pokeclicker_v3')
+             || localStorage.getItem('pokeclicker_v2')
+             || localStorage.getItem('pokeclicker_save');
     if(!raw) return;
     const data = JSON.parse(raw);
     G = {...newGame(), ...data};
@@ -1300,7 +1303,7 @@ function loadGame(){
     const offlineSecs = Math.min((Date.now() - (data.lastSave||Date.now())) / 1000, 86400);
     if(offlineSecs > 5){
       const offCPS = calcCPS(G);
-      const gained = offCPS * offlineSecs * 0.5; // 50% while offline
+      const gained = offCPS * offlineSecs * 0.5;
       G.pd += gained;
       G.te += gained;
       G.tl += gained;
@@ -1308,6 +1311,8 @@ function loadGame(){
       if(gained > 0) notif('💤 Gains hors-ligne : +'+fmtP(gained)+' ('+Math.floor(offlineSecs)+'s)','buy');
     }
     G.sessions = (G.sessions||0)+1;
+    // Migre immédiatement vers v3
+    saveGame();
   } catch(e){ console.warn('Load failed',e); }
 }
 
