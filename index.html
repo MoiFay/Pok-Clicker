@@ -153,6 +153,15 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 @media(max-width:480px){
   #left{max-height:160px} #pb{width:85px;height:85px} .pb-dot{width:18px;height:18px;border-width:3px}
 }
+
+/* Candy shop button */
+.tbtn.candy{border-color:#CE93D8;color:#CE93D8}
+.tbtn.candy:hover{background:rgba(206,147,216,.2);box-shadow:0 0 18px rgba(156,39,176,.35)}
+/* Mega prestige button */
+.tbtn.mega{border-color:#FFD700;color:#FFD700;background:rgba(255,215,0,.07)}
+.tbtn.mega:hover{background:rgba(255,215,0,.2);box-shadow:0 0 18px rgba(255,215,0,.5)}
+/* Ultra rare glow */
+@keyframes ultraGlow{0%,100%{box-shadow:0 0 20px gold,0 0 50px gold}50%{box-shadow:0 0 40px white,0 0 80px gold}}
 </style>
 </head>
 <body>
@@ -167,7 +176,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <button class="tbtn pres" onclick="openPrestige()">✨ Prestige</button>
       <button class="tbtn" onclick="openSave()">💾 Save</button>
       <button class="tbtn" onclick="openStats()">📊 Stats</button>
+      <button class="tbtn candy" onclick="openCandyShop()">🍬 Boutique</button>
+      <button class="tbtn mega" id="mega-btn" onclick="openMegaPrestige()" style="display:none">⭐ MÉGA PRESTIGE</button>
+      <button class="tbtn" onclick="openPokedex()" style="border-color:var(--red-l);color:var(--red-l)">📖 Pokédex</button>
       <button class="tbtn" onclick="openHelp()" style="border-color:#4FC3F7;color:#4FC3F7">❓ Comment jouer</button>
+      <button class="tbtn" onclick="hardRefresh()" style="border-color:var(--dim);color:var(--dim)" title="Vide le cache et recharge la page">🔄 Actualiser</button>
       <a href="https://subs.twitch.tv/moifay" target="_blank" style="text-decoration:none">
         <button class="tbtn" style="border-color:#9146FF;color:#9146FF;background:rgba(145,70,255,.1)">💜 Me soutenir</button>
       </a>
@@ -706,6 +719,41 @@ const EVENTS=[
   {id:'hooh',    em:'🔥', name:'HO-OH',   mult:20,  dur:10, color:'#FFCC02', desc:'×20 prod pendant 10s !'},
   {id:'deoxys',  em:'👽', name:'DEOXYS',  mult:12,  dur:12, color:'#80CBC4', desc:'×12 prod pendant 12s !'},
 ];
+
+// Événements Ultra-Rares — chance par tick de 3s (indépendante du taux normal)
+const ULTRA_EVENTS=[
+  {id:'ultra_arceus',  em:'🌟', name:'ARCEUS DIVIN',          mult:777, dur:7,  color:'#FFD700',
+   chance:0.0001, desc:'×777 production pendant 7s !'},
+  {id:'ultra_dialga',  em:'⏰', name:'DISTORSION DE DIALGA',  mult:1,   dur:10, color:'#7EC8E3',
+   chance:0.0003, timeWarp:3, desc:'Accélère le temps ×3 pendant 10s !'},
+  {id:'ultra_girat',   em:'🌀', name:'PACTE DE GIRATINA',     mult:200, dur:15, color:'#9b59b6',
+   chance:0.0002, desc:'×200 production pendant 15s !'},
+  {id:'ultra_necro',   em:'💥', name:'NECROZMA ABSOLU',       mult:500, dur:5,  color:'#fff',
+   chance:0.00005, desc:'×500 production pendant 5s !'},
+  {id:'ultra_god',     em:'♾️', name:'VOLONTÉ DIVINE',        mult:1000,dur:3,  color:'#FFD700',
+   chance:0.00001, desc:'×1000 production pendant 3s !'},
+];
+
+// ============================================================
+// CANDY SHOP — Boutique Bonbons Rares (permanents inter-parties)
+// ============================================================
+const CANDY_SHOP = [
+  {id:'cs_evrate',  em:'🍀', name:'Aimant à Rares',     cost:3,  desc:'+1% chance événement rare',      type:'ev_rate_bonus',  val:0.01},
+  {id:'cs_evdur',   em:'⏱️', name:'Durée Prolongée',    cost:5,  desc:'+50% durée des événements',      type:'ev_dur_mult',    val:0.5},
+  {id:'cs_offline', em:'💤', name:'Gains Nocturnes',     cost:4,  desc:'+10% gains hors-ligne',          type:'offline_bonus',  val:0.1},
+  {id:'cs_bldgcost',em:'💰', name:'Marchand Pokémon',   cost:6,  desc:'-5% prix des bâtiments',         type:'bldg_discount',  val:0.05},
+  {id:'cs_cps',     em:'⚡', name:'Énergie Permanente', cost:8,  desc:'+5% production globale',         type:'global_flat',    val:0.05},
+  {id:'cs_cps2',    em:'🌟', name:'Aura Légendaire',    cost:15, desc:'+15% production globale',        type:'global_flat',    val:0.15},
+  {id:'cs_cps3',    em:'💎', name:'Puissance Ancestrale',cost:25,desc:'+30% production globale',        type:'global_flat',    val:0.30},
+  {id:'cs_click',   em:'👆', name:'Dresseur Renforcé',  cost:5,  desc:'+10% puissance de clic',         type:'click_flat_pct', val:0.1},
+  {id:'cs_click2',  em:'💥', name:'Frappe Légendaire',  cost:12, desc:'+25% puissance de clic',         type:'click_flat_pct', val:0.25},
+  {id:'cs_prestige',em:'🍬', name:'Bonus Bonbon',       cost:10, desc:'+0.5% bonus par bonbon (au lieu de 2%)', type:'candy_bonus', val:0.005},
+  {id:'cs_start',   em:'🚀', name:'Départ Boosté',      cost:8,  desc:'Commence avec 1 Centre Pokémon', type:'start_bldg',     val:1},
+  {id:'cs_start2',  em:'🏆', name:'Dresseur Vétéran',   cost:20, desc:'Commence avec un petit stock de ₽', type:'start_pd',   val:5000},
+  {id:'cs_ultra',   em:'🌀', name:'Détecteur Ultra',    cost:15, desc:'+0.5% chance ultra-rares',       type:'ultra_rate',     val:0.005},
+  {id:'cs_combo',   em:'🔥', name:'Combo Maître',       cost:7,  desc:'Le combo augmente le CPS (+1% par clic combo)', type:'combo_cps', val:0.01},
+];
+
 </script>
 <script>
 // ============================================================
@@ -719,6 +767,8 @@ function newGame(){
     te:0,        // Total earned ever
     tl:0,        // Earned legitimately (CPS + clics, pas events)
     tc:0,        // Total clicks
+    pokedex:{},   // Pokémon capturés
+    wildCpsBoost:0, wildCpsEnd:0, wildClickBoost:0, wildClickEnd:0, wildMult:1, wildMultEnd:0,
     tt:0,        // Total time played (s)
     pc:0,        // Prestige count
     rc:0,        // Rare candies total
@@ -731,11 +781,16 @@ function newGame(){
     bestPrestige:0, // Best candies in single prestige
     offlineEarned:0,
     capturés:{mew:0,celebi:0,jirachi:0,victini:0,shaymin:0,manaphy:0,arceus:0,darkrai:0,mewtwo:0,lugia:0,hooh:0,deoxys:0},
+    cs: new Set(),     // Candy shop achats permanents
     b: Object.fromEntries(BLDGS.map(b=>[b.id,0])),
     bu: new Set(),    // Bought upgrades (ids)
     ach: new Set(),   // Earned achievements (ids)
     evMult:1,         // Current event multiplier
-    evEnd:0,          // Event end timestamp
+    timeWarpMult:1,   // Dialga time warp multiplier
+    timeWarpEnd:0,    // Dialga time warp end timestamp
+    megaCount:0,      // Nombre de Méga Prestiges
+    megaMult:1,       // Multiplicateur permanent Méga Prestige
+    megaDone:false,
     lastSave: Date.now(),
     startTime: Date.now(),
   };
@@ -921,12 +976,21 @@ function calcCPS(g){
     if(up.type==='global_mult' && g.bu.has(up.id)) gm *= up.val;
   }
   total *= gm;
-  // Prestige bonus: +2% per candy (multiplicative)
-  // +1% de production par niveau de prestige (additif)
-  const presBonus = 1 + (g.pc||0) * 0.01;
+  // Prestige bonus: +2% par bonbon rare (rc) multiplicatif
+  const candyRate = 0.02 + csBonus('candy_bonus');
+  const presBonus = Math.pow(1 + candyRate, g.rc||0);
   total *= presBonus;
   // Achievement bonus: +1% per achievement
-  total *= (1 + g.ach.size * 0.005); // +0.5% par succès (au lieu de 1%)
+  total *= (1 + g.ach.size * 0.005); // +0.5% par succès
+  // Méga Prestige bonus permanent
+  if(g.megaMult && g.megaMult > 1) total *= g.megaMult;
+  // Candy shop global bonus
+  const csGlobal = 1 + csBonus('global_flat');
+  total *= csGlobal;
+  // Wild pokemon boosts
+  const wNow = Date.now();
+  if(g.wildCpsBoost && g.wildCpsEnd && wNow < g.wildCpsEnd) total *= (1 + g.wildCpsBoost);
+  if(g.wildMult && g.wildMultEnd && wNow < g.wildMultEnd) total *= g.wildMult;
   // Event mult
   const now = Date.now();
   if(g.evEnd > now) total *= g.evMult;
@@ -952,10 +1016,15 @@ function calcClickValue(g){
     if(up.type==='click_ratio' && g.bu.has(up.id)) ratio += up.val;
   }
   if(ratio > 0) base += calcCPS(g) * ratio;
-  // Prestige bonus
-  const presBonus = 1 + (g.pc||0) * 0.01;
+  // Prestige bonus: +2% par bonbon rare
+  const candyRate = 0.02 + csBonus('candy_bonus');
+  const presBonus = Math.pow(1 + candyRate, G.rc||0);
   base *= presBonus;
   // Event mult
+  // Candy shop click bonus
+  base *= (1 + csBonus('click_flat_pct'));
+  // Wild pokemon click boost
+  if(g.wildClickBoost && g.wildClickEnd && Date.now() < g.wildClickEnd) base *= (1 + g.wildClickBoost);
   if(g.evEnd > Date.now()) base *= g.evMult;
   return Math.max(1, base);
 }
@@ -964,7 +1033,7 @@ function calcClickValue(g){
 // Taux d'apparition des événements rares
 // Base : 0.5% toutes les 3s  |  Max absolu : 4%
 function getEventRate(){
-  let rate = 0.005; // 0.5% base
+  let rate = 0.005 + csBonus('ev_rate_bonus'); // 0.5% base + candy shop
   for(const up of UPGRADES){
     if(up.type==='ev_rate' && G.bu.has(up.id)) rate += up.val;
   }
@@ -972,10 +1041,10 @@ function getEventRate(){
 }
 
 function bldgCost(bd, owned, qty){
-  // Returns cost to buy `qty` of building from `owned` state
+  const discount = csBonus('bldg_discount');
   let total = 0;
   for(let i=0;i<qty;i++){
-    total += bd.cost * Math.pow(1.15, owned + i);
+    total += bd.cost * Math.pow(1.15, owned+i) * (1 - discount);
   }
   return total;
 }
@@ -1006,33 +1075,38 @@ function uniqB(g){ g=g||G; return BLDGS.filter(b=>(g.b[b.id]||0)>0).length; }
 // Reset : PD + bâtiments + améliorations. Garde : niveaux prestige.
 // ═══════════════════════════════════════════════════════════════
 
-const PRES_BASE = 1e12; // 1 trillion
-
-function presGainFromTe(te){
-  // Niveaux de prestige gagnable pour ce montant de te
-  return Math.floor(Math.cbrt((te||0) / PRES_BASE));
-}
-
-function presNextGoal(currentLevels){
-  // te nécessaire pour atteindre le prochain niveau (+1)
-  const next = currentLevels + 1;
-  return Math.pow(next, 3) * PRES_BASE;
+// ── PRESTIGE : 500B base × 5^(n-1) sur tl (légitime seulement) ──
+// #1=500B #2=2.5T #3=12.5T #4=62.5T #5=312T…
+function presThreshold(n){
+  return 500e9 * Math.pow(5, n - 1);
 }
 
 function presAvailable(g){
   g = g||G;
-  return presGainFromTe(g.te);
+  let remaining = g.tl || 0;
+  let count = 0;
+  let n = (g.pc||0) + 1;
+  while(remaining >= presThreshold(n)){
+    remaining -= presThreshold(n);
+    count++;
+    n++;
+  }
+  return count;
 }
 
 function presProgressInCycle(g){
   g = g||G;
-  const gained = presGainFromTe(g.te);
-  const goal = presNextGoal(gained);
-  const prevGoal = gained > 0 ? Math.pow(gained, 3) * PRES_BASE : 0;
-  return { current: g.te - prevGoal, goal: goal - prevGoal, total: g.te };
+  let remaining = g.tl || 0;
+  let n = (g.pc||0) + 1;
+  while(remaining >= presThreshold(n)){
+    remaining -= presThreshold(n);
+    n++;
+  }
+  return { current: remaining, goal: presThreshold(n) };
 }
 
 function prestigeGain(g){ return presAvailable(g||G); }
+
 
 // ============================================================
 // GAME LOOP
@@ -1043,7 +1117,8 @@ const TICK_RATE = 50; // ms (20 ticks/s)
 
 function gameTick(){
   const now = Date.now();
-  const dt = (now - lastTick) / 1000;
+  const rawDt = (now - lastTick) / 1000;
+  const dt = rawDt * (G.timeWarpEnd&&now<G.timeWarpEnd ? G.timeWarpMult : 1);
   lastTick = now;
 
   const cps = calcCPS(G);
@@ -1063,10 +1138,23 @@ function gameTick(){
 
   // Random event trigger (~every 90-300s on average)
   tickAcc += dt;
+  // Wild Pokémon : tick séparé toutes les 30s
+  if(!G._wildAcc) G._wildAcc = 0;
+  G._wildAcc += dt;
+  if(G._wildAcc >= 30){
+    G._wildAcc = 0;
+    trySpawnWild();
+  }
   if(tickAcc >= 3){
     tickAcc = 0;
-    if(!activeEventId && Math.random() < getEventRate()){
-      triggerEvent();
+    if(!activeEventId){
+      // Check ultra-rares (taux propre, indépendant)
+      const ultra = ULTRA_EVENTS.find(u=>Math.random()<u.chance);
+      if(ultra){
+        triggerEvent(ultra.id);
+      } else if(Math.random() < getEventRate()){
+        triggerEvent();
+      }
     }
   }
 
@@ -1166,9 +1254,10 @@ function openPrestige(){
     html += 'Production totale cette run : <strong>'+fmtP(G.te)+'</strong><br>';
     html += 'Formule : cbrt('+fmtP(G.te)+' / 1T) = <strong>'+gained+'</strong><br><br>';
   } else {
-    html += 'Prochain niveau à : <strong>'+fmtP(presNextGoal(0))+'</strong> prod totale<br>';
-    html += 'Progression : <strong>'+fmtP(G.te)+'</strong> / <strong>'+fmtP(presNextGoal(gained))+'</strong> ('+pct+'%)<br>';
-    html += '<em style="color:var(--dim)">Encore '+fmtP(presNextGoal(0) - G.te)+' à produire</em><br><br>';
+    const nextGoal = presThreshold((G.pc||0) + (presAvailable(G)||0) + 1);
+    html += 'Prochain niveau à : <strong>'+fmtP(nextGoal)+'</strong> prod totale<br>';
+    html += 'Progression : <strong>'+fmtP(G.te)+'</strong> / <strong>'+fmtP(nextGoal)+'</strong> ('+pct+'%)<br>';
+    html += '<em style="color:var(--dim)">Encore '+fmtP(Math.max(0,nextGoal - G.te))+' à produire</em><br><br>';
   }
   html += 'Niveau prestige actuel : <strong>'+(G.pc||0)+'</strong> — Bonus : <strong>+'+curBonus+'%</strong><br>';
   html += 'Après prestige : <strong>'+newPc+'</strong> — Bonus : <strong>+'+newBonus+'%</strong>';
@@ -1179,27 +1268,35 @@ function openPrestige(){
 function doPrestige(){
   const gained = presAvailable(G);
   if(gained <= 0) return;
+  // Calculer le tl résiduel après avoir "payé" les seuils
+  let tlConsumed = 0;
+  for(let i=0; i<gained; i++) tlConsumed += presThreshold((G.pc||0) + 1 + i);
+  const tlLeft = Math.max(0, (G.tl||0) - tlConsumed);
+  G.rc += gained;         // ← Donner les bonbons
   G.pc += gained;
   G.bestPrestige = Math.max(G.bestPrestige||0, gained);
   const keep = {
-    // Run stats reset
-    te:0, tl:0, pd:0,
-    // Cumul conservé
+    te:0, tl:tlLeft, pd:0,
     tc:G.tc, tt:G.tt, pc:G.pc, rc:G.rc, ec:G.ec,
     maxCps:0, maxCombo:G.maxCombo, wentBroke:G.wentBroke,
     imported:G.imported, sessions:G.sessions, bestPrestige:G.bestPrestige,
     offlineEarned:G.offlineEarned, capturés:G.capturés,
-    // Bâtiments et améliorations reset complet
+    pokedex:G.pokedex||{},
+    megaCount:G.megaCount||0, megaMult:G.megaMult||1, megaDone:G.megaDone||false,
     b: Object.fromEntries(BLDGS.map(b=>[b.id,0])),
-    bu: new Set(),   // améliorations reset
+    bu: new Set(G.bu),     // ← Upgrades CONSERVÉES
+    cs: new Set(G.cs||new Set()), // ← Candy shop CONSERVÉ
     ach: new Set(G.ach),
-    evMult:1, evEnd:0, lastSave:Date.now(), startTime:Date.now(),
+    evMult:1, evEnd:0, timeWarpMult:1, timeWarpEnd:0,
+    lastSave:Date.now(), startTime:Date.now(),
   };
   G = keep;
   saveGame();
   closeModal('md-pres');
-  const bonus = (G.pc * 0.01 * 100).toFixed(0);
-  notif('⭐ +'+gained+' niveaux prestige ! Total : #'+G.pc+' — Bonus : +'+bonus+'% prod','ev');
+  const msg = gained>1
+    ? '🍬 '+gained+' Prestiges ! +'+gained+' bonbons — Bonus : ×'+Math.pow(1.02,G.rc).toFixed(3)
+    : '🍬 Prestige #'+G.pc+' ! +1 bonbon — Bonus : ×'+Math.pow(1.02,G.rc).toFixed(3);
+  notif(msg,'ev');
   renderShop();
   updateUI();
 }
@@ -1207,32 +1304,68 @@ function doPrestige(){
 // ============================================================
 // RARE EVENTS
 // ============================================================
-function triggerEvent(){
-  const ev = EVENTS[Math.floor(Math.random()*EVENTS.length)];
+function triggerEvent(forceId){
+  // Choisit un event normal ou ultra-rare selon la chance
+  let ev;
+  if(forceId){
+    ev = [...EVENTS,...ULTRA_EVENTS].find(e=>e.id===forceId);
+  } else {
+    // Vérifier ultra-rares d'abord
+    const ultra = ULTRA_EVENTS.find(u=>Math.random()<u.chance/3);
+    ev = ultra || EVENTS[Math.floor(Math.random()*EVENTS.length)];
+  }
   activeEventId = ev.id;
-  G.evMult = ev.mult;
-  G.evEnd = Date.now() + ev.dur * 1000;
+  // NE PAS appliquer le multiplicateur ici — seulement au clic
+  // G.evMult et G.evEnd restent inchangés jusqu'au clic
   const pop = document.getElementById('ev-popup');
+  const isUltra = ULTRA_EVENTS.some(u=>u.id===ev.id);
   document.getElementById('ev-emoji').textContent = ev.em;
-  document.getElementById('ev-name').textContent = ev.name;
+  document.getElementById('ev-name').textContent = (isUltra?'⭐ ':'')+ev.name;
   pop.style.display = 'block';
-  pop.style.left = (20 + Math.random()*40) + '%';
-  pop.style.top  = (20 + Math.random()*40) + '%';
+  pop.style.left = (15 + Math.random()*50) + '%';
+  pop.style.top  = (15 + Math.random()*45) + '%';
   pop.style.borderColor = ev.color||'var(--gold)';
-  notif(ev.em+' '+ev.name+' apparaît ! ' + ev.desc, 'ev');
+  if(isUltra){
+    pop.style.boxShadow = '0 0 40px '+ev.color+', 0 0 80px '+ev.color;
+    pop.style.animation = 'evFloat 1.5s ease-in-out infinite';
+  } else {
+    pop.style.boxShadow = '';
+    pop.style.animation = 'evFloat 2.2s ease-in-out infinite';
+  }
+  // Timer de disparition si pas cliqué
+  clearTimeout(window._evTimeout);
+  window._evTimeout = setTimeout(()=>{
+    if(activeEventId===ev.id){
+      // Disparaît sans bonus
+      document.getElementById('ev-popup').style.display='none';
+      activeEventId = null;
+    }
+  }, ev.dur * 1000);
+  notif(ev.em+' '+(isUltra?'⭐ ULTRA-RARE ! ':'')+ev.name+' apparaît ! Cliquez vite !', 'ev');
 }
 function clickEvent(){
-  const ev = EVENTS.find(e=>e.id===activeEventId);
+  const ev = [...EVENTS,...ULTRA_EVENTS].find(e=>e.id===activeEventId);
   if(!ev) return;
+  clearTimeout(window._evTimeout);
   G.ec++;
   if(G.capturés[ev.id] !== undefined) G.capturés[ev.id]++;
   else G.capturés[ev.id] = 1;
-  // Bonus: 2s worth of CPS instantly
-  const bonus = calcCPS(G) * 8; // Bonus réduit : 8s de prod (pas 30)
+  // MAINTENANT on applique le multiplicateur (au clic, pas à l'apparition)
+  G.evMult = ev.mult;
+  G.evEnd = Date.now() + ev.dur * 1000;
+  // Dialga : accélère le temps
+  if(ev.timeWarp){
+    G.timeWarpMult = ev.timeWarp;
+    G.timeWarpEnd = Date.now() + ev.dur * 1000;
+  }
+  // Bonus instantané en plus : 8s de prod
+  const bonus = calcCPS(G) * 8;
   G.pd += bonus;
   G.te += bonus;
-  spawnParticle(window.innerWidth/2, window.innerHeight/2, '✨ +'+fmtP(bonus));
-  notif('🎉 '+ev.name+' capturé ! +'+fmtP(bonus)+' !','ach');
+  const isUltra = ULTRA_EVENTS.some(u=>u.id===ev.id);
+  const prefix = isUltra ? '⭐ ULTRA-RARE ! ' : '🎉 ';
+  spawnParticle(window.innerWidth/2, window.innerHeight/2, (isUltra?'⭐':'✨')+' +'+fmtP(bonus));
+  notif(prefix+ev.name+' capturé ! +'+fmtP(bonus)+' | ×'+ev.mult+' pendant '+ev.dur+'s !','ach');
   document.getElementById('ev-popup').style.display='none';
   activeEventId = null;
 }
@@ -1262,6 +1395,7 @@ function saveGame(){
     const data = {...G,
       bu: serializeSet(G.bu),
       ach: serializeSet(G.ach),
+      cs: serializeSet(G.cs||new Set()),
       lastSave: Date.now()
     };
     localStorage.setItem('pokeclicker_v3', JSON.stringify(data));
@@ -1279,13 +1413,15 @@ function loadGame(){
     G = {...newGame(), ...data};
     G.bu = deserializeSet(data.bu);
     G.ach = deserializeSet(data.ach);
+    G.cs = deserializeSet(data.cs);
     G.b = {...newGame().b, ...data.b};
     G.capturés = {...newGame().capturés, ...data.capturés};
     // Offline earnings
     const offlineSecs = Math.min((Date.now() - (data.lastSave||Date.now())) / 1000, 86400);
     if(offlineSecs > 5){
       const offCPS = calcCPS(G);
-      const gained = offCPS * offlineSecs * 0.5;
+      const offlineMult = 0.5 + csBonus('offline_bonus');
+      const gained = offCPS * offlineSecs * offlineMult;
       G.pd += gained;
       G.te += gained;
       G.tl += gained;
@@ -1364,6 +1500,231 @@ function doReset(){
 }
 function resetAll(){ openResetConfirm(); }
 function openHelp(){ document.getElementById('md-help').classList.add('on'); }
+
+function hardRefresh(){
+  // Vide le cache et force le rechargement complet
+  saveGame(); // Sauvegarde d'abord pour ne pas perdre la progression
+  if('caches' in window){
+    caches.keys().then(names => names.forEach(n => caches.delete(n)));
+  }
+  // location.reload(true) = hard reload avec vidage cache
+  window.location.reload(true);
+}
+
+// ============================================================
+// CANDY SHOP HELPERS
+// ============================================================
+function csGet(id){ return G.cs&&G.cs.has(id); }
+function csCount(id){ return csGet(id)?1:0; } // stackable à l'avenir
+
+function csBonus(type){
+  // Somme tous les bonus d'un type dans le shop acheté
+  let total = 0;
+  for(const item of CANDY_SHOP){
+    if(item.type===type && G.cs&&G.cs.has(item.id)) total += item.val;
+  }
+  return total;
+}
+
+function buyCandyShop(id){
+  const item = CANDY_SHOP.find(i=>i.id===id);
+  if(!item || (G.cs&&G.cs.has(id))) return;
+  if(G.rc < item.cost){ notif('❌ Pas assez de bonbons !','ev'); return; }
+  G.rc -= item.cost;
+  if(!G.cs) G.cs = new Set();
+  G.cs.add(id);
+  notif('🍬 '+item.name+' acheté !','buy');
+  // Appliquer les effets immédiats
+  if(item.type==='start_bldg') G.b.centre = (G.b.centre||0)+item.val;
+  if(item.type==='start_pd') G.pd += item.val;
+  renderShop(); updateUI();
+  saveGame();
+}
+
+function openCandyShop(){
+  document.getElementById('md-candy').classList.add('on');
+  renderCandyShop();
+}
+
+function renderCandyShop(){
+  const el = document.getElementById('candy-shop-list');
+  if(!el) return;
+  el.innerHTML = CANDY_SHOP.map(item=>{
+    const bought = G.cs&&G.cs.has(item.id);
+    const canAfford = G.rc >= item.cost;
+    return '<div class="ucard '+(bought?'bought':canAfford?'':'na')+'" onclick="buyCandyShop(\''+item.id+'\')">'+
+      '<div class="uem">'+item.em+'</div>'+
+      '<div class="uinfo"><div class="uname">'+item.name+'</div><div class="udesc">'+item.desc+'</div></div>'+
+      '<div class="uprice" style="color:'+(bought?'var(--green)':'var(--purple)')+'">'+
+        (bought?'✓':item.cost+' 🍬')+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+
+// ============================================================
+// MÉGA PRESTIGE
+// ============================================================
+const MEGA_THRESHOLD = 100; // 100 bonbons au total
+
+function canMegaPrestige(g){ g=g||G; return (g.rc||0) >= MEGA_THRESHOLD && !(g.megaDone); }
+
+function openMegaPrestige(){
+  if(!canMegaPrestige()) return;
+  document.getElementById('md-mega').classList.add('on');
+}
+
+function doMegaPrestige(){
+  if(!canMegaPrestige()) return;
+  // Reset total SAUF candy shop, méga count
+  const megaCount = (G.megaCount||0) + 1;
+  const megaMult = Math.pow(10, megaCount); // ×10 par méga prestige
+  const savedCs = new Set(G.cs||new Set()); // Conserver candy shop
+  G = newGame();
+  G.megaCount = megaCount;
+  G.megaMult = megaMult;
+  G.megaDone = false;
+  G.cs = savedCs; // Candy shop permanent
+  saveGame();
+  closeModal('md-mega');
+  notif('⭐ MÉGA PRESTIGE #'+megaCount+' ! Bonus permanent ×'+megaMult+' !','ev');
+  renderShop(); updateUI();
+}
+
+
+// ============================================================
+// POKÉMON SAUVAGES — Apparitions aléatoires cliquables
+// ============================================================
+const WILD_POKEMON = [
+  // Communs
+  {id:'wp_pikachu',   em:'⚡',name:'Pikachu',    rarity:'commun',    effect:'click_boost', val:0.1,  dur:30, desc:'+10% puissance de clic pendant 30s'},
+  {id:'wp_magikarp',  em:'🐟',name:'Magikarp',   rarity:'commun',    effect:'instant_pd',  val:100,  dur:0,  desc:'+100 ₽ instantanément'},
+  {id:'wp_ronflex',   em:'😴',name:'Ronflex',    rarity:'commun',    effect:'cps_boost',   val:0.05, dur:20, desc:'+5% CPS pendant 20s'},
+  {id:'wp_magicarpe', em:'🐠',name:'Tentacool',  rarity:'commun',    effect:'instant_pd',  val:500,  dur:0,  desc:'+500 ₽ instantanément'},
+  {id:'wp_chenipan',  em:'🐛',name:'Chenipan',   rarity:'commun',    effect:'instant_pd',  val:200,  dur:0,  desc:'+200 ₽ instantanément'},
+  // Peu communs
+  {id:'wp_bulbizarre',em:'🌱',name:'Bulbizarre', rarity:'peu_commun',effect:'cps_boost',   val:0.15, dur:30, desc:'+15% CPS pendant 30s'},
+  {id:'wp_carapuce',  em:'💦',name:'Carapuce',   rarity:'peu_commun',effect:'cps_boost',   val:0.15, dur:30, desc:'+15% CPS pendant 30s'},
+  {id:'wp_salameche', em:'🔥',name:'Salamèche',  rarity:'peu_commun',effect:'click_boost', val:0.2,  dur:25, desc:'+20% puissance de clic pendant 25s'},
+  {id:'wp_psykokwak', em:'🦆',name:'Psykokwak',  rarity:'peu_commun',effect:'cps_boost',   val:0.1,  dur:45, desc:'+10% CPS pendant 45s'},
+  {id:'wp_evoli',     em:'🦊',name:'Évoli',      rarity:'peu_commun',effect:'click_boost', val:0.15, dur:40, desc:'+15% clic pendant 40s'},
+  // Rares
+  {id:'wp_dracaufeu', em:'🐉',name:'Dracaufeu',  rarity:'rare',      effect:'global_mult', val:5,    dur:15, desc:'×5 production pendant 15s'},
+  {id:'wp_raichu',    em:'🐭',name:'Raichu',     rarity:'rare',      effect:'click_boost', val:0.5,  dur:20, desc:'+50% puissance de clic pendant 20s'},
+  {id:'wp_mewtwo',    em:'💜',name:'Mewtwo',     rarity:'rare',      effect:'global_mult', val:10,   dur:10, desc:'×10 production pendant 10s'},
+  {id:'wp_gengar',    em:'👻',name:'Gengar',     rarity:'rare',      effect:'cps_boost',   val:0.5,  dur:20, desc:'+50% CPS pendant 20s'},
+  {id:'wp_noctali',   em:'🌙',name:'Noctali',    rarity:'rare',      effect:'instant_cps', val:30,   dur:0,  desc:'Bonus = 30s de production'},
+  // Épiques
+  {id:'wp_dracolosse',em:'🦁',name:'Dracolosse', rarity:'epique',    effect:'global_mult', val:20,   dur:12, desc:'×20 production pendant 12s'},
+  {id:'wp_lugia',     em:'🕊️',name:'Lugia',      rarity:'epique',    effect:'global_mult', val:25,   dur:10, desc:'×25 production pendant 10s'},
+  {id:'wp_rayquaza',  em:'🐲',name:'Rayquaza',   rarity:'epique',    effect:'global_mult', val:50,   dur:8,  desc:'×50 production pendant 8s'},
+  // Légendaires
+  {id:'wp_mew',       em:'✨',name:'Mew',        rarity:'legendaire',effect:'global_mult', val:100,  dur:10, desc:'×100 production pendant 10s'},
+  {id:'wp_arceus',    em:'👼',name:'Arceus',     rarity:'legendaire',effect:'global_mult', val:500,  dur:5,  desc:'×500 production pendant 5s'},
+];
+
+const WILD_RARITY_RATE = {
+  commun:     0.0015,  // ~1 toutes les 10min (1 tick/30s × 0.15%)
+  peu_commun: 0.0008,
+  rare:       0.0003,
+  epique:     0.00008,
+  legendaire: 0.00002,
+};
+
+const RARITY_COLOR = {
+  commun:'#9E9E9E', peu_commun:'#4CAF50', rare:'#2196F3', epique:'#9C27B0', legendaire:'#FFD700'
+};
+
+let activeWild = null;
+let wildTimeout = null;
+
+function trySpawnWild(){
+  if(activeWild || activeEventId) return;
+  // Tirer un Pokémon au hasard selon les taux de rareté
+  for(const wp of WILD_POKEMON.sort(()=>Math.random()-.5)){
+    if(Math.random() < WILD_RARITY_RATE[wp.rarity]){
+      spawnWild(wp);
+      return;
+    }
+  }
+}
+
+function spawnWild(wp){
+  activeWild = wp;
+  const el = document.getElementById('wild-popup');
+  document.getElementById('wild-emoji').textContent = wp.em;
+  document.getElementById('wild-name').textContent = wp.name;
+  document.getElementById('wild-rarity').textContent = wp.rarity.replace('_',' ').toUpperCase();
+  document.getElementById('wild-desc').textContent = wp.desc;
+  el.style.display = 'block';
+  el.style.right = (5 + Math.random()*30) + '%';
+  el.style.top   = (20 + Math.random()*40) + '%';
+  el.style.borderColor = RARITY_COLOR[wp.rarity];
+  el.style.boxShadow = '0 0 20px '+RARITY_COLOR[wp.rarity]+'88';
+  clearTimeout(wildTimeout);
+  wildTimeout = setTimeout(()=>{ if(activeWild===wp){ el.style.display='none'; activeWild=null; }}, 12000);
+}
+
+function catchWild(){
+  const wp = activeWild;
+  if(!wp) return;
+  clearTimeout(wildTimeout);
+  document.getElementById('wild-popup').style.display='none';
+  activeWild = null;
+  // Enregistrer dans pokédex
+  if(!G.pokedex) G.pokedex = {};
+  G.pokedex[wp.id] = (G.pokedex[wp.id]||0) + 1;
+  // Appliquer l'effet
+  applyWildEffect(wp);
+  notif(wp.em+' '+wp.name+' capturé ! '+wp.desc,'buy');
+}
+
+function applyWildEffect(wp){
+  const now = Date.now();
+  if(wp.effect==='instant_pd'){
+    G.pd += wp.val; G.te += wp.val;
+    spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(wp.val));
+  } else if(wp.effect==='instant_cps'){
+    const bonus = calcCPS(G) * wp.val;
+    G.pd += bonus; G.te += bonus;
+    spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(bonus));
+  } else if(wp.effect==='cps_boost'){
+    G.wildCpsBoost = (G.wildCpsBoost||0) + wp.val;
+    G.wildCpsEnd   = now + wp.dur * 1000;
+  } else if(wp.effect==='click_boost'){
+    G.wildClickBoost = (G.wildClickBoost||0) + wp.val;
+    G.wildClickEnd   = now + wp.dur * 1000;
+  } else if(wp.effect==='global_mult'){
+    G.wildMult = wp.val;
+    G.wildMultEnd = now + wp.dur * 1000;
+  }
+}
+
+
+function openPokedex(){
+  renderPokedex();
+  document.getElementById('md-pokedex').classList.add('on');
+}
+
+function renderPokedex(){
+  const el = document.getElementById('pokedex-list');
+  if(!el) return;
+  const total = WILD_POKEMON.length;
+  const caught = Object.keys(G.pokedex||{}).length;
+  document.getElementById('pokedex-count').textContent = caught + ' / ' + total;
+  el.innerHTML = WILD_POKEMON.map(wp=>{
+    const count = G.pokedex&&G.pokedex[wp.id] ? G.pokedex[wp.id] : 0;
+    const known = count > 0;
+    const col = RARITY_COLOR[wp.rarity];
+    return '<div style="background:var(--card);border:1px solid '+(known?col:'var(--border)')+';border-radius:9px;padding:9px;text-align:center;opacity:'+(known?1:.35)+'">'+
+      '<div style="font-size:26px">'+(known?wp.em:'❓')+'</div>'+
+      '<div style="font-size:9px;font-weight:900;margin-top:4px;color:'+(known?'var(--text)':'var(--dim)')+'">'+(known?wp.name:'???')+'</div>'+
+      '<div style="font-size:8px;color:'+col+';margin-top:2px">'+wp.rarity.replace('_',' ')+'</div>'+
+      (known?'<div style="font-size:8px;color:var(--dim);margin-top:2px">×'+count+' capturé'+(count>1?'s':'')+'</div>':'')+
+    '</div>';
+  }).join('');
+}
+
 function openStats(){
   const cps=calcCPS(G), cv=calcClickValue(G);
   document.getElementById('stats-tbl').innerHTML=`
@@ -1442,8 +1803,8 @@ function updateUI(){
   // Barre 2 : vers prochain niveau
   fill.style.width = pct + '%';
   fill.classList.remove('ready');
-  const nextLvl = gained + 1;
-  document.getElementById('pbar-next-lbl').textContent = 'Niveau '+nextLvl+' ('+fmtP(presNextGoal(gained))+' total)';
+  const nextLvl = (G.pc||0) + gained + 1;
+  document.getElementById('pbar-next-lbl').textContent = 'Prestige #'+nextLvl+' ('+fmtP(presThreshold(nextLvl))+')';
   document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal);
   document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
   if(G.pc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=(1+(G.pc||0)*0.01).toFixed(2);}
@@ -1620,5 +1981,61 @@ if(G.tc===0 && G.te===0){
   setTimeout(()=>notif('⚡ Bienvenue dans Pokémon Clicker ! Cliquez sur la Pokéball !','ach'),500);
 }
 </script>
+
+<!-- Candy Shop Modal -->
+<div class="overlay" id="md-candy">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title" style="color:var(--purple)">🍬 BOUTIQUE BONBONS RARES<button class="mcls" onclick="closeModal('md-candy')">✕</button></div>
+    <div style="font-size:10px;color:var(--dim);margin-bottom:10px;text-align:center">
+      Vos bonbons : <strong id="candy-count" style="color:var(--purple)">0 🍬</strong> — Achats permanents, conservés après Prestige et Reset
+    </div>
+    <div id="candy-shop-list"></div>
+  </div>
+</div>
+
+<!-- Méga Prestige Modal -->
+<div class="overlay" id="md-mega">
+  <div class="modal" style="max-width:420px;text-align:center">
+    <div class="modal-title" style="justify-content:center;color:var(--gold)">⭐ MÉGA PRESTIGE ⭐</div>
+    <div style="font-size:48px;margin-bottom:10px">🌟</div>
+    <div style="background:rgba(255,215,0,.08);border:1px solid var(--gold);border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-family:var(--fn-px);font-size:10px;color:var(--gold);margin-bottom:8px">RESET TOTAL</div>
+      <div style="font-size:11px;color:var(--dim);line-height:1.8">
+        Vous avez atteint <strong style="color:var(--gold)">100 Bonbons Rares</strong> !<br>
+        Le Méga Prestige <strong style="color:var(--red-l)">remet tout à zéro</strong> en échange d'un<br>
+        <strong style="color:var(--gold)">multiplicateur permanent ×10</strong> sur toute la production.<br><br>
+        Ce bonus se cumule à chaque Méga Prestige (×10, ×100, ×1000…)<br>
+        La <strong>Boutique Bonbons</strong> est conservée.
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="sbtn" style="flex:1" onclick="closeModal('md-mega')">Annuler</button>
+      <button onclick="doMegaPrestige()" style="flex:2;padding:11px;background:linear-gradient(135deg,#f39c12,#e74c3c);border:none;border-radius:9px;color:#fff;font-family:var(--fn-px);font-size:9px;cursor:pointer">⭐ MÉGA PRESTIGE !</button>
+    </div>
+  </div>
+</div>
+
+<!-- Wild Pokemon Popup -->
+<div id="wild-popup" style="display:none;position:fixed;cursor:pointer;z-index:299;animation:evFloat 2s ease-in-out infinite;touch-action:manipulation;right:10%;top:30%"
+     onclick="catchWild()" ontouchstart="catchWild()">
+  <div style="background:rgba(13,14,27,.92);border-radius:14px;padding:10px 14px;text-align:center;border:2px solid #4CAF50;box-shadow:0 0 22px #4CAF5088;min-width:100px">
+    <span id="wild-emoji" style="font-size:42px;line-height:1;display:block;filter:drop-shadow(0 0 8px currentColor)">✨</span>
+    <div id="wild-name" style="font-family:'Press Start 2P',monospace;font-size:7px;color:#fff;margin-top:4px">MEW</div>
+    <div id="wild-rarity" style="font-size:7px;font-weight:800;margin-top:2px;color:#4CAF50">COMMUN</div>
+    <div id="wild-desc" style="font-size:7px;color:#aaa;margin-top:3px;max-width:120px;line-height:1.4">desc</div>
+  </div>
+</div>
+
+<!-- Pokédex Modal -->
+<div class="overlay" id="md-pokedex">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title" style="color:var(--red-l)">📖 POKÉDEX<button class="mcls" onclick="closeModal('md-pokedex')">✕</button></div>
+    <div style="font-size:10px;color:var(--dim);margin-bottom:10px;text-align:center">
+      Capturez des Pokémon sauvages pour compléter votre Pokédex !<br>
+      <span id="pokedex-count" style="color:var(--gold);font-weight:800">0 / 20</span> Pokémon découverts
+    </div>
+    <div id="pokedex-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px"></div>
+  </div>
+</div>
 </body>
 </html>
