@@ -729,6 +729,134 @@ let CURTAB = 'b';
 let comboCount = 0;
 let comboTimer = null;
 
+// ============================================================
+// ANTI-AUTOCLICKER
+// ============================================================
+const AC = {
+  intervals: [],        // Derniers intervalles entre clics (ms)
+  lastClickTime: 0,     // Timestamp du dernier clic
+  recentClicks: [],     // Timestamps des clics récents (fenêtre 2s)
+  banned: false,        // Clics actuellement désactivés
+  banUntil: 0,          // Timestamp fin de ban
+  BAN_DURATION: 5 * 60 * 1000, // 5 minutes en ms
+  HISTORY: 12,          // Nombre d'intervalles à analyser
+  STD_THRESHOLD: 8,     // Écart-type max (ms) avant suspicion
+  MAX_CPS: 18,          // Clics/sec max humainement possible
+  SPEED_WINDOW: 2000,   // Fenêtre de détection vitesse (ms)
+  warningCount: 0,      // Nombre de détections successives
+};
+
+function acStdDev(arr){
+  if(arr.length < 2) return 999;
+  const mean = arr.reduce((a,b)=>a+b,0) / arr.length;
+  const variance = arr.reduce((s,v)=>s+Math.pow(v-mean,2),0) / arr.length;
+  return Math.sqrt(variance);
+}
+
+function acCheck(now){
+  // Calcul intervalle
+  if(AC.lastClickTime > 0){
+    const interval = now - AC.lastClickTime;
+    if(interval < 2000){ // Ignore les pauses longues
+      AC.intervals.push(interval);
+      if(AC.intervals.length > AC.HISTORY) AC.intervals.shift();
+    }
+  }
+  AC.lastClickTime = now;
+
+  // Nettoie les vieux clics hors fenêtre
+  AC.recentClicks = AC.recentClicks.filter(t => now - t < AC.SPEED_WINDOW);
+  AC.recentClicks.push(now);
+
+  // Condition 1 : rythme trop régulier
+  const std = acStdDev(AC.intervals);
+  const tooRegular = AC.intervals.length >= AC.HISTORY && std < AC.STD_THRESHOLD;
+
+  // Condition 2 : vitesse impossible
+  const cps = AC.recentClicks.length / (AC.SPEED_WINDOW / 1000);
+  const tooFast = cps > AC.MAX_CPS;
+
+  if(tooRegular && tooFast){
+    AC.warningCount++;
+    if(AC.warningCount >= 2){ // 2 détections consécutives = ban
+      acBan();
+      return true;
+    }
+  } else {
+    AC.warningCount = Math.max(0, AC.warningCount - 1);
+  }
+  return false;
+}
+
+function acBan(){
+  AC.banned = true;
+  AC.banUntil = Date.now() + AC.BAN_DURATION;
+  AC.intervals = [];
+  AC.recentClicks = [];
+  AC.warningCount = 0;
+  // Sauvegarder le ban (anti-refresh)
+  localStorage.setItem('ac_ban', AC.banUntil.toString());
+  showBanOverlay();
+}
+
+function acCheckBan(){
+  const stored = localStorage.getItem('ac_ban');
+  if(stored){
+    const until = parseInt(stored);
+    if(Date.now() < until){
+      AC.banned = true;
+      AC.banUntil = until;
+      showBanOverlay();
+    } else {
+      localStorage.removeItem('ac_ban');
+    }
+  }
+}
+
+function showBanOverlay(){
+  let el = document.getElementById('ac-ban-overlay');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'ac-ban-overlay';
+    el.style.cssText = `
+      position:fixed;inset:0;background:rgba(229,57,53,.15);backdrop-filter:blur(3px);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      z-index:999;pointer-events:none;
+    `;
+    el.innerHTML = `
+      <div style="background:#1e2040;border:2px solid #E53935;border-radius:16px;padding:28px 36px;text-align:center;max-width:360px;box-shadow:0 0 40px rgba(229,57,53,.4)">
+        <div style="font-size:42px;margin-bottom:10px">🚫</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:11px;color:#FF6B6B;margin-bottom:12px">AUTOCLICKER DÉTECTÉ</div>
+        <div style="font-size:12px;color:#E8E8F4;margin-bottom:8px">Clics désactivés pendant</div>
+        <div id="ac-countdown" style="font-family:'Press Start 2P',monospace;font-size:22px;color:#FFD700;margin-bottom:12px">5:00</div>
+        <div style="font-size:10px;color:#7788AA">Jouer honnêtement, c'est plus fun 😉</div>
+      </div>
+    `;
+    document.body.appendChild(el);
+  }
+  el.style.display = 'flex';
+  updateBanCountdown();
+}
+
+function updateBanCountdown(){
+  const el = document.getElementById('ac-ban-overlay');
+  const cd = document.getElementById('ac-countdown');
+  if(!el || !cd) return;
+  const remaining = Math.max(0, AC.banUntil - Date.now());
+  if(remaining <= 0){
+    AC.banned = false;
+    AC.banUntil = 0;
+    localStorage.removeItem('ac_ban');
+    el.style.display = 'none';
+    notif('✅ Clics réactivés — bienvenue de retour !', 'buy');
+    return;
+  }
+  const m = Math.floor(remaining / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  cd.textContent = m + ':' + String(s).padStart(2,'0');
+  setTimeout(updateBanCountdown, 500);
+}
+
 // Active event state
 let activeEventId = null;
 let evTimeout = null;
@@ -899,6 +1027,10 @@ function handleTouch(e){
   doClick(t.clientX, t.clientY);
 }
 function doClick(cx, cy){
+  // Anti-autoclicker check
+  const now = Date.now();
+  if(AC.banned){ if(now < AC.banUntil){ showBanOverlay(); return; } else { AC.banned=false; localStorage.removeItem('ac_ban'); }}
+  if(acCheck(now)) return; // Détection → ban déclenché, on ignore ce clic
   const val = calcClickValue(G);
   G.pd += val;
   G.te += val;
@@ -1353,6 +1485,7 @@ function notif(msg, type=''){
 // INIT
 // ============================================================
 loadGame();
+acCheckBan(); // Restaure un éventuel ban actif après refresh
 renderShop();
 updateUI();
 
