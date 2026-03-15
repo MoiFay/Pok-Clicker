@@ -1003,8 +1003,8 @@ function uniqB(g){ g=g||G; return BLDGS.filter(b=>(g.b[b.id]||0)>0).length; }
 
 function presThreshold(n){
   // n = numéro du prestige (1-indexé)
-  // Formule x4 : prestige 1 = 4M, 2 = 16M, 3 = 64M, 4 = 256M…
-  return 4e6 * Math.pow(4, n - 1);
+  // Base 500B, facteur ×5 : #1=500B, #2=2.5T, #3=12.5T, #4=62.5T, #5=312T…
+  return 500e9 * Math.pow(5, n - 1);
 }
 
 function presAvailable(g){
@@ -1282,13 +1282,13 @@ function saveGame(){
       ach: serializeSet(G.ach),
       lastSave: Date.now()
     };
-    localStorage.setItem('pokeclicker_v2', JSON.stringify(data));
+    localStorage.setItem('pokeclicker_v3', JSON.stringify(data));
   } catch(e){ console.warn('Save failed',e); }
 }
 
 function loadGame(){
   try{
-    const raw = localStorage.getItem('pokeclicker_v2');
+    const raw = localStorage.getItem('pokeclicker_v3');
     if(!raw) return;
     const data = JSON.parse(raw);
     G = {...newGame(), ...data};
@@ -1322,7 +1322,7 @@ function dlSave(){
   const txt = document.getElementById('tx-exp').value;
   const a = document.createElement('a');
   a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
-  a.download='pokeclicker_v2.txt'; a.click();
+  a.download='pokeclicker_v3.txt'; a.click();
 }
 function importSave(){
   try{
@@ -1348,7 +1348,7 @@ function openResetConfirm(){
 }
 function doReset(){
   if(document.getElementById('reset-input').value !== 'DELETE') return;
-  localStorage.removeItem('pokeclicker_v2');
+  localStorage.removeItem('pokeclicker_v3');
   G = newGame();
   closeModal('md-reset');
   notif('🗑️ Progression effacée. Bonne chance !','ev');
