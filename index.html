@@ -165,6 +165,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <button class="tbtn pres" onclick="openPrestige()">✨ Prestige</button>
       <button class="tbtn" onclick="openSave()">💾 Save</button>
       <button class="tbtn" onclick="openStats()">📊 Stats</button>
+      <button class="tbtn" onclick="openHelp()" style="border-color:#4FC3F7;color:#4FC3F7">❓ Comment jouer</button>
+      <a href="https://subs.twitch.tv/moifay" target="_blank" style="text-decoration:none">
+        <button class="tbtn" style="border-color:#9146FF;color:#9146FF;background:rgba(145,70,255,.1)">💜 Me soutenir</button>
+      </a>
     </div>
   </div>
   <div id="left">
@@ -247,7 +251,70 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   </div>
 </div>
 
-<!-- Reset confirmation modal -->
+<!-- Help modal -->
+<div class="overlay" id="md-help">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-title">❓ COMMENT JOUER<button class="mcls" onclick="closeModal('md-help')">✕</button></div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;font-size:11px;line-height:1.75;color:var(--text)">
+
+      <div style="background:var(--card);border-radius:10px;padding:13px;border-left:3px solid var(--gold)">
+        <div style="font-family:var(--fn-px);font-size:9px;color:var(--gold);margin-bottom:8px">⚡ LE PRINCIPE</div>
+        Cliquez sur la <strong>Pokéball géante</strong> pour gagner des <strong>Poké Dollars (₽)</strong>.
+        Dépensez-les pour acheter des <strong>bâtiments</strong> qui génèrent des ₽ automatiquement, même quand vous ne jouez pas.
+        Le but : aller le plus loin possible dans la progression !
+      </div>
+
+      <div style="background:var(--card);border-radius:10px;padding:13px;border-left:3px solid var(--blue)">
+        <div style="font-family:var(--fn-px);font-size:9px;color:var(--blue);margin-bottom:8px">🏢 BÂTIMENTS</div>
+        Chaque bâtiment produit des <strong>₽/s</strong> en continu. Plus vous en achetez, plus votre revenu monte.
+        Le prix augmente à chaque achat <em>(×1.15)</em> — achetez-en plusieurs d'un coup avec <strong>×1 / ×10 / ×100 / MAX</strong>.
+        Les nouveaux bâtiments se débloquent progressivement au fil de vos gains.
+      </div>
+
+      <div style="background:var(--card);border-radius:10px;padding:13px;border-left:3px solid var(--purple)">
+        <div style="font-family:var(--fn-px);font-size:9px;color:var(--purple);margin-bottom:8px">⬆️ AMÉLIORATIONS</div>
+        Dans l'onglet <strong>Amélios</strong>, des Pokémon peuvent doubler la production d'un bâtiment, booster vos clics ou multiplier toute votre production globalement.
+        Les conditions de déblocage varient : nombre de clics, ₽ gagnés, ou bâtiments possédés.
+      </div>
+
+      <div style="background:var(--card);border-radius:10px;padding:13px;border-left:3px solid var(--purp-d)">
+        <div style="font-family:var(--fn-px);font-size:9px;color:var(--purple);margin-bottom:8px">🍬 PRESTIGE</div>
+        Une fois <strong>4 millions de ₽ légitimes</strong> gagnés <em>(clics + production — les événements ne comptent pas)</em>,
+        vous pouvez prestige via le bouton <strong>✨ Prestige</strong>.
+        Vous gagnez <strong>1 Bonbon Rare 🍬</strong> et repartez de zéro, mais chaque bonbon donne
+        <strong>+2% de production permanente</strong> (multiplicatif). Plus vous prestigez, plus vous allez vite !
+      </div>
+
+      <div style="background:var(--card);border-radius:10px;padding:13px;border-left:3px solid var(--gold)">
+        <div style="font-family:var(--fn-px);font-size:9px;color:var(--gold);margin-bottom:8px">✨ ÉVÉNEMENTS RARES</div>
+        Des Pokémon légendaires apparaissent aléatoirement sur l'écran — <strong>cliquez dessus rapidement</strong> avant qu'ils disparaissent !
+        Ils donnent un <strong>bonus de production temporaire</strong> (×5 à ×50 pendant quelques secondes).
+        Des améliorations dans l'onglet Amélios permettent d'augmenter leur taux d'apparition
+        (base 0.5%, max 4% avec toutes les upgrades).
+      </div>
+
+      <div style="background:var(--card);border-radius:10px;padding:13px;border-left:3px solid var(--green)">
+        <div style="font-family:var(--fn-px);font-size:9px;color:var(--green);margin-bottom:8px">🏆 SUCCÈS & HORS-LIGNE</div>
+        Débloquez <strong>155 succès</strong> en atteignant des jalons de clics, ₽ gagnés, bâtiments, captures et plus.
+        Chaque succès donne <strong>+1% de production</strong> globale.
+        Le jeu continue de produire à <strong>50% de vitesse</strong> pendant votre absence (max 24h).
+        La sauvegarde est automatique toutes les 30 secondes.
+      </div>
+
+      <div style="background:rgba(145,70,255,.1);border-radius:10px;padding:13px;border:1px solid #9146FF;text-align:center">
+        <div style="font-size:13px;margin-bottom:5px">💜 Vous aimez le jeu ?</div>
+        <div style="color:var(--dim);margin-bottom:10px">Soutenez le créateur sur Twitch !</div>
+        <a href="https://subs.twitch.tv/moifay" target="_blank" style="text-decoration:none">
+          <button style="padding:8px 20px;background:#9146FF;border:none;border-radius:8px;color:#fff;font-family:var(--fn);font-weight:800;font-size:12px;cursor:pointer">
+            💜 S'abonner à moifay
+          </button>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
 <div class="overlay" id="md-reset">
   <div class="modal" style="max-width:380px;text-align:center">
     <div class="modal-title" style="justify-content:center;color:var(--red-l)">⚠️ RESET TOTAL ⚠️</div>
@@ -1059,6 +1126,7 @@ function doReset(){
   updateUI();
 }
 function resetAll(){ openResetConfirm(); }
+function openHelp(){ document.getElementById('md-help').classList.add('on'); }
 function openStats(){
   const cps=calcCPS(G), cv=calcClickValue(G);
   document.getElementById('stats-tbl').innerHTML=`
