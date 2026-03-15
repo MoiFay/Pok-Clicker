@@ -238,9 +238,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="gain" id="pres-gain">0 🍬</div>
       <p>Les <strong>Bonbons Rares</strong> augmentent votre production de +2% par bonbon (multiplicatif).<br>Vous perdrez vos ₽ et bâtiments mais <em>gardez vos améliorations achetées</em>.</p>
     </div>
-    <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:8px">
-      Bonbons actuels : <strong id="pres-cur">0</strong> — Bonus : <strong id="pres-cmult">x1.00</strong><br>
-      Après prestige : <strong id="pres-amult">x1.00</strong>
+    <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:8px" id="pres-info">
+      <!-- rempli dynamiquement par openPrestige() -->
     </div>
     <button class="pres-go" id="pres-btn" onclick="doPrestige()">🍬 EFFECTUER LE PRESTIGE</button>
   </div>
@@ -1173,8 +1172,7 @@ function openPrestige(){
   } else {
     document.getElementById('pres-gain').textContent = '0 🍬 — pas encore éligible';
   }
-  // Info block
-  const infoEl = document.getElementById('pres-cur').parentElement;
+  // Info block — utilise directement pres-info (jamais remplacé, jamais perdu)
   let html = '';
   if(available > 0){
     html += '<div style="color:var(--green);margin-bottom:6px">✅ <strong>' + available + ' prestige' + (available>1?'s disponibles':' disponible') + '</strong></div>';
@@ -1191,7 +1189,7 @@ function openPrestige(){
   }
   html += 'Bonbons actuels : <strong>' + G.rc + '</strong> — Bonus : <strong>x' + Math.pow(1.02,G.rc).toFixed(3) + '</strong><br>';
   html += 'Après prestige' + (available>1?'s':'') + ' : <strong>x' + Math.pow(1.02,newTotal).toFixed(3) + '</strong>';
-  infoEl.innerHTML = html;
+  document.getElementById('pres-info').innerHTML = html;
   document.getElementById('pres-btn').disabled = available <= 0;
   document.getElementById('md-pres').classList.add('on');
 }
