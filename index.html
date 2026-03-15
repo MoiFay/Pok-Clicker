@@ -162,7 +162,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="chip gold"><span class="lbl">₽</span><span class="val" id="c-pd">0</span></div>
     <div class="chip blue"><span class="lbl">⚡/s</span><span class="val" id="c-cps">0</span></div>
     <div class="chip red"><span class="lbl">👆</span><span class="val" id="c-cp">1</span></div>
-    <div class="chip pur" style="border-color:var(--purp-d)"><span>🍬</span><span class="val" id="c-candy">0</span></div>
+    <div class="chip pur" style="border-color:var(--purp-d)"><span>⭐</span><span class="val" id="c-candy">0</span></div>
     <div id="bar-btns">
       <button class="tbtn pres" onclick="openPrestige()">✨ Prestige</button>
       <button class="tbtn" onclick="openSave()">💾 Save</button>
@@ -193,7 +193,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div id="pbar-wrap" style="max-width:290px;width:100%">
       <!-- Ligne bonbons -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-        <span style="font-size:9px;color:var(--purple);font-weight:800">🍬 <span id="pbar-candy">0</span> bonbons</span>
+        <span style="font-size:9px;color:var(--gold);font-weight:800">⭐ <span id="pbar-candy">0</span> niveaux prestige</span>
         <span style="font-size:9px;color:var(--gold);font-weight:800" id="pbar-mult"></span>
       </div>
       <!-- Barre 1 : prestiges disponibles (cachée si 0) -->
@@ -236,12 +236,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="pres-box">
       <div style="font-size:11px">Vous allez gagner :</div>
       <div class="gain" id="pres-gain">0 🍬</div>
-      <p>Les <strong>Bonbons Rares</strong> augmentent votre production de +2% par bonbon (multiplicatif).<br>Vous perdrez vos ₽ et bâtiments mais <em>gardez vos améliorations achetées</em>.</p>
+      <p>Chaque <strong>niveau de prestige ⭐</strong> donne <strong>+1% de production permanente</strong> (additif).<br>Vous perdrez vos ₽, bâtiments et améliorations, mais gardez vos <em>niveaux de prestige</em>.</p>
     </div>
     <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:8px" id="pres-info">
       <!-- rempli dynamiquement par openPrestige() -->
     </div>
-    <button class="pres-go" id="pres-btn" onclick="doPrestige()">🍬 EFFECTUER LE PRESTIGE</button>
+    <button class="pres-go" id="pres-btn" onclick="doPrestige()">⭐ EFFECTUER LE PRESTIGE</button>
   </div>
 </div>
 <div class="overlay" id="md-save">
@@ -922,10 +922,8 @@ function calcCPS(g){
   }
   total *= gm;
   // Prestige bonus: +2% per candy (multiplicative)
-  let presBonus = Math.pow(1.02, g.rc);
-  for(const up of UPGRADES){
-    if(up.type==='prestige_mult' && g.bu.has(up.id)) presBonus *= up.val;
-  }
+  // +1% de production par niveau de prestige (additif)
+  const presBonus = 1 + (g.pc||0) * 0.01;
   total *= presBonus;
   // Achievement bonus: +1% per achievement
   total *= (1 + g.ach.size * 0.005); // +0.5% par succès (au lieu de 1%)
@@ -955,8 +953,7 @@ function calcClickValue(g){
   }
   if(ratio > 0) base += calcCPS(g) * ratio;
   // Prestige bonus
-  let presBonus = Math.pow(1.02, g.rc);
-  for(const up of UPGRADES){ if(up.type==='prestige_mult' && g.bu.has(up.id)) presBonus *= up.val; }
+  const presBonus = 1 + (g.pc||0) * 0.01;
   base *= presBonus;
   // Event mult
   if(g.evEnd > Date.now()) base *= g.evMult;
@@ -1001,49 +998,38 @@ function maxBuy(bd){
 function totB(g){ g=g||G; return BLDGS.reduce((s,b)=>s+(g.b[b.id]||0),0); }
 function uniqB(g){ g=g||G; return BLDGS.filter(b=>(g.b[b.id]||0)>0).length; }
 
-// ── SYSTÈME PRESTIGE SCALÉ ─────────────────────────────────────
-// Coût du prestige N (1-indexé) = 4M × N  (4M, 8M, 12M, 16M…)
-// tl se remet à 0 après chaque prestige → chaque cycle est indépendant
-// Si tl dépasse plusieurs seuils → plusieurs prestiges disponibles
+// ═══════════════════════════════════════════════════════════════
+// SYSTÈME PRESTIGE — Formule cubique
+// Niveaux gagnables = floor( cbrt( te_cette_run / 1T ) )
+// Exemples : 1T→1, 8T→2, 27T→3, 64T→4, 125T→5, 1Qa→10
+// Bonus : +1% prod par niveau accumulé (additif)
+// Reset : PD + bâtiments + améliorations. Garde : niveaux prestige.
+// ═══════════════════════════════════════════════════════════════
 
-function presThreshold(n){
-  // n = numéro du prestige (1-indexé)
-  // Base 500B, facteur ×5 : #1=500B, #2=2.5T, #3=12.5T, #4=62.5T, #5=312T…
-  return 500e9 * Math.pow(5, n - 1);
+const PRES_BASE = 1e12; // 1 trillion
+
+function presGainFromTe(te){
+  // Niveaux de prestige gagnable pour ce montant de te
+  return Math.floor(Math.cbrt((te||0) / PRES_BASE));
+}
+
+function presNextGoal(currentLevels){
+  // te nécessaire pour atteindre le prochain niveau (+1)
+  const next = currentLevels + 1;
+  return Math.pow(next, 3) * PRES_BASE;
 }
 
 function presAvailable(g){
-  // Combien de prestiges peut-on faire avec le tl actuel ?
-  // On simule : on soustrait les seuils successifs du tl courant
   g = g||G;
-  let remaining = g.tl || 0;
-  let count = 0;
-  let n = (g.pc||0) + 1; // prochain prestige
-  while(remaining >= presThreshold(n)){
-    remaining -= presThreshold(n);
-    count++;
-    n++;
-  }
-  return count;
-}
-
-function presNextThreshold(g){
-  // Seuil du prochain prestige non encore atteint
-  g = g||G;
-  const available = presAvailable(g);
-  return presThreshold((g.pc||0) + available + 1);
+  return presGainFromTe(g.te);
 }
 
 function presProgressInCycle(g){
-  // Progression dans le cycle courant (tl résiduel après prestiges dispo)
   g = g||G;
-  let remaining = g.tl || 0;
-  let n = (g.pc||0) + 1;
-  while(remaining >= presThreshold(n)){
-    remaining -= presThreshold(n);
-    n++;
-  }
-  return { current: remaining, goal: presThreshold(n) };
+  const gained = presGainFromTe(g.te);
+  const goal = presNextGoal(gained);
+  const prevGoal = gained > 0 ? Math.pow(gained, 3) * PRES_BASE : 0;
+  return { current: g.te - prevGoal, goal: goal - prevGoal, total: g.te };
 }
 
 function prestigeGain(g){ return presAvailable(g||G); }
@@ -1162,66 +1148,58 @@ function buyUpgrade(id){
 // PRESTIGE
 // ============================================================
 function openPrestige(){
-  const available = presAvailable(G);
-  const newTotal = G.rc + available;
-  const prog = presProgressInCycle(G);
-  const nextN = (G.pc||0) + 1;
+  const gained  = presAvailable(G);
+  const newPc   = (G.pc||0) + gained;
+  const prog    = presProgressInCycle(G);
+  const curBonus = (G.pc * 0.01 * 100).toFixed(0);
+  const newBonus = (newPc * 0.01 * 100).toFixed(0);
   // Gain affiché
-  if(available > 0){
-    document.getElementById('pres-gain').textContent = available + ' 🍬 (' + available + ' prestige' + (available>1?'s':'') + ')';
-  } else {
-    document.getElementById('pres-gain').textContent = '0 🍬 — pas encore éligible';
-  }
-  // Info block — utilise directement pres-info (jamais remplacé, jamais perdu)
+  document.getElementById('pres-gain').textContent =
+    gained > 0
+      ? '+' + gained + ' niveau' + (gained>1?'x':'') + ' prestige ⭐'
+      : '0 niveau — pas encore éligible';
+  // Info block
+  const pct = prog.goal > 0 ? (prog.current / prog.goal * 100).toFixed(1) : 0;
   let html = '';
-  if(available > 0){
-    html += '<div style="color:var(--green);margin-bottom:6px">✅ <strong>' + available + ' prestige' + (available>1?'s disponibles':' disponible') + '</strong></div>';
-    for(let i=0;i<Math.min(available,5);i++){
-      const n = nextN + i;
-      html += '🍬 Prestige #' + n + ' — coût : <strong>' + fmtP(presThreshold(n)) + '</strong><br>';
-    }
-    if(available>5) html += '… et ' + (available-5) + ' de plus<br>';
-    html += '<br>';
+  if(gained > 0){
+    html += '<div style="color:var(--green);font-weight:900;margin-bottom:6px">✅ +'+gained+' niveau'+(gained>1?'x':'')+' disponible'+(gained>1?'s':'')+'</div>';
+    html += 'Production totale cette run : <strong>'+fmtP(G.te)+'</strong><br>';
+    html += 'Formule : cbrt('+fmtP(G.te)+' / 1T) = <strong>'+gained+'</strong><br><br>';
   } else {
-    const pct = (prog.current/prog.goal*100).toFixed(1);
-    html += 'Prochain prestige (#'+nextN+') : <strong>' + fmtP(prog.current) + '</strong> / <strong>' + fmtP(prog.goal) + '</strong> (' + pct + '%)<br>';
-    html += '<em style="color:var(--dim)">Il manque ' + fmtP(prog.goal - prog.current) + ' légitimes</em><br><br>';
+    html += 'Prochain niveau à : <strong>'+fmtP(presNextGoal(0))+'</strong> prod totale<br>';
+    html += 'Progression : <strong>'+fmtP(G.te)+'</strong> / <strong>'+fmtP(presNextGoal(gained))+'</strong> ('+pct+'%)<br>';
+    html += '<em style="color:var(--dim)">Encore '+fmtP(presNextGoal(0) - G.te)+' à produire</em><br><br>';
   }
-  html += 'Bonbons actuels : <strong>' + G.rc + '</strong> — Bonus : <strong>x' + Math.pow(1.02,G.rc).toFixed(3) + '</strong><br>';
-  html += 'Après prestige' + (available>1?'s':'') + ' : <strong>x' + Math.pow(1.02,newTotal).toFixed(3) + '</strong>';
+  html += 'Niveau prestige actuel : <strong>'+(G.pc||0)+'</strong> — Bonus : <strong>+'+curBonus+'%</strong><br>';
+  html += 'Après prestige : <strong>'+newPc+'</strong> — Bonus : <strong>+'+newBonus+'%</strong>';
   document.getElementById('pres-info').innerHTML = html;
-  document.getElementById('pres-btn').disabled = available <= 0;
+  document.getElementById('pres-btn').disabled = gained <= 0;
   document.getElementById('md-pres').classList.add('on');
 }
 function doPrestige(){
-  const available = presAvailable(G);
-  if(available <= 0) return;
-  // Calculer combien de tl est consommé par ces prestiges
-  let tlConsumed = 0;
-  for(let i=0; i<available; i++) tlConsumed += presThreshold((G.pc||0) + 1 + i);
-  G.rc += available;
-  G.pc += available;
-  G.bestPrestige = Math.max(G.bestPrestige||0, available);
-  // tl résiduel = tl - ce qui a été consommé
-  const tlLeft = Math.max(0, (G.tl||0) - tlConsumed);
+  const gained = presAvailable(G);
+  if(gained <= 0) return;
+  G.pc += gained;
+  G.bestPrestige = Math.max(G.bestPrestige||0, gained);
   const keep = {
-    te:0, tl:tlLeft, tc:G.tc, tt:G.tt, pc:G.pc, rc:G.rc, ec:G.ec,
+    // Run stats reset
+    te:0, tl:0, pd:0,
+    // Cumul conservé
+    tc:G.tc, tt:G.tt, pc:G.pc, rc:G.rc, ec:G.ec,
     maxCps:0, maxCombo:G.maxCombo, wentBroke:G.wentBroke,
     imported:G.imported, sessions:G.sessions, bestPrestige:G.bestPrestige,
-    offlineEarned:G.offlineEarned,
-    capturés:G.capturés,
+    offlineEarned:G.offlineEarned, capturés:G.capturés,
+    // Bâtiments et améliorations reset complet
     b: Object.fromEntries(BLDGS.map(b=>[b.id,0])),
-    bu: new Set(G.bu),
+    bu: new Set(),   // améliorations reset
     ach: new Set(G.ach),
-    pd:0, evMult:1, evEnd:0, lastSave:Date.now(), startTime:Date.now(),
+    evMult:1, evEnd:0, lastSave:Date.now(), startTime:Date.now(),
   };
   G = keep;
   saveGame();
   closeModal('md-pres');
-  const msg = available > 1
-    ? '🍬 '+available+' Prestiges ! +'+available+' bonbons — Bonus : x'+Math.pow(1.02,G.rc).toFixed(3)
-    : '🍬 Prestige #'+G.pc+' ! +1 bonbon — Bonus : x'+Math.pow(1.02,G.rc).toFixed(3);
-  notif(msg,'ev');
+  const bonus = (G.pc * 0.01 * 100).toFixed(0);
+  notif('⭐ +'+gained+' niveaux prestige ! Total : #'+G.pc+' — Bonus : +'+bonus+'% prod','ev');
   renderShop();
   updateUI();
 }
@@ -1398,8 +1376,8 @@ function openStats(){
     <div><span class="lbl">Types possédés</span><span class="val">${uniqB()}</span></div>
     <div><span class="lbl">Améliorations</span><span class="val">${G.bu.size}</span></div>
     <div><span class="lbl">Succès</span><span class="val">${G.ach.size} / ${ACHIEV.length}</span></div>
-    <div><span class="lbl">Bonbons Rares</span><span class="val">${G.rc} 🍬</span></div>
-    <div><span class="lbl">Bonus Prestige</span><span class="val">×${Math.pow(1.02,G.rc).toFixed(3)}</span></div>
+    <div><span class="lbl">Niveau Prestige</span><span class="val">${G.pc||0}</span></div>
+    <div><span class="lbl">Bonus Prestige</span><span class="val">x${(1+(G.pc||0)*0.01).toFixed(2)}</span></div>
     <div><span class="lbl">Nombre de Prestige</span><span class="val">${G.pc}</span></div>
     <div><span class="lbl">Pokémon capturés</span><span class="val">${G.ec}</span></div>
     <div><span class="lbl">Temps de jeu</span><span class="val">${fmtT(G.tt)}</span></div>
@@ -1436,40 +1414,39 @@ function updateUI(){
   document.getElementById('c-pd').textContent = fmtP(G.pd);
   document.getElementById('c-cps').textContent = fmtP(cps);
   document.getElementById('c-cp').textContent = fmtP(cv);
-  document.getElementById('c-candy').textContent = G.rc;
+  document.getElementById('c-candy').textContent = 'Nv '+(G.pc||0);
   document.getElementById('pd-display').textContent = fmtP(G.pd);
   document.getElementById('cps-display').textContent = fmtP(cps)+'/s';
   document.getElementById('click-display').textContent = 'Clic = '+fmtP(cv);
   document.getElementById('b-totb').textContent = totB();
   document.getElementById('b-nach').textContent = G.ach.size;
-  // Prestige bar — x4 scalé, 2 barres séparées
+  // Prestige bar — formule cubique
   const fill = document.getElementById('pbar-fill');
-  const available = presAvailable(G);
-  const prog = presProgressInCycle(G);  // progression vers le PROCHAIN non atteint
-  const nextN = (G.pc||0) + available + 1; // numéro du prochain prestige pas encore dispo
-  const pct = Math.min(100, (prog.current / prog.goal) * 100);
+  const gained = presAvailable(G);
+  const prog = presProgressInCycle(G);
+  const pct = prog.goal > 0 ? Math.min(100, (prog.current / prog.goal) * 100) : 100;
 
-  // Bonbons + multiplicateur
-  document.getElementById('pbar-candy').textContent = G.rc;
-  document.getElementById('pbar-mult').textContent = G.rc > 0 ? 'x'+Math.pow(1.02,G.rc).toFixed(2) : '';
+  // Ligne niveaux + bonus
+  document.getElementById('pbar-candy').textContent = (G.pc||0);
+  document.getElementById('pbar-mult').textContent = G.pc > 0 ? '+'+((G.pc)*1).toFixed(0)+'%' : '';
 
-  // Barre 1 : prestiges disponibles
+  // Barre 1 : prestige disponible
   const availWrap = document.getElementById('pbar-avail-wrap');
-  if(available > 0){
+  if(gained > 0){
     availWrap.style.display = 'block';
-    const label = available > 1 ? '✨ '+available+' PRESTIGES DISPO !' : '✨ 1 PRESTIGE DISPO !';
-    document.getElementById('pbar-avail-lbl').textContent = label;
+    document.getElementById('pbar-avail-lbl').textContent = gained > 1 ? '⭐ '+gained+' NIVEAUX PRESTIGE DISPO !' : '⭐ PRESTIGE DISPONIBLE !';
   } else {
     availWrap.style.display = 'none';
   }
 
-  // Barre 2 : progression vers le prochain prestige pas encore atteint
+  // Barre 2 : vers prochain niveau
   fill.style.width = pct + '%';
   fill.classList.remove('ready');
-  document.getElementById('pbar-next-lbl').textContent = 'Prestige #' + nextN + ' ('+fmtP(presThreshold(nextN))+')';
+  const nextLvl = gained + 1;
+  document.getElementById('pbar-next-lbl').textContent = 'Niveau '+nextLvl+' ('+fmtP(presNextGoal(gained))+' total)';
   document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal);
   document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
-  if(G.rc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=Math.pow(1.02,G.rc).toFixed(2);}
+  if(G.pc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=(1+(G.pc||0)*0.01).toFixed(2);}
   // Upgrade / achievement badge counts
   const avail = UPGRADES.filter(u=>!G.bu.has(u.id)&&u.cond&&u.cond(G)&&G.pd>=u.cost).length;
   const newAch = ACHIEV.filter(a=>!G.ach.has(a.id)&&a.cond&&a.cond(G)).length;
