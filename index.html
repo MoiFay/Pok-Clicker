@@ -734,51 +734,63 @@ let comboTimer = null;
 // ============================================================
 const AC = {
   intervals: [],        // Derniers intervalles entre clics (ms)
-  lastClickTime: 0,     // Timestamp du dernier clic
-  recentClicks: [],     // Timestamps des clics récents (fenêtre 2s)
-  banned: false,        // Clics actuellement désactivés
-  banUntil: 0,          // Timestamp fin de ban
-  BAN_DURATION: 5 * 60 * 1000, // 5 minutes en ms
-  HISTORY: 12,          // Nombre d'intervalles à analyser
-  STD_THRESHOLD: 8,     // Écart-type max (ms) avant suspicion
-  MAX_CPS: 18,          // Clics/sec max humainement possible
-  SPEED_WINDOW: 2000,   // Fenêtre de détection vitesse (ms)
-  warningCount: 0,      // Nombre de détections successives
+  lastClickTime: 0,
+  recentClicks: [],     // Timestamps fenêtre courte (1s)
+  recentClicks2: [],    // Timestamps fenêtre longue (3s)
+  banned: false,
+  banUntil: 0,
+  BAN_DURATION: 5 * 60 * 1000,
+  HISTORY: 10,
+  // Seuils ajustés pour Github Pages (latence CDN ~8-12ms en plus)
+  STD_THRESHOLD: 20,    // ms — autoclicker basique < 5ms même avec jitter réseau
+  MAX_CPS_1S: 15,       // Clics/s sur 1 seconde — impossible humainement > 12
+  MAX_CPS_3S: 12,       // Clics/s moyenne sur 3s — encore plus fiable
+  warningCount: 0,
+  hitCounts: [],        // Historique des détections (rolling)
 };
 
 function acStdDev(arr){
-  if(arr.length < 2) return 999;
+  if(arr.length < 3) return 999;
   const mean = arr.reduce((a,b)=>a+b,0) / arr.length;
   const variance = arr.reduce((s,v)=>s+Math.pow(v-mean,2),0) / arr.length;
   return Math.sqrt(variance);
 }
 
 function acCheck(now){
-  // Calcul intervalle
   if(AC.lastClickTime > 0){
     const interval = now - AC.lastClickTime;
-    if(interval < 2000){ // Ignore les pauses longues
+    if(interval > 0 && interval < 1500){
       AC.intervals.push(interval);
       if(AC.intervals.length > AC.HISTORY) AC.intervals.shift();
     }
   }
   AC.lastClickTime = now;
 
-  // Nettoie les vieux clics hors fenêtre
-  AC.recentClicks = AC.recentClicks.filter(t => now - t < AC.SPEED_WINDOW);
+  // Fenêtre 1s
+  AC.recentClicks = AC.recentClicks.filter(t => now - t < 1000);
   AC.recentClicks.push(now);
+  // Fenêtre 3s
+  AC.recentClicks2 = AC.recentClicks2.filter(t => now - t < 3000);
+  AC.recentClicks2.push(now);
 
-  // Condition 1 : rythme trop régulier
-  const std = acStdDev(AC.intervals);
-  const tooRegular = AC.intervals.length >= AC.HISTORY && std < AC.STD_THRESHOLD;
+  const std      = acStdDev(AC.intervals);
+  const cps1s    = AC.recentClicks.length;          // clics dans la dernière seconde
+  const cps3s    = AC.recentClicks2.length / 3;     // moyenne sur 3s
 
-  // Condition 2 : vitesse impossible
-  const cps = AC.recentClicks.length / (AC.SPEED_WINDOW / 1000);
-  const tooFast = cps > AC.MAX_CPS;
+  // 3 signaux indépendants — chacun peut déclencher seul s'il est extrême,
+  // ou se combiner avec un autre pour le cas limite
+  const sigRegular = AC.intervals.length >= AC.HISTORY && std < AC.STD_THRESHOLD; // rythme régulier
+  const sigFast1s  = cps1s  > AC.MAX_CPS_1S;  // burst rapide
+  const sigFast3s  = cps3s  > AC.MAX_CPS_3S;  // vitesse soutenue
 
-  if(tooRegular && tooFast){
+  // Score : chaque signal vaut 1 point
+  const score = (sigRegular?1:0) + (sigFast1s?1:0) + (sigFast3s?1:0);
+
+  // Ban si : 2 signaux simultanés OU vitesse extrême (>25 cps en 1s = impossible)
+  const extremeSpeed = cps1s > 25;
+  if(score >= 2 || extremeSpeed){
     AC.warningCount++;
-    if(AC.warningCount >= 2){ // 2 détections consécutives = ban
+    if(AC.warningCount >= 2){
       acBan();
       return true;
     }
