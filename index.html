@@ -190,9 +190,19 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div class="badge green">🏢 <span id="b-totb">0</span></div>
       <div class="badge gold">🏆 <span id="b-nach">0</span></div>
     </div>
-    <div id="pbar-wrap">
-      <div class="pbar-label"><span>Prochain Prestige</span><span id="pbar-txt">0 / ?</span></div>
+    <div id="pbar-wrap" style="max-width:290px;width:100%">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:9px;color:var(--dim);font-weight:800">Prochain Prestige</span>
+        <span style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:9px;color:var(--purple);font-weight:800">🍬 <span id="pbar-candy">0</span> bonbons</span>
+          <span style="font-size:9px;color:var(--gold);font-weight:800" id="pbar-mult"></span>
+        </span>
+      </div>
       <div class="pbar-track"><div class="pbar-fill" id="pbar-fill" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:3px">
+        <span style="font-size:9px;color:var(--dim)" id="pbar-txt">0 / ?</span>
+        <span style="font-size:9px;color:var(--dim)" id="pbar-pct">0%</span>
+      </div>
     </div>
     <button id="qty-btn" onclick="cycleQty()">Acheter × <span id="qty-lbl">1</span></button>
   </div>
@@ -985,8 +995,9 @@ function uniqB(g){ g=g||G; return BLDGS.filter(b=>(g.b[b.id]||0)>0).length; }
 // Si tl dépasse plusieurs seuils → plusieurs prestiges disponibles
 
 function presThreshold(n){
-  // n = numéro du prochain prestige (G.pc + 1, G.pc + 2…)
-  return 4e6 * n;
+  // n = numéro du prestige (1-indexé)
+  // Formule x4 : prestige 1 = 4M, 2 = 16M, 3 = 64M, 4 = 256M…
+  return 4e6 * Math.pow(4, n - 1);
 }
 
 function presAvailable(g){
@@ -1395,23 +1406,26 @@ function updateUI(){
   document.getElementById('click-display').textContent = 'Clic = '+fmtP(cv);
   document.getElementById('b-totb').textContent = totB();
   document.getElementById('b-nach').textContent = G.ach.size;
-  // Prestige bar — cycle scalé
+  // Prestige bar — x4 scalé
   const fill = document.getElementById('pbar-fill');
   const available = presAvailable(G);
   const prog = presProgressInCycle(G);
+  const nextN = (G.pc||0) + available + 1;
+  const pct = Math.min(100, (prog.current / prog.goal) * 100);
+  // Bonbons + multiplicateur
+  document.getElementById('pbar-candy').textContent = G.rc;
+  document.getElementById('pbar-mult').textContent = G.rc > 0 ? 'x'+Math.pow(1.02,G.rc).toFixed(2) : '';
   if(available > 0){
     fill.style.width = '100%';
     fill.classList.add('ready');
-    const txt = available > 1
-      ? '<span style="color:var(--gold);font-weight:900;animation:pbarPulse 1.2s infinite;display:inline-block">✨ '+available+' PRESTIGES DISPO !</span>'
-      : '<span style="color:var(--gold);font-weight:900;animation:pbarPulse 1.2s infinite;display:inline-block">✨ PRÊT À PRESTIGE !</span>';
-    document.getElementById('pbar-txt').innerHTML = txt;
+    const label = available > 1 ? '✨ '+available+' PRESTIGES DISPO !' : '✨ PRÊT À PRESTIGE !';
+    document.getElementById('pbar-txt').innerHTML = '<span style="color:var(--gold);font-weight:900;animation:pbarPulse 1.2s infinite;display:inline-block">'+label+'</span>';
+    document.getElementById('pbar-pct').textContent = '';
   } else {
-    const pct = Math.min(100, (prog.current / prog.goal) * 100);
     fill.style.width = pct + '%';
     fill.classList.remove('ready');
-    const nextN = (G.pc||0) + 1;
-    document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal) + '  (Prestige #'+nextN+')';
+    document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal) + ' (#'+nextN+')';
+    document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
   }
   if(G.rc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=Math.pow(1.02,G.rc).toFixed(2);}
   // Upgrade / achievement badge counts
