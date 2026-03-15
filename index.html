@@ -248,6 +248,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 <div class="overlay" id="md-save">
   <div class="modal">
     <div class="modal-title">💾 SAUVEGARDE<button class="mcls" onclick="closeModal('md-save')">✕</button></div>
+    <!-- Récupération ancienne save -->
+    <div id="old-save-banner" style="display:none;background:rgba(255,215,0,.08);border:1px solid var(--gold);border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:10px">
+      ⚠️ Une ancienne sauvegarde a été détectée !
+      <button class="sbtn" style="margin-top:6px;width:100%;border-color:var(--gold);color:var(--gold)" onclick="recoverOldSave()">🔄 Récupérer l'ancienne progression</button>
+    </div>
     <div style="font-size:10px;color:var(--dim);margin-bottom:3px">Exporter :</div>
     <textarea class="stx" id="tx-exp" readonly></textarea>
     <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
@@ -1320,7 +1325,27 @@ function openSave(){
   const data = {...G, bu: serializeSet(G.bu), ach: serializeSet(G.ach)};
   document.getElementById('tx-exp').value = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
   document.getElementById('tx-imp').value = '';
+  // Vérifie si une ancienne save existe
+  const hasOld = !!localStorage.getItem('pokeclicker_v2') || !!localStorage.getItem('pokeclicker_save');
+  document.getElementById('old-save-banner').style.display = hasOld ? 'block' : 'none';
   document.getElementById('md-save').classList.add('on');
+}
+
+function recoverOldSave(){
+  const raw = localStorage.getItem('pokeclicker_v2') || localStorage.getItem('pokeclicker_save');
+  if(!raw){ notif('❌ Aucune ancienne save trouvée','ev'); return; }
+  try{
+    const data = JSON.parse(raw);
+    G = {...newGame(), ...data};
+    G.bu = deserializeSet(data.bu);
+    G.ach = deserializeSet(data.ach);
+    G.b = {...newGame().b, ...data.b};
+    G.capturés = {...newGame().capturés, ...data.capturés};
+    saveGame(); // Sauvegarde dans v3
+    closeModal('md-save');
+    notif('✅ Ancienne progression récupérée !','buy');
+    renderShop(); updateUI();
+  } catch(e){ notif('❌ Erreur lors de la récupération','ev'); }
 }
 function copySave(){ const t=document.getElementById('tx-exp'); t.select(); document.execCommand('copy'); notif('📋 Copié !','buy'); }
 function dlSave(){
