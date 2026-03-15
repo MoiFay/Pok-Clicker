@@ -1033,7 +1033,7 @@ function calcClickValue(g){
 // Taux d'apparition des événements rares
 // Base : 0.5% toutes les 3s  |  Max absolu : 4%
 function getEventRate(){
-  let rate = 0.005 + csBonus('ev_rate_bonus'); // 0.5% base + candy shop
+  let rate = 0.003 + csBonus('ev_rate_bonus'); // 0.3% base (1 event ~45min sans upgrades)
   for(const up of UPGRADES){
     if(up.type==='ev_rate' && G.bu.has(up.id)) rate += up.val;
   }
@@ -1145,7 +1145,7 @@ function gameTick(){
     G._wildAcc = 0;
     trySpawnWild();
   }
-  if(tickAcc >= 3){
+  if(tickAcc >= 8){
     tickAcc = 0;
     if(!activeEventId){
       // Check ultra-rares (taux propre, indépendant)
@@ -1315,8 +1315,9 @@ function triggerEvent(forceId){
     ev = ultra || EVENTS[Math.floor(Math.random()*EVENTS.length)];
   }
   activeEventId = ev.id;
-  // NE PAS appliquer le multiplicateur ici — seulement au clic
-  // G.evMult et G.evEnd restent inchangés jusqu'au clic
+  // On remet evMult à neutre — le vrai bonus n'est appliqué qu'au clic
+  G.evMult = 1;
+  G.evEnd = 0;
   const pop = document.getElementById('ev-popup');
   const isUltra = ULTRA_EVENTS.some(u=>u.id===ev.id);
   document.getElementById('ev-emoji').textContent = ev.em;
