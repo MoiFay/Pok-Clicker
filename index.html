@@ -159,6 +159,22 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   #left{max-height:160px} #pb{width:85px;height:85px} .pb-dot{width:18px;height:18px;border-width:3px}
 }
 
+
+/* Sound toggle button */
+#sound-btn{
+  padding:5px 9px;background:var(--card);border:1px solid var(--border);
+  border-radius:7px;color:var(--dim);cursor:pointer;font-size:13px;
+  transition:var(--ease);
+}
+#sound-btn:hover{background:var(--card-h);border-color:var(--border-b)}
+#sound-btn.on{border-color:var(--gold);color:var(--gold)}
+
+/* Event timer countdown */
+#ev-timer{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:var(--gold);margin-top:5px;text-align:center;
+  display:none;
+}
 /* Candy shop button */
 .tbtn.candy{border-color:#CE93D8;color:#CE93D8}
 .tbtn.candy:hover{background:rgba(206,147,216,.2);box-shadow:0 0 18px rgba(156,39,176,.35)}
@@ -224,6 +240,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 <body>
 <div id="app">
   <div id="topbar">
+    <button id="sound-btn" onclick="toggleSound()" title="Sons">🔇</button>
     <button id="burger" onclick="toggleDrawer()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -257,6 +274,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <button class="tbtn candy" onclick="openCandyShop();closeDrawer()">🍬 Boutique Bonbons</button>
   <button class="tbtn mega" id="mega-btn-drawer" onclick="openMegaPrestige();closeDrawer()" style="display:none">⭐ MÉGA PRESTIGE</button>
   <button class="tbtn" onclick="openPokedex();closeDrawer()" style="border-color:var(--red-l);color:var(--red-l)">📖 Pokédex</button>
+  <button class="tbtn" onclick="openDailies();closeDrawer()" style="border-color:var(--blue);color:var(--blue)">🎯 Objectifs du jour</button>
   <button class="tbtn" onclick="openHelp();closeDrawer()" style="border-color:#4FC3F7;color:#4FC3F7">❓ Comment jouer</button>
   <button class="tbtn" onclick="hardRefresh()" style="border-color:var(--dim);color:var(--dim)">🔄 Actualiser</button>
   <a href="https://subs.twitch.tv/moifay" target="_blank" style="text-decoration:none">
@@ -326,6 +344,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="ev-inner">
     <span class="ev-emoji" id="ev-emoji">✨</span>
     <div class="ev-name" id="ev-name">MEW</div>
+    <div id="ev-timer">⏱ --</div>
   </div>
 </div>
 <div class="overlay" id="md-pres">
@@ -557,6 +576,7 @@ const UPGRADES=[
   {id:'pb01',em:'🔴',name:'Pokéball Renforcée',    cost:500,    type:'pokeball_mult', val:2,   desc:'×2 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=5},
   {id:'pb02',em:'⚪',name:'Superball',             cost:15e3,   type:'pokeball_mult', val:3,   desc:'×3 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=20},
   {id:'pb03',em:'🟡',name:'Hyperball',             cost:200e3,  type:'pokeball_mult', val:4,   desc:'×4 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=50},
+  {id:'pb04',em:'🟣',name:'Masterball',            cost:5e6,    type:'pokeball_mult', val:5,   desc:'×5 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=100},
   // --- Click multiplier (valeurs modérées, conditions sévères) ---
   {id:'cm01',em:'✌️',name:'Double Énergie',  cost:50e3,   type:'click_mult',  val:1.5,  desc:'x1.5 puissance clic',cond:g=>g.tc>=500},
   {id:'cm02',em:'💪',name:'Frappe Soutenue', cost:800e3,  type:'click_mult',  val:1.5,  desc:'encore x1.5 clic',   cond:g=>g.bu.has('cm01')&&g.tc>=5e3},
@@ -667,6 +687,34 @@ const UPGRADES=[
   {id:'er04',em:'⭐',name:'Fragment Etoile',      cost:200e6,  type:'ev_rate', val:.005, desc:'+0.5% chance evenement',   cond:g=>g.bu.has('er03')&&g.ec>=30},
   {id:'er05',em:'💫',name:'Poudre de Comète',     cost:2e9,    type:'ev_rate', val:.006, desc:'+0.6% chance événement',   cond:g=>g.bu.has('er04')&&g.ec>=60},
   {id:'er06',em:'🌟',name:'Cristal Légendaire',   cost:20e9,   type:'ev_rate', val:.007, desc:'+0.7% chance événement',   cond:g=>g.bu.has('er05')&&g.ec>=100},
+
+  // --- 2ème upgrade pour les bâtiments mid/late qui en avaient qu'une ---
+  {id:'bm_uu2',em:'🌐',name:'Univers II',      cost:1e21,   type:'bldg_mult',bId:'univultra', val:2,cond:g=>g.b.univultra>=50, desc:'encore x2 Univers Ultra'},
+  {id:'bm_mi2',em:'🪞',name:'Double Miroir',   cost:6e21,   type:'bldg_mult',bId:'miroir',    val:2,cond:g=>g.b.miroir>=50,   desc:'encore x2 Miroir'},
+  {id:'bm_zo2',em:'🌑',name:'Darkrai II',      cost:40e21,  type:'bldg_mult',bId:'zone',      val:2,cond:g=>g.b.zone>=50,    desc:'encore x2 Zone Obscure'},
+  {id:'bm_pa2',em:'☀️',name:'Cresselia II',    cost:250e21, type:'bldg_mult',bId:'palais',    val:2,cond:g=>g.b.palais>=50,  desc:'encore x2 Palais'},
+  {id:'bm_ga2',em:'👻',name:'Giratina II',     cost:1.5e24, type:'bldg_mult',bId:'galactic',  val:2,cond:g=>g.b.galactic>=50,desc:'encore x2 Galactique'},
+  {id:'bm_st2',em:'⏰',name:'Dialga II',       cost:10e24,  type:'bldg_mult',bId:'spacetime', val:2,cond:g=>g.b.spacetime>=50,desc:'encore x2 Espace-Temps'},
+  {id:'bm_di2',em:'💫',name:'Palkia II',       cost:65e24,  type:'bldg_mult',bId:'distort',   val:2,cond:g=>g.b.distort>=50, desc:'encore x2 Distorsion'},
+  {id:'bm_dr2',em:'💤',name:'Munna II',        cost:400e24, type:'bldg_mult',bId:'dream',     val:2,cond:g=>g.b.dream>=50,   desc:'encore x2 Reves'},
+  {id:'bm_fo2',em:'🌸',name:'Shaymin II',      cost:2.5e27, type:'bldg_mult',bId:'foret',     val:2,cond:g=>g.b.foret>=50,   desc:'encore x2 Foret'},
+  {id:'bm_sz2',em:'💠',name:'Tapu II',         cost:15e27,  type:'bldg_mult',bId:'stationz',  val:2,cond:g=>g.b.stationz>=50,desc:'encore x2 Station Z'},
+  {id:'bm_ml2',em:'🔮',name:'Mega Mewtwo II',  cost:100e27, type:'bldg_mult',bId:'megalab',   val:2,cond:g=>g.b.megalab>=50, desc:'encore x2 Mega-Lab'},
+  {id:'bm_c22',em:'🤖',name:'Genesect II',     cost:600e27, type:'bldg_mult',bId:'crystal2',  val:2,cond:g=>g.b.crystal2>=50,desc:'encore x2 Tour Cristalline'},
+  {id:'bm_le2',em:'🌸',name:'Mew II',          cost:4e30,   type:'bldg_mult',bId:'legendary', val:2,cond:g=>g.b.legendary>=50,desc:'encore x2 Centre Legendaire'},
+  {id:'bm_mw2',em:'💜',name:'MegaMewtwo X II', cost:25e30,  type:'bldg_mult',bId:'mewtwolab', val:2,cond:g=>g.b.mewtwolab>=50,desc:'encore x2 Labo Mewtwo'},
+  {id:'bm_ac2',em:'✨',name:'Arceus II',       cost:150e30, type:'bldg_mult',bId:'arceus',    val:2,cond:g=>g.b.arceus>=50,  desc:'encore x2 Temple Arceus'},
+  {id:'bm_so2',em:'💧',name:'Manaphy II',      cost:1e33,   type:'bldg_mult',bId:'source',    val:2,cond:g=>g.b.source>=50,  desc:'encore x2 Source'},
+  {id:'bm_te2',em:'⏳',name:'Celebi II',       cost:7e33,   type:'bldg_mult',bId:'temporal',  val:2,cond:g=>g.b.temporal>=50,desc:'encore x2 Cristal Temporel'},
+  {id:'bm_sn2',em:'✌️',name:'Victini II',      cost:50e33,  type:'bldg_mult',bId:'sanctu',    val:2,cond:g=>g.b.sanctu>=50,  desc:'encore x2 Sanctuaire'},
+  {id:'bm_pl2c',em:'🪐',name:'Solgaleo III',   cost:350e33, type:'bldg_mult',bId:'planete',   val:2,cond:g=>g.b.planete>=50, desc:'encore x2 Planete'},
+  {id:'bm_ub2',em:'💥',name:'Ultra-Nec II',    cost:2.5e36, type:'bldg_mult',bId:'univball',  val:2,cond:g=>g.b.univball>=50,desc:'encore x2 Univers Pokeball'},
+  {id:'bm_nx2',em:'🌀',name:'Eternatus II',    cost:17e36,  type:'bldg_mult',bId:'nexus',     val:2,cond:g=>g.b.nexus>=50,   desc:'encore x2 Nexus'},
+  {id:'bm_om2',em:'🔮',name:'Necrozma II',     cost:120e36, type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=50,   desc:'encore x2 Omega'},
+  {id:'bm_gi2',em:'👼',name:'Arceus God II',   cost:1e39,   type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=50,desc:'encore x2 DIEU ARCEUS'},
+  // Pokéball upgrade pour cohérence
+  {id:'bm_pb1',em:'🔴',name:'Pokéball Forge',  cost:200,    type:'bldg_mult',bId:'pokeball',  val:1, cond:g=>g.b.pokeball>=10, desc:'Augmente la valeur de base des Pokéballs'},
+
   // --- Upgrades Prestige ---
   {id:'pm01',em:'🍬',name:'Bonbon Rare+ x2', cost:20e6,   type:'prestige_mult',val:2, desc:'Double le bonus Prestige',   cond:g=>g.rc>=5},
   {id:'pm02',em:'🍭',name:'Bonbon Max x3',   cost:200e6,  type:'prestige_mult',val:3, desc:'Triple le bonus Prestige',   cond:g=>g.rc>=20},
@@ -853,6 +901,13 @@ const CANDY_SHOP = [
   {id:'cs_start2',  em:'🏆', name:'Dresseur Vétéran',   cost:20, desc:'Commence avec un petit stock de ₽', type:'start_pd',   val:5000},
   {id:'cs_ultra',   em:'🌀', name:'Détecteur Ultra',    cost:15, desc:'+0.5% chance ultra-rares',       type:'ultra_rate',     val:0.005},
   {id:'cs_combo',   em:'🔥', name:'Combo Maître',       cost:7,  desc:'Le combo augmente le CPS (+1% par clic combo)', type:'combo_cps', val:0.01},
+  // --- Items avancés (late game) ---
+  {id:'cs_adv1', em:'⚡', name:'Surcharge Permanente', cost:20, desc:'+50% production globale permanente',  type:'global_flat',    val:0.5},
+  {id:'cs_adv2', em:'🌟', name:'Aura Divine',          cost:30, desc:'+100% production globale permanente', type:'global_flat',    val:1.0},
+  {id:'cs_adv3', em:'🎯', name:'Clic Divin',           cost:20, desc:'+50% puissance de clic',              type:'click_flat_pct', val:0.5},
+  {id:'cs_adv4', em:'💤', name:'Reve de Richesse',     cost:25, desc:'+25% gains hors-ligne',               type:'offline_bonus',  val:0.25},
+  {id:'cs_adv5', em:'🔴', name:'Arsenal Pokéball',     cost:15, desc:'Les Pokéballs donnent +2 ₽/clic bonus', type:'pb_flat',      val:2},
+  {id:'cs_adv6', em:'♾️', name:'Essence Cosmique',    cost:50, desc:'+200% production globale permanente',  type:'global_flat',    val:2.0},
 ];
 
 </script>
@@ -1130,6 +1185,8 @@ function calcClickValue(g){
   // Event mult
   // Candy shop click bonus
   base *= (1 + csBonus('click_flat_pct'));
+  // Candy shop pokeball flat bonus
+  base += csBonus('pb_flat') * (G.b&&G.b.pokeball||0);
   // Wild pokemon click boost
   if(g.wildClickBoost && g.wildClickEnd && Date.now() < g.wildClickEnd) base *= (1 + g.wildClickBoost);
   if(g.evEnd > Date.now()) base *= g.evMult;
@@ -1232,7 +1289,8 @@ function gameTick(){
   const earned = cps * dt;
   G.pd += earned;
   G.te += earned;
-  G.tl += earned; // Comptabilise pour prestige
+  G.tl += earned;
+  updateDailies('earn', earned);
   G.tt += dt;
   if(cps > G.maxCps) G.maxCps = cps;
 
@@ -1297,6 +1355,8 @@ function doClick(cx, cy){
   G.tl += val; // Clic légitime
   G.tc++;
   if(G.pd < 0.01) G.wentBroke++;
+  playSound('click');
+  updateDailies('clicks',1);
 
   // Combo
   clearTimeout(comboTimer);
@@ -1321,6 +1381,8 @@ function buyBuilding(id){
   if(G.pd < cost) return;
   G.pd -= cost;
   G.b[id] = (G.b[id]||0) + qty;
+  playSound('buy');
+  updateDailies('buys', qty);
   notif(`✅ ${qty}× ${bd.name} acheté !`, 'buy');
   renderShop();
 }
@@ -1335,6 +1397,7 @@ function buyUpgrade(id){
   if(!up.cond(G)) return;
   G.pd -= up.cost;
   G.bu.add(id);
+  updateDailies('upgrades',1);
   notif(`⬆️ ${up.name} acheté !`, 'buy');
   renderShop();
 }
@@ -1449,13 +1512,17 @@ function triggerEvent(forceId){
       activeEventId = null;
     }
   }, ev.dur * 1000);
+  // Démarrer le compte à rebours affiché
+  startEventTimer(ev.dur);
   notif(ev.em+' '+(isUltra?'⭐ ULTRA-RARE ! ':'')+ev.name+' apparaît ! Cliquez vite !', 'ev');
 }
 function clickEvent(){
   const ev = [...EVENTS,...ULTRA_EVENTS].find(e=>e.id===activeEventId);
   if(!ev) return;
   clearTimeout(window._evTimeout);
+  stopEventTimer();
   G.ec++;
+  updateDailies('events',1);
   if(G.capturés[ev.id] !== undefined) G.capturés[ev.id]++;
   else G.capturés[ev.id] = 1;
   // MAINTENANT on applique le multiplicateur (au clic, pas à l'apparition)
@@ -1471,6 +1538,7 @@ function clickEvent(){
   G.pd += bonus;
   G.te += bonus;
   const isUltra = ULTRA_EVENTS.some(u=>u.id===ev.id);
+  playSound(isUltra ? 'ultra' : 'event');
   const prefix = isUltra ? '⭐ ULTRA-RARE ! ' : '🎉 ';
   spawnParticle(window.innerWidth/2, window.innerHeight/2, (isUltra?'⭐':'✨')+' +'+fmtP(bonus));
   notif(prefix+ev.name+' capturé ! +'+fmtP(bonus)+' | ×'+ev.mult+' pendant '+ev.dur+'s !','ach');
@@ -1486,6 +1554,7 @@ function checkAchievements(){
     if(!G.ach.has(ac.id)){
       try{ if(ac.cond(G)){
         G.ach.add(ac.id);
+        playSound('ach');
         notif('🏆 SUCCÈS : '+ac.em+' '+ac.name,'ach');
       }} catch(e){}
     }
@@ -1652,6 +1721,118 @@ function setQtyMobile(idx){
     if(el) el.classList.toggle('on',i===idx);
   });
   renderShop();
+}
+
+
+// ── Timer visible sur les events ───────────────────────────
+let _evTimerInterval = null;
+function startEventTimer(dur){
+  const el = document.getElementById('ev-timer');
+  if(!el) return;
+  el.style.display = 'block';
+  let remaining = dur;
+  el.textContent = '⏱ ' + remaining + 's';
+  clearInterval(_evTimerInterval);
+  _evTimerInterval = setInterval(()=>{
+    remaining--;
+    if(remaining <= 0){
+      clearInterval(_evTimerInterval);
+      el.style.display = 'none';
+    } else {
+      el.textContent = '⏱ ' + remaining + 's';
+      // Couleur rouge si urgent
+      el.style.color = remaining <= 3 ? 'var(--red-l)' : 'var(--gold)';
+    }
+  }, 1000);
+}
+function stopEventTimer(){
+  clearInterval(_evTimerInterval);
+  const el = document.getElementById('ev-timer');
+  if(el) el.style.display = 'none';
+}
+
+
+// ── Système de sons désactivables ──────────────────────────
+let SOUND_ON = localStorage.getItem('sound') !== 'off';
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _audioCtx = null;
+
+function getAudioCtx(){
+  if(!_audioCtx && AudioCtx){ try{ _audioCtx = new AudioCtx(); }catch(e){} }
+  return _audioCtx;
+}
+
+function playSound(type){
+  if(!SOUND_ON) return;
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  try{
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if(type==='click'){
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime+0.05);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.08);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.08);
+    } else if(type==='event'){
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime+0.1);
+      osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime+0.2);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.3);
+    } else if(type==='buy'){
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(400, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime+0.1);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.15);
+    } else if(type==='ultra'){
+      // Son spectaculaire pour les ultra-rares
+      for(let i=0;i<3;i++){
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(400+i*200, ctx.currentTime+i*0.08);
+        o2.frequency.exponentialRampToValueAtTime(800+i*300, ctx.currentTime+i*0.08+0.15);
+        g2.gain.setValueAtTime(0.12, ctx.currentTime+i*0.08);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+i*0.08+0.2);
+        o2.start(ctx.currentTime+i*0.08);
+        o2.stop(ctx.currentTime+i*0.08+0.2);
+      }
+    } else if(type==='ach'){
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime+0.1);
+      osc.frequency.setValueAtTime(784, ctx.currentTime+0.2);
+      gain.gain.setValueAtTime(0.07, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.35);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.35);
+    }
+  } catch(e){}
+}
+
+function toggleSound(){
+  SOUND_ON = !SOUND_ON;
+  localStorage.setItem('sound', SOUND_ON ? 'on' : 'off');
+  const btn = document.getElementById('sound-btn');
+  if(btn){ btn.textContent = SOUND_ON ? '🔊' : '🔇'; btn.classList.toggle('on', SOUND_ON); }
+  if(SOUND_ON) playSound('buy');
+}
+
+function initSoundBtn(){
+  const btn = document.getElementById('sound-btn');
+  if(btn){ btn.textContent = SOUND_ON ? '🔊' : '🔇'; btn.classList.toggle('on', SOUND_ON); }
 }
 
 function openHelp(){ document.getElementById('md-help').classList.add('on'); }
@@ -1827,6 +2008,7 @@ function catchWild(){
   document.getElementById('wild-popup').style.display='none';
   activeWild = null;
   // Enregistrer dans pokédex
+  updateDailies('wilds',1);
   if(!G.pokedex) G.pokedex = {};
   G.pokedex[wp.id] = (G.pokedex[wp.id]||0) + 1;
   // Appliquer l'effet
@@ -1836,11 +2018,14 @@ function catchWild(){
 
 function applyWildEffect(wp){
   const now = Date.now();
+  const cps = calcCPS(G);
   if(wp.effect==='instant_pd'){
-    G.pd += wp.val; G.te += wp.val;
-    spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(wp.val));
+    // Scale avec la production : min val, max 60s de prod
+    const scaled = Math.max(wp.val, cps * 2);
+    G.pd += scaled; G.te += scaled;
+    spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(scaled));
   } else if(wp.effect==='instant_cps'){
-    const bonus = calcCPS(G) * wp.val;
+    const bonus = cps * wp.val;
     G.pd += bonus; G.te += bonus;
     spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(bonus));
   } else if(wp.effect==='cps_boost'){
@@ -1877,6 +2062,98 @@ function renderPokedex(){
       '<div style="font-size:8px;color:'+col+';margin-top:2px">'+wp.rarity.replace('_',' ')+'</div>'+
       (known?'<div style="font-size:8px;color:var(--dim);margin-top:2px">×'+count+' capturé'+(count>1?'s':'')+'</div>':'')+
     '</div>';
+  }).join('');
+}
+
+
+// ============================================================
+// OBJECTIFS JOURNALIERS
+// ============================================================
+const DAILY_POOL = [
+  {id:'d_click',   em:'👆', name:'Cliqueur Assidu',    desc:'Cliquez X fois',          type:'clicks',    targets:[100,500,1000,5000]},
+  {id:'d_buy',     em:'🏢', name:'Constructeur',       desc:'Achetez X bâtiments',     type:'buys',      targets:[5,15,30,50]},
+  {id:'d_earn',    em:'💰', name:'Accumulateur',       desc:'Gagnez X ₽',              type:'earn',      targets:[1e3,10e3,1e6,1e9]},
+  {id:'d_event',   em:'✨', name:'Chasseur Events', desc:'Capturez X events',       type:'events',    targets:[1,3,5,10]},
+  {id:'d_upgrade', em:'⬆️', name:'Améliorateur',       desc:'Achetez X améliorations', type:'upgrades',  targets:[1,3,5,10]},
+  {id:'d_wild',    em:'🐾', name:'Dresseur',           desc:'Capturez X Pokémon sauvages', type:'wilds', targets:[1,2,5,10]},
+];
+
+const DAILY_REWARDS = [500, 5e3, 50e3, 1e6]; // récompense en ₽ selon difficulté
+
+function getDailyKey(){
+  const d = new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+function initDailies(){
+  const key = getDailyKey();
+  const stored = localStorage.getItem('dailies_'+key);
+  if(stored){
+    G._dailies = JSON.parse(stored);
+  } else {
+    // Générer 3 objectifs aléatoires pour aujourd'hui
+    const shuffled = [...DAILY_POOL].sort(()=>Math.random()-.5).slice(0,3);
+    const diff = Math.floor(Math.random()*4); // 0-3
+    G._dailies = shuffled.map(d=>({
+      id:d.id, em:d.em, name:d.name, desc:d.desc, type:d.type,
+      target:d.targets[diff], reward:DAILY_REWARDS[diff],
+      progress:0, done:false
+    }));
+    localStorage.setItem('dailies_'+key, JSON.stringify(G._dailies));
+  }
+  G._dailyKey = key;
+}
+
+function updateDailies(type, amount){
+  if(!G._dailies) return;
+  let changed = false;
+  for(const obj of G._dailies){
+    if(obj.done) continue;
+    if(obj.type === type){
+      obj.progress = Math.min(obj.target, (obj.progress||0) + (amount||1));
+      if(obj.progress >= obj.target){
+        obj.done = true;
+        G.pd += obj.reward;
+        G.te += obj.reward;
+        playSound('ach');
+        notif('🎯 Objectif du jour complété : '+obj.name+' ! +'+fmtP(obj.reward),'ach');
+        changed = true;
+      }
+    }
+  }
+  if(changed){
+    localStorage.setItem('dailies_'+(G._dailyKey||getDailyKey()), JSON.stringify(G._dailies));
+  }
+}
+
+function openDailies(){
+  if(!G._dailies) initDailies();
+  renderDailies();
+  document.getElementById('md-daily').classList.add('on');
+}
+
+function renderDailies(){
+  const el = document.getElementById('daily-list');
+  if(!el || !G._dailies) return;
+  const key = getDailyKey();
+  // Reset si nouveau jour
+  if(G._dailyKey && G._dailyKey !== key){ initDailies(); }
+  el.innerHTML = G._dailies.map(obj=>{
+    const pct = Math.min(100,(obj.progress/obj.target)*100);
+    return '<div style="background:var(--card);border:1px solid '+(obj.done?'var(--green)':'var(--border)')+';border-radius:10px;padding:12px;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<span style="font-size:20px">'+obj.em+'</span>'
+        +'<div style="flex:1">'
+          +'<div style="font-size:11px;font-weight:900;color:'+(obj.done?'var(--green)':'var(--text)')+'">'+obj.name+(obj.done?' ✅':'')+'</div>'
+          +'<div style="font-size:9px;color:var(--dim)">'+obj.desc.replace('X', String(obj.target))+'</div>'
+        +'</div>'
+        +'<div style="font-size:10px;font-weight:800;color:var(--gold)">+'+fmtP(obj.reward)+'</div>'
+      +'</div>'
+      +'<div style="background:var(--bg);border-radius:4px;height:6px;overflow:hidden">'
+        +'<div style="height:100%;width:'+pct+'%;background:'+(obj.done?'var(--green)':'linear-gradient(90deg,var(--purp-d),var(--gold))')+';border-radius:4px;transition:width .3s"></div>'
+      +'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:3px;text-align:right">'+Math.min(obj.progress,obj.target)+' / '+obj.target+'</div>'
+    +'</div>';
   }).join('');
 }
 
@@ -2138,7 +2415,9 @@ function notif(msg, type=''){
 // INIT
 // ============================================================
 loadGame();
-acCheckBan(); // Restaure un éventuel ban actif après refresh
+acCheckBan();
+initSoundBtn();
+initDailies(); // Restaure un éventuel ban actif après refresh
 renderShop();
 updateUI();
 
@@ -2201,6 +2480,17 @@ if(G.tc===0 && G.te===0){
       <span id="pokedex-count" style="color:var(--gold);font-weight:800">0 / 20</span> Pokémon découverts
     </div>
     <div id="pokedex-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px"></div>
+  </div>
+</div>
+
+<!-- Daily Objectives Modal -->
+<div class="overlay" id="md-daily">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title" style="color:var(--blue)">🎯 OBJECTIFS DU JOUR<button class="mcls" onclick="closeModal('md-daily')">✕</button></div>
+    <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:12px">
+      3 défis renouvelés chaque jour à minuit. Complétez-les pour des récompenses !
+    </div>
+    <div id="daily-list"></div>
   </div>
 </div>
 </body>
