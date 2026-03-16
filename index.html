@@ -820,9 +820,9 @@ const ACHIEV=[
   {id:'ca3',em:'🏭',name:'Usine à Bonbons',     desc:'Obtenez 100 Bonbons Rares',     cond:g=>g.rc>=100},
   {id:'ca4',em:'👑',name:'Roi des Bonbons',     desc:'Obtenez 500 Bonbons Rares',     cond:g=>g.rc>=500},
   {id:'ev1',em:'✨',name:'Rencontre Rare',       desc:'Capturez 1 Pokémon rare',       cond:g=>g.ec>=1},
-  {id:'ev2',em:'🎯',name:'Chasseur Légendaire', desc:'Capturez 10 Pokémon rares',     cond:g=>g.ec>=10},
-  {id:'ev3',em:'🌟',name:'Expert Légendaire',   desc:'Capturez 50 Pokémon rares',     cond:g=>g.ec>=50},
-  {id:'ev4',em:'👑',name:'Maître Légendaire',   desc:'Capturez 100 Pokémon rares',    cond:g=>g.ec>=100},
+  {id:'ev2',em:'🎯',name:'Chasseur Assidu',     desc:'Capturez 10 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=10},
+  {id:'ev3',em:'🌟',name:'Expert Légendaire',   desc:'Capturez 50 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=50},
+  {id:'ev4',em:'👑',name:'Maître Légendaire',   desc:'Capturez 100 Pokémon uniques',  cond:g=>Object.keys(g.pokedex||{}).length>=100},
   {id:'sp1',em:'🎒',name:'Dresseur Débutant',   desc:'Commencez votre aventure',      cond:g=>g.te>=1},
   {id:'sp2',em:'😤',name:'Workaholic',          desc:'Cliquez 50 000 fois',           cond:g=>g.tc>=5e4},
   {id:'sp3',em:'😱',name:'Pokémaniaque',        desc:'25 types de bâtiments',         cond:g=>uniqB(g)>=25},
@@ -854,12 +854,47 @@ const ACHIEV=[
   // Prestige milestones
   {id:'prc1',em:'💜',name:'Bonbons x10',         desc:'Obtenez 10 bonbons en 1 prestige',cond:g=>g.bestPrestige>=10},
   {id:'prc2',em:'🌈',name:'Bonbons x100',        desc:'Obtenez 100 bonbons en 1 prestige',cond:g=>g.bestPrestige>=100},
-  // Event captures
-  {id:'ecap1',em:'✨',name:'Mew Capturé',        desc:'Capturez Mew',                   cond:g=>g.capturés&&g.capturés.mew>=1},
-  {id:'ecap2',em:'🌟',name:'Lugia Capturé',      desc:'Capturez Lugia',                 cond:g=>g.capturés&&g.capturés.lugia>=1},
-  {id:'ecap3',em:'🎉',name:'Jirachi Capturé',    desc:'Capturez Jirachi',               cond:g=>g.capturés&&g.capturés.jirachi>=1},
-  {id:'ecap4',em:'💫',name:'Victini Capturé',    desc:'Capturez Victini',               cond:g=>g.capturés&&g.capturés.victini>=1},
-  {id:'ecap5',em:'🌿',name:'Celebi Capturé',     desc:'Capturez Celebi',                cond:g=>g.capturés&&g.capturés.celebi>=1},
+  // ── Pokémon Capturés (Gen 1 — G.pokedex[num]) ───────────────────────
+  // Premiers pas
+  {id:'pk1',  em:'🎒',name:'Première Capture',    desc:'Capturez votre 1er Pokémon',    cond:g=>Object.keys(g.pokedex||{}).length>=1},
+  {id:'pk2',  em:'🐾',name:'Dresseur Débutant',   desc:'Capturez 5 Pokémon uniques',    cond:g=>Object.keys(g.pokedex||{}).length>=5},
+  {id:'pk3',  em:'🎯',name:'Vrai Dresseur',        desc:'Capturez 10 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=10},
+  {id:'pk4',  em:'🌟',name:'Chasseur Confirmé',   desc:'Capturez 25 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=25},
+  {id:'pk5',  em:'💫',name:'Expert Pokémon',       desc:'Capturez 50 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=50},
+  {id:'pk6',  em:'💎',name:'Maître Pokémon',       desc:'Capturez 100 Pokémon uniques',  cond:g=>Object.keys(g.pokedex||{}).length>=100},
+  {id:'pk7',  em:'👑',name:'Pokédex Légendaire',  desc:'Capturez 140 Pokémon uniques',  cond:g=>Object.keys(g.pokedex||{}).length>=140},
+  {id:'pk8',  em:'✨',name:'Pokédex Complet !',   desc:'Capturez les 151 Pokémon',      cond:g=>Object.keys(g.pokedex||{}).length>=151},
+  // Total captures (avec doublons)
+  {id:'pt1',  em:'🔴',name:'100 Captures',         desc:'Capturez 100 Pokémon au total', cond:g=>Object.values(g.pokedex||{}).reduce((a,b)=>a+b,0)>=100},
+  {id:'pt2',  em:'🔴',name:'500 Captures',         desc:'Capturez 500 Pokémon au total', cond:g=>Object.values(g.pokedex||{}).reduce((a,b)=>a+b,0)>=500},
+  // Starters
+  {id:'st1',  em:'🌱',name:'Bulbizarre Capturé',   desc:'Capturez Bulbizarre (#1)',       cond:g=>(g.pokedex&&g.pokedex[1]||0)>=1},
+  {id:'st2',  em:'🔥',name:'Salamèche Capturé',    desc:'Capturez Salamèche (#4)',        cond:g=>(g.pokedex&&g.pokedex[4]||0)>=1},
+  {id:'st3',  em:'💦',name:'Carapuce Capturé',     desc:'Capturez Carapuce (#7)',         cond:g=>(g.pokedex&&g.pokedex[7]||0)>=1},
+  {id:'st4',  em:'⚡',name:'Pikachu Capturé',      desc:'Capturez Pikachu (#25)',         cond:g=>(g.pokedex&&g.pokedex[25]||0)>=1},
+  {id:'st5',  em:'🐉',name:'Dracaufeu Capturé',    desc:'Capturez Dracaufeu (#6)',        cond:g=>(g.pokedex&&g.pokedex[6]||0)>=1},
+  {id:'st6',  em:'💪',name:'Tortank Capturé',      desc:'Capturez Tortank (#9)',          cond:g=>(g.pokedex&&g.pokedex[9]||0)>=1},
+  {id:'st7',  em:'🌺',name:'Florizarre Capturé',   desc:'Capturez Florizarre (#3)',       cond:g=>(g.pokedex&&g.pokedex[3]||0)>=1},
+  {id:'st8',  em:'😈',name:'Gengar Capturé',       desc:'Capturez Gengar (#94)',          cond:g=>(g.pokedex&&g.pokedex[94]||0)>=1},
+  {id:'st9',  em:'🦁',name:'Dracolosse Capturé',   desc:'Capturez Dracolosse (#149)',     cond:g=>(g.pokedex&&g.pokedex[149]||0)>=1},
+  // Légendaires
+  {id:'lg1',  em:'❄️',name:'Artikodin Capturé',    desc:'Capturez Artikodin (#144)',      cond:g=>(g.pokedex&&g.pokedex[144]||0)>=1},
+  {id:'lg2',  em:'⚡',name:'Électhor Capturé',     desc:'Capturez Électhor (#145)',       cond:g=>(g.pokedex&&g.pokedex[145]||0)>=1},
+  {id:'lg3',  em:'🔥',name:'Sulfura Capturé',      desc:'Capturez Sulfura (#146)',        cond:g=>(g.pokedex&&g.pokedex[146]||0)>=1},
+  {id:'lg4',  em:'🔱',name:'Trio Légendaire',      desc:'Capturez les 3 oiseaux légendaires',cond:g=>(g.pokedex&&g.pokedex[144]&&g.pokedex[145]&&g.pokedex[146])},
+  // Ultra
+  {id:'ul1',  em:'💜',name:'Mewtwo Capturé',       desc:'Capturez Mewtwo (#150)',         cond:g=>(g.pokedex&&g.pokedex[150]||0)>=1},
+  {id:'ul2',  em:'✨',name:'Mew Capturé',           desc:'Capturez Mew (#151)',            cond:g=>(g.pokedex&&g.pokedex[151]||0)>=1},
+  {id:'ul3',  em:'🌟',name:'Les Fabuleux',          desc:'Capturez Mewtwo ET Mew',         cond:g=>(g.pokedex&&g.pokedex[150]&&g.pokedex[151])},
+  // Méga Prestige
+  {id:'mp1',  em:'⭐',name:'Méga Dresseur',         desc:'Effectuez votre 1er Méga Prestige', cond:g=>(g.megaCount||0)>=1},
+  {id:'mp2',  em:'🌟',name:'Méga Légende',          desc:'Effectuez 3 Méga Prestiges',    cond:g=>(g.megaCount||0)>=3},
+  {id:'mp3',  em:'♾️',name:'Au-delà du Possible',  desc:'Effectuez 5 Méga Prestiges',    cond:g=>(g.megaCount||0)>=5},
+  // Boutique Bonbons
+  {id:'cb1',  em:'🍬',name:'Premier Achat Bonbon',  desc:'Achetez 1 item boutique',       cond:g=>(g.cs&&g.cs.size||0)>=1},
+  {id:'cb2',  em:'🍭',name:'Client Sucré',          desc:'Achetez 5 items boutique',      cond:g=>(g.cs&&g.cs.size||0)>=5},
+  {id:'cb3',  em:'💎',name:'Collectionneur Bonbon', desc:'Achetez 10 items boutique',     cond:g=>(g.cs&&g.cs.size||0)>=10},
+  {id:'cb4',  em:'👑',name:'Maître Bonbons',        desc:'Achetez tous les items boutique',cond:g=>(g.cs&&g.cs.size||0)>=14},
   // Offline
   {id:'offl1',em:'💤',name:'Gains Passifs',       desc:'Gagnez 1M ₽ hors-ligne',        cond:g=>g.offlineEarned>=1e6},
   {id:'offl2',em:'🌙',name:'Richesse en Dormant', desc:'Gagnez 1B ₽ hors-ligne',        cond:g=>g.offlineEarned>=1e9},
@@ -870,7 +905,7 @@ const ACHIEV=[
   {id:'misc4',em:'🛒',name:'Shopaholic',           desc:'Achetez 500 bâtiments au total',cond:g=>totB(g)>=500},
   {id:'misc5',em:'👛',name:'Économe',              desc:'Ayez 0 ₽ au moins 1 fois',      cond:g=>g.wentBroke>=1},
   {id:'misc6',em:'🎯',name:'Précision',            desc:'Achetez 1 amélioration exacte', cond:g=>g.bu.size>=1},
-  {id:'misc7',em:'🌠',name:'Étoile Filante',       desc:'Capturez 5 Pokémon rares',      cond:g=>g.ec>=5},
+  {id:'misc7',em:'🌠',name:'Étoile Filante',       desc:'Capturez 5 Pokémon uniques',    cond:g=>Object.keys(g.pokedex||{}).length>=5},
   {id:'misc8',em:'🔑',name:'Clé Secrète',          desc:'Importez une sauvegarde',       cond:g=>g.imported>=1},
   {id:'misc9',em:'📅',name:'Joueur Régulier',      desc:'Jouez 3 sessions différentes',  cond:g=>g.sessions>=3},
   {id:'misc10',em:'🏅',name:'Grand Total',          desc:'Achetez 150 améliorations',     cond:g=>g.bu.size>=150},
@@ -883,7 +918,7 @@ const ACHIEV=[
 // POKEMON GEN 1 — 151 Pokémon unifiés (wild + events)
 // commun → instant_pd (1s CPS) | peu_commun → instant_pd (3s CPS)
 // rare → cps_boost +25% 30s | epique → global_mult ×5-15 8-12s
-// legendaire → global_mult ×30 8s | ultra → global_mult ×100-200 4-5s
+// legendaire → global_mult ×100-200 5s | ultra → global_mult ×666-777 6-7s
 // ============================================================
 const SPAWN_RATE = {commun:0.12, peu_commun:0.06, rare:0.025, epique:0.008, legendaire:0.002, ultra:0.0004};
 const SPAWN_DUR  = {commun:12, peu_commun:12, rare:10, epique:8, legendaire:6, ultra:5};
@@ -1039,12 +1074,12 @@ const POKEMON_GEN1 = [
   {num:148,em:'🐲',name:'Draco',      rarity:'epique',     effect:'global_mult', val:8,   dur:12},
   {num:149,em:'🦁',name:'Dracolosse', rarity:'epique',     effect:'global_mult', val:15,  dur:8},
   // LEGENDAIRE — trio oiseaux
-  {num:144,em:'❄',name:'Artikodin',  rarity:'legendaire', effect:'global_mult', val:30,  dur:8},
-  {num:145,em:'⚡',name:'Electhor',   rarity:'legendaire', effect:'global_mult', val:30,  dur:8},
-  {num:146,em:'🔥',name:'Sulfura',    rarity:'legendaire', effect:'global_mult', val:30,  dur:8},
+  {num:144,em:'❄',name:'Artikodin',  rarity:'legendaire', effect:'global_mult', val:100, dur:5},
+  {num:145,em:'⚡',name:'Electhor',   rarity:'legendaire', effect:'global_mult', val:150, dur:5},
+  {num:146,em:'🔥',name:'Sulfura',    rarity:'legendaire', effect:'global_mult', val:200, dur:5},
   // ULTRA — Mewtwo et Mew (fabuleux)
-  {num:150,em:'💜',name:'Mewtwo',     rarity:'ultra',      effect:'global_mult', val:100, dur:5},
-  {num:151,em:'✨',name:'Mew',        rarity:'ultra',      effect:'global_mult', val:200, dur:4},
+  {num:150,em:'💜',name:'Mewtwo',     rarity:'ultra',      effect:'global_mult', val:666, dur:6},
+  {num:151,em:'✨',name:'Mew',        rarity:'ultra',      effect:'global_mult', val:777, dur:7},
 ];
 
 // ============================================================
@@ -1466,13 +1501,13 @@ function gameTick(){
   }
 
 
-  // Spawn Pokémon : toutes les 10-15 min (aléatoire)
+  // Spawn Pokémon : toutes les 2-5 min (aléatoire)
   if(!G._wildAcc) G._wildAcc = 0;
-  if(!G._wildNext) G._wildNext = 600 + Math.random()*300; // 600-900s
+  if(!G._wildNext) G._wildNext = 120 + Math.random()*180; // 120-300s
   G._wildAcc += dt;
   if(G._wildAcc >= G._wildNext){
     G._wildAcc = 0;
-    G._wildNext = 600 + Math.random()*300; // reset pour le prochain
+    G._wildNext = 120 + Math.random()*180; // reset pour le prochain
     if(!activeEventId) triggerEvent();
   }
 
@@ -2644,7 +2679,7 @@ if(G.tc===0 && G.te===0){
     <div class="modal-title" style="color:var(--red-l)">📖 POKÉDEX<button class="mcls" onclick="closeModal('md-pokedex')">✕</button></div>
     <div style="font-size:10px;color:var(--dim);margin-bottom:10px;text-align:center">
       Capturez des Pokémon sauvages pour compléter votre Pokédex !<br>
-      <span id="pokedex-count" style="color:var(--gold);font-weight:800">0 / 20</span> Pokémon découverts
+      <span id="pokedex-count" style="color:var(--gold);font-weight:800">0 / 151</span> Pokémon capturés
     </div>
     <div id="pokedex-list"></div>
   </div>
