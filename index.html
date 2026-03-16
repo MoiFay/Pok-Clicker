@@ -855,32 +855,32 @@ const ACHIEV=[
 // RARE EVENTS
 // ============================================================
 const EVENTS=[
-  {id:'mew',     em:'✨', name:'MEW',     mult:10,  dur:15, color:'#F48FB1', desc:'×10 prod pendant 15s !'},
-  {id:'celebi',  em:'🌿', name:'CELEBI',  mult:8,   dur:15, color:'#A5D6A7', desc:'×8 prod pendant 15s !'},
-  {id:'jirachi', em:'⭐', name:'JIRACHI', mult:15,  dur:10, color:'#FFF59D', desc:'×15 prod pendant 10s !'},
-  {id:'victini', em:'✌️', name:'VICTINI', mult:5,   dur:20, color:'#CE93D8', desc:'×5 prod pendant 20s !'},
-  {id:'shaymin', em:'🌸', name:'SHAYMIN', mult:7,   dur:15, color:'#A5D6A7', desc:'×7 prod pendant 15s !'},
-  {id:'manaphy', em:'💧', name:'MANAPHY', mult:6,   dur:20, color:'#81D4FA', desc:'×6 prod pendant 20s !'},
-  {id:'arceus',  em:'👼', name:'ARCEUS',  mult:50,  dur:5,  color:'#FFD700', desc:'×50 prod pendant 5s !'},
-  {id:'darkrai', em:'🌑', name:'DARKRAI', mult:20,  dur:8,  color:'#9C27B0', desc:'×20 prod pendant 8s !'},
-  {id:'mewtwo',  em:'💜', name:'MEWTWO',  mult:30,  dur:7,  color:'#CE93D8', desc:'×30 prod pendant 7s !'},
-  {id:'lugia',   em:'🕊️', name:'LUGIA',   mult:25,  dur:8,  color:'#B3E5FC', desc:'×25 prod pendant 8s !'},
-  {id:'hooh',    em:'🔥', name:'HO-OH',   mult:20,  dur:10, color:'#FFCC02', desc:'×20 prod pendant 10s !'},
-  {id:'deoxys',  em:'👽', name:'DEOXYS',  mult:12,  dur:12, color:'#80CBC4', desc:'×12 prod pendant 12s !'},
+  {id:'mew',     em:'✨', name:'MEW',     mult:10,  dur:15, color:'#F48FB1', desc:'×10 prod pendant 15s !', rarity:'rare'},
+  {id:'celebi',  em:'🌿', name:'CELEBI',  mult:8,   dur:15, color:'#A5D6A7', desc:'×8 prod pendant 15s !', rarity:'rare'},
+  {id:'jirachi', em:'⭐', name:'JIRACHI', mult:15,  dur:10, color:'#FFF59D', desc:'×15 prod pendant 10s !', rarity:'epique'},
+  {id:'victini', em:'✌️', name:'VICTINI', mult:5,   dur:20, color:'#CE93D8', desc:'×5 prod pendant 20s !', rarity:'peu_commun'},
+  {id:'shaymin', em:'🌸', name:'SHAYMIN', mult:7,   dur:15, color:'#A5D6A7', desc:'×7 prod pendant 15s !', rarity:'peu_commun'},
+  {id:'manaphy', em:'💧', name:'MANAPHY', mult:6,   dur:20, color:'#81D4FA', desc:'×6 prod pendant 20s !', rarity:'peu_commun'},
+  {id:'arceus',  em:'👼', name:'ARCEUS',  mult:50,  dur:5,  color:'#FFD700', desc:'×50 prod pendant 5s !', rarity:'legendaire'},
+  {id:'darkrai', em:'🌑', name:'DARKRAI', mult:20,  dur:8,  color:'#9C27B0', desc:'×20 prod pendant 8s !', rarity:'epique'},
+  {id:'mewtwo',  em:'💜', name:'MEWTWO',  mult:30,  dur:7,  color:'#CE93D8', desc:'×30 prod pendant 7s !', rarity:'legendaire'},
+  {id:'lugia',   em:'🕊️', name:'LUGIA',   mult:25,  dur:8,  color:'#B3E5FC', desc:'×25 prod pendant 8s !', rarity:'epique'},
+  {id:'hooh',    em:'🔥', name:'HO-OH',   mult:20,  dur:10, color:'#FFCC02', desc:'×20 prod pendant 10s !', rarity:'epique'},
+  {id:'deoxys',  em:'👽', name:'DEOXYS',  mult:12,  dur:12, color:'#80CBC4', desc:'×12 prod pendant 12s !', rarity:'rare'},
 ];
 
 // Événements Ultra-Rares — chance par tick de 3s (indépendante du taux normal)
 const ULTRA_EVENTS=[
-  {id:'ultra_arceus',  em:'🌟', name:'ARCEUS DIVIN',          mult:777, dur:7,  color:'#FFD700',
-   chance:0.0001, desc:'×777 production pendant 7s !'},
-  {id:'ultra_dialga',  em:'⏰', name:'DISTORSION DE DIALGA',  mult:1,   dur:10, color:'#7EC8E3',
-   chance:0.0003, timeWarp:3, desc:'Accélère le temps ×3 pendant 10s !'},
-  {id:'ultra_girat',   em:'🌀', name:'PACTE DE GIRATINA',     mult:200, dur:15, color:'#9b59b6',
-   chance:0.0002, desc:'×200 production pendant 15s !'},
-  {id:'ultra_necro',   em:'💥', name:'NECROZMA ABSOLU',       mult:500, dur:5,  color:'#fff',
-   chance:0.00005, desc:'×500 production pendant 5s !'},
+  {id:'ultra_arceus',  em:'🌟', name:'ARCEUS',          mult:777, dur:7,  color:'#FFD700',
+   chance:0.0001, desc:'×777 production pendant 7s !', rarity:'ultra'},
+  {id:'ultra_dialga',  em:'⏰', name:'DIALGA',  mult:1,   dur:10, color:'#7EC8E3',
+   chance:0.0003, timeWarp:3, desc:'Accélère le temps ×3 pendant 10s !', rarity:'ultra'},
+  {id:'ultra_girat',   em:'🌀', name:'GIRATINA',     mult:200, dur:15, color:'#9b59b6',
+   chance:0.0002, desc:'×200 production pendant 15s !', rarity:'ultra'},
+  {id:'ultra_necro',   em:'💥', name:'NECROZMA',       mult:500, dur:5,  color:'#fff',
+   chance:0.00005, desc:'×500 production pendant 5s !', rarity:'ultra'},
   {id:'ultra_god',     em:'♾️', name:'VOLONTÉ DIVINE',        mult:1000,dur:3,  color:'#FFD700',
-   chance:0.00001, desc:'×1000 production pendant 3s !'},
+   chance:0.00001, desc:'×1000 production pendant 3s !', rarity:'ultra'},
 ];
 
 // ============================================================
@@ -1525,6 +1525,9 @@ function clickEvent(){
   updateDailies('events',1);
   if(G.capturés[ev.id] !== undefined) G.capturés[ev.id]++;
   else G.capturés[ev.id] = 1;
+  // Enregistrer dans le Pokédex (même système que les wild)
+  if(!G.pokedex) G.pokedex = {};
+  G.pokedex[ev.id] = (G.pokedex[ev.id]||0) + 1;
   // MAINTENANT on applique le multiplicateur (au clic, pas à l'apparition)
   G.evMult = ev.mult;
   G.evEnd = Date.now() + ev.dur * 1000;
@@ -1967,8 +1970,165 @@ const WILD_RARITY_RATE = {
   legendaire: 0.00002,
 };
 
+// ============================================================
+// POKÉDEX GEN 1 — 151 premiers Pokémon (Coming Soon)
+// ============================================================
+const GEN1_POKEDEX = [
+  {num:1, em:'🌱', name:'Bulbizarre', coming:true},
+  {num:2, em:'🌿', name:'Herbizarre', coming:true},
+  {num:3, em:'🌺', name:'Florizarre', coming:true},
+  {num:4, em:'🔥', name:'Salamèche', coming:true},
+  {num:5, em:'🦎', name:'Reptincel', coming:true},
+  {num:6, em:'🐉', name:'Dracaufeu', coming:true},
+  {num:7, em:'💦', name:'Carapuce', coming:true},
+  {num:8, em:'🐢', name:'Carabaffe', coming:true},
+  {num:9, em:'💪', name:'Tortank', coming:true},
+  {num:10, em:'🐛', name:'Chenipan', coming:true},
+  {num:11, em:'🫛', name:'Chrysacier', coming:true},
+  {num:12, em:'🦋', name:'Papilusion', coming:true},
+  {num:13, em:'🐝', name:'Aspicot', coming:true},
+  {num:14, em:'🫧', name:'Coconfort', coming:true},
+  {num:15, em:'🐝', name:'Dardargnan', coming:true},
+  {num:16, em:'🐦', name:'Roucool', coming:true},
+  {num:17, em:'🦅', name:'Roucoups', coming:true},
+  {num:18, em:'🦅', name:'Roucarnage', coming:true},
+  {num:19, em:'🐀', name:'Rattata', coming:true},
+  {num:20, em:'🐁', name:'Rattatac', coming:true},
+  {num:21, em:'🐦', name:'Piafabec', coming:true},
+  {num:22, em:'🦅', name:'Rapasdepic', coming:true},
+  {num:23, em:'🐍', name:'Abo', coming:true},
+  {num:24, em:'🐍', name:'Arbok', coming:true},
+  {num:25, em:'⚡', name:'Pikachu', coming:true},
+  {num:26, em:'🐭', name:'Raichu', coming:true},
+  {num:27, em:'🏜️', name:'Sabelette', coming:true},
+  {num:28, em:'🏜️', name:'Sablaireau', coming:true},
+  {num:29, em:'💜', name:'Nidoran♀', coming:true},
+  {num:30, em:'💜', name:'Nidorina', coming:true},
+  {num:31, em:'👑', name:'Nidoqueen', coming:true},
+  {num:32, em:'💙', name:'Nidoran♂', coming:true},
+  {num:33, em:'💙', name:'Nidorino', coming:true},
+  {num:34, em:'👑', name:'Nidoking', coming:true},
+  {num:35, em:'🌙', name:'Mélofée', coming:true},
+  {num:36, em:'🌟', name:'Mélodelfe', coming:true},
+  {num:37, em:'🦊', name:'Goupix', coming:true},
+  {num:38, em:'🦊', name:'Feunard', coming:true},
+  {num:39, em:'🎵', name:'Rondoudou', coming:true},
+  {num:40, em:'🎵', name:'Grodoudou', coming:true},
+  {num:41, em:'🦇', name:'Nosferapti', coming:true},
+  {num:42, em:'🦇', name:'Nosferalto', coming:true},
+  {num:43, em:'🌸', name:'Mystherbe', coming:true},
+  {num:44, em:'🌸', name:'Ortide', coming:true},
+  {num:45, em:'🌺', name:'Rafflesia', coming:true},
+  {num:46, em:'🍄', name:'Paras', coming:true},
+  {num:47, em:'🍄', name:'Parasect', coming:true},
+  {num:48, em:'🐛', name:'Mimitoss', coming:true},
+  {num:49, em:'🦋', name:'Aéromite', coming:true},
+  {num:50, em:'🦔', name:'Taupiqueur', coming:true},
+  {num:51, em:'🦔', name:'Triopikeur', coming:true},
+  {num:52, em:'😺', name:'Miaouss', coming:true},
+  {num:53, em:'🐱', name:'Persian', coming:true},
+  {num:54, em:'🦆', name:'Psykokwak', coming:true},
+  {num:55, em:'🦆', name:'Akwakwak', coming:true},
+  {num:56, em:'🐒', name:'Férosinge', coming:true},
+  {num:57, em:'🦍', name:'Colossinge', coming:true},
+  {num:58, em:'🐶', name:'Caninos', coming:true},
+  {num:59, em:'🐕', name:'Arcanin', coming:true},
+  {num:60, em:'🐸', name:'Têtarte', coming:true},
+  {num:61, em:'🐸', name:'Têtarte', coming:true},
+  {num:62, em:'🐘', name:'Éléphanfant', coming:true},
+  {num:63, em:'🔮', name:'Abra', coming:true},
+  {num:64, em:'🔮', name:'Kadabra', coming:true},
+  {num:65, em:'✨', name:'Alakazam', coming:true},
+  {num:66, em:'💪', name:'Machoc', coming:true},
+  {num:67, em:'💪', name:'Machopeur', coming:true},
+  {num:68, em:'🥊', name:'Mackogneur', coming:true},
+  {num:69, em:'🌻', name:'Chétiflor', coming:true},
+  {num:70, em:'🌻', name:'Boustiflor', coming:true},
+  {num:71, em:'🌻', name:'Empiflor', coming:true},
+  {num:72, em:'🪼', name:'Tentacool', coming:true},
+  {num:73, em:'🪼', name:'Tentacruel', coming:true},
+  {num:74, em:'🪨', name:'Racaillou', coming:true},
+  {num:75, em:'🪨', name:'Gravalanch', coming:true},
+  {num:76, em:'🪨', name:'Grolem', coming:true},
+  {num:77, em:'🐴', name:'Ponyta', coming:true},
+  {num:78, em:'🐴', name:'Galopa', coming:true},
+  {num:79, em:'😴', name:'Ramoloss', coming:true},
+  {num:80, em:'😴', name:'Flagadoss', coming:true},
+  {num:81, em:'🔩', name:'Magnéti', coming:true},
+  {num:82, em:'🔩', name:'Magnéton', coming:true},
+  {num:83, em:'🦘', name:'Kangourex', coming:true},
+  {num:84, em:'🐦', name:'Doduo', coming:true},
+  {num:85, em:'🐦', name:'Dodrio', coming:true},
+  {num:86, em:'🦭', name:'Otaria', coming:true},
+  {num:87, em:'🦭', name:'Lamantine', coming:true},
+  {num:88, em:'☠️', name:'Tadmorv', coming:true},
+  {num:89, em:'☠️', name:'Grotadmorv', coming:true},
+  {num:90, em:'🐚', name:'Kokiyas', coming:true},
+  {num:91, em:'🦀', name:'Crustabri', coming:true},
+  {num:92, em:'👻', name:'Spectrum', coming:true},
+  {num:93, em:'👻', name:'Spectrum', coming:true},
+  {num:94, em:'😈', name:'Gengar', coming:true},
+  {num:95, em:'🐍', name:'Onix', coming:true},
+  {num:96, em:'😴', name:'Soporifik', coming:true},
+  {num:97, em:'😴', name:'Hypnomade', coming:true},
+  {num:98, em:'🦀', name:'Krabby', coming:true},
+  {num:99, em:'🦀', name:'Krabboss', coming:true},
+  {num:100, em:'⚡', name:'Voltorbe', coming:true},
+  {num:101, em:'⚡', name:'Électrode', coming:true},
+  {num:102, em:'🥚', name:'Noeunoeuf', coming:true},
+  {num:103, em:'🥥', name:'Noadkoko', coming:true},
+  {num:104, em:'💀', name:'Osselait', coming:true},
+  {num:105, em:'💀', name:'Ossatueur', coming:true},
+  {num:106, em:'🥋', name:'Kicklee', coming:true},
+  {num:107, em:'🥊', name:'Tygnon', coming:true},
+  {num:108, em:'👅', name:'Excelangue', coming:true},
+  {num:109, em:'💨', name:'Smogo', coming:true},
+  {num:110, em:'💨', name:'Smogogo', coming:true},
+  {num:111, em:'🦏', name:'Rhinocorne', coming:true},
+  {num:112, em:'🦏', name:'Rhinoféros', coming:true},
+  {num:113, em:'💖', name:'Leveinard', coming:true},
+  {num:114, em:'🌿', name:'Saquedeneu', coming:true},
+  {num:115, em:'🦘', name:'Kangourex', coming:true},
+  {num:116, em:'🐠', name:'Hypotrempe', coming:true},
+  {num:117, em:'🐠', name:'Hypocéan', coming:true},
+  {num:118, em:'🐟', name:'Poissirène', coming:true},
+  {num:119, em:'🐟', name:'Poissoroy', coming:true},
+  {num:120, em:'⭐', name:'Stari', coming:true},
+  {num:121, em:'⭐', name:'Staross', coming:true},
+  {num:122, em:'🎪', name:'M. Mime', coming:true},
+  {num:123, em:'🦗', name:'Insécateur', coming:true},
+  {num:124, em:'💋', name:'Lippoutou', coming:true},
+  {num:125, em:'⚡', name:'Élekable', coming:true},
+  {num:126, em:'🔥', name:'Magmar', coming:true},
+  {num:127, em:'🦟', name:'Scarabrute', coming:true},
+  {num:128, em:'🐂', name:'Tauros', coming:true},
+  {num:129, em:'🐟', name:'Magicarpe', coming:true},
+  {num:130, em:'🐲', name:'Léviator', coming:true},
+  {num:131, em:'🐉', name:'Lokhlass', coming:true},
+  {num:132, em:'💫', name:'Métamorph', coming:true},
+  {num:133, em:'🦊', name:'Évoli', coming:true},
+  {num:134, em:'💧', name:'Aquali', coming:true},
+  {num:135, em:'⚡', name:'Voltali', coming:true},
+  {num:136, em:'🔥', name:'Pyroli', coming:true},
+  {num:137, em:'💾', name:'Porygon', coming:true},
+  {num:138, em:'🐚', name:'Amonita', coming:true},
+  {num:139, em:'🐚', name:'Amonistar', coming:true},
+  {num:140, em:'🦀', name:'Kabuto', coming:true},
+  {num:141, em:'⚔️', name:'Kabutops', coming:true},
+  {num:142, em:'🦕', name:'Ptéra', coming:true},
+  {num:143, em:'😴', name:'Ronflex', coming:true},
+  {num:144, em:'❄️', name:'Artikodin', coming:true},
+  {num:145, em:'⚡', name:'Électhor', coming:true},
+  {num:146, em:'🔥', name:'Sulfura', coming:true},
+  {num:147, em:'🐲', name:'Minidraco', coming:true},
+  {num:148, em:'🐲', name:'Draco', coming:true},
+  {num:149, em:'🦁', name:'Dracolosse', coming:true},
+  {num:150, em:'💜', name:'Mewtwo', coming:true},
+  {num:151, em:'✨', name:'Mew', coming:true},
+];
+
 const RARITY_COLOR = {
-  commun:'#9E9E9E', peu_commun:'#4CAF50', rare:'#2196F3', epique:'#9C27B0', legendaire:'#FFD700'
+  commun:'#9E9E9E', peu_commun:'#4CAF50', rare:'#2196F3', epique:'#9C27B0', legendaire:'#FFD700', ultra:'#FFFFFF'
 };
 
 let activeWild = null;
@@ -2049,21 +2209,64 @@ function openPokedex(){
 function renderPokedex(){
   const el = document.getElementById('pokedex-list');
   if(!el) return;
-  const total = WILD_POKEMON.length;
-  const caught = Object.keys(G.pokedex||{}).length;
-  document.getElementById('pokedex-count').textContent = caught + ' / ' + total;
-  el.innerHTML = WILD_POKEMON.map(wp=>{
-    const count = G.pokedex&&G.pokedex[wp.id] ? G.pokedex[wp.id] : 0;
-    const known = count > 0;
-    const col = RARITY_COLOR[wp.rarity];
-    return '<div style="background:var(--card);border:1px solid '+(known?col:'var(--border)')+';border-radius:9px;padding:9px;text-align:center;opacity:'+(known?1:.35)+'">'+
-      '<div style="font-size:26px">'+(known?wp.em:'❓')+'</div>'+
-      '<div style="font-size:9px;font-weight:900;margin-top:4px;color:'+(known?'var(--text)':'var(--dim)')+'">'+(known?wp.name:'???')+'</div>'+
-      '<div style="font-size:8px;color:'+col+';margin-top:2px">'+wp.rarity.replace('_',' ')+'</div>'+
-      (known?'<div style="font-size:8px;color:var(--dim);margin-top:2px">×'+count+' capturé'+(count>1?'s':'')+'</div>':'')+
-    '</div>';
-  }).join('');
+
+  const allPokemon = [
+    ...WILD_POKEMON,
+    ...[...EVENTS,...ULTRA_EVENTS].map(ev=>({
+      id:ev.id, em:ev.em, name:ev.name,
+      rarity: ev.rarity || 'legendaire',
+    }))
+  ];
+  const total = allPokemon.length;
+  const caught = allPokemon.filter(p=>(G.pokedex&&G.pokedex[p.id]||0)>0).length;
+  document.getElementById('pokedex-count').textContent = caught + ' / ' + total + ' captures';
+
+  const rarityOrder  = ['commun','peu_commun','rare','epique','legendaire','ultra'];
+  const rarityEmoji  = {commun:'x',peu_commun:'x',rare:'x',epique:'x',legendaire:'x',ultra:'x'};
+  const RE = {commun:'⚪',peu_commun:'🟢',rare:'🔵',epique:'🟣',legendaire:'🟡',ultra:'⭐'};
+  const RL = {commun:'Commun',peu_commun:'Peu Commun',rare:'Rare',epique:'Epique',legendaire:'Legendaire',ultra:'Ultra-Rare'};
+
+  let html = '';
+  html += '<div style="font-family:var(--fn-px);font-size:8px;color:var(--gold);margin-bottom:10px">POKEMON DU JEU</div>';
+
+  for(const rar of rarityOrder){
+    const group = allPokemon.filter(p=>(p.rarity||'legendaire')===rar);
+    if(!group.length) continue;
+    const col = RARITY_COLOR[rar]||'#FFD700';
+    const gc = group.filter(p=>(G.pokedex&&G.pokedex[p.id]||0)>0).length;
+    html += '<div style="font-size:9px;color:'+col+';font-weight:800;margin:8px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--border)">'+RE[rar]+' '+RL[rar]+' <span style="color:var(--dim);font-weight:400">('+gc+'/'+group.length+')</span></div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(85px,1fr));gap:5px;margin-bottom:8px">';
+    for(const wp of group){
+      const count = (G.pokedex&&G.pokedex[wp.id])||0;
+      const known = count>0;
+      html += '<div style="background:var(--card);border:1px solid '+(known?col:'var(--border)')+';border-radius:8px;padding:7px 4px;text-align:center;opacity:'+(known?1:.28)+'">'
+        +'<div style="font-size:26px;line-height:1">'+(known?wp.em:'❓')+'</div>'
+        +'<div style="font-size:7px;font-weight:900;margin-top:3px;color:'+(known?'var(--text)':'var(--dim)')+'">'+( known?wp.name:'???')+'</div>'
+        +(known?'<div style="font-size:7px;color:'+col+';margin-top:2px">x'+count+'</div>':'')
+      +'</div>';
+    }
+    html += '</div>';
+  }
+
+  // Gen 1 coming soon
+  html += '<div style="border-top:2px solid var(--border-b);margin:14px 0 10px"></div>';
+  html += '<div style="font-family:var(--fn-px);font-size:8px;color:var(--purple);margin-bottom:4px">POKEDEX GEN 1</div>';
+  html += '<div style="font-size:9px;color:var(--dim);margin-bottom:10px">Les vraies sprites arrivent prochainement !</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:4px">';
+  for(const pk of GEN1_POKEDEX){
+    html += '<div style="background:var(--card);border:1px solid var(--border);border-radius:7px;padding:5px 3px;text-align:center;opacity:.4">'
+      +'<div style="font-size:9px;color:var(--dim);font-weight:800">#'+pk.num+'</div>'
+      +'<div style="font-size:20px;line-height:1;margin:2px 0">'+pk.em+'</div>'
+      +'<div style="font-size:6px;color:var(--dim)">'+pk.name+'</div>'
+      +'<div style="font-size:6px;color:var(--purp-d);font-weight:800;margin-top:2px">BIENTOT</div>'
+    +'</div>';
+  }
+  html += '</div>';
+
+  el.style.display = 'block';
+  el.innerHTML = html;
 }
+
 
 
 // ============================================================
@@ -2479,7 +2682,7 @@ if(G.tc===0 && G.te===0){
       Capturez des Pokémon sauvages pour compléter votre Pokédex !<br>
       <span id="pokedex-count" style="color:var(--gold);font-weight:800">0 / 20</span> Pokémon découverts
     </div>
-    <div id="pokedex-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px"></div>
+    <div id="pokedex-list"></div>
   </div>
 </div>
 
