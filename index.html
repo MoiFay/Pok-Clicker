@@ -2252,7 +2252,7 @@ function renderPokedex(){
     const known = count > 0;
     const col = RARITY_COLOR[pk.rarity]||'#FFD700';
     const spriteNum = String(pk.num).padStart(3,'0');
-    const spriteUrl = 'sprites/' + spriteNum + '.png';
+    const spriteUrl = 'Sprites/' + spriteNum + '.png';
     return '<div style="background:var(--card);border:1px solid '+(known?col:'var(--border)')+';'
       +'border-radius:8px;padding:6px 4px;text-align:center;'
       +'opacity:'+(known?1:.45)+';position:relative">'
