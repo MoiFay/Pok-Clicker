@@ -334,6 +334,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <button class="tbtn" onclick="openSave()">💾 Save</button>
       <button class="tbtn" onclick="openStats()">📊 Stats</button>
       <button class="tbtn candy" onclick="openCandyShop()">🍬 Boutique</button>
+      <button class="tbtn" onclick="openPearlShop()" style="border-color:#1E88E5;color:#1E88E5;position:relative">🔵 Perles<span id="pearl-shop-badge" class="pearl-shop-badge" style="display:none">!</span></button>
       <button class="tbtn mega" id="mega-btn" onclick="openMegaPrestige()" style="display:none">⭐ MÉGA PRESTIGE</button>
       <button class="tbtn" onclick="openPokedex()" style="border-color:var(--red-l);color:var(--red-l)">📖 Pokédex</button>
       <button class="tbtn" onclick="openHelp()" style="border-color:#4FC3F7;color:#4FC3F7">❓ Comment jouer</button>
@@ -2622,15 +2623,14 @@ function updatePearlUI(){
   if(pm) pm.textContent = G.pearls||0;
   if(tm) tm.textContent = G.triplets||0;
   if(gm) gm.textContent = G.grandes||0;
-  // Badge boutique
-  const badge = document.getElementById('pearl-shop-badge');
-  if(badge){
+  // Badge boutique (tous les éléments avec cet id)
+  document.querySelectorAll('#pearl-shop-badge').forEach(badge=>{
     const canBuy = PEARL_SHOP.some(item=>{
       const cur = item.currency==='perle'?(G.pearls||0):item.currency==='triple'?(G.triplets||0):(G.grandes||0);
       return cur >= item.cost;
     });
     badge.style.display = canBuy ? '' : 'none';
-  }
+  });
 }
 
 function openPearlShop(){
