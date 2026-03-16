@@ -128,6 +128,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 #ev-popup:active{transform:scale(.88)!important;animation:none!important}
 .ev-inner{background:rgba(13,14,27,.9);border-radius:14px;padding:9px 13px;text-align:center;border:2px solid var(--gold);box-shadow:0 0 28px rgba(255,215,0,.5);}
 .ev-emoji{font-size:48px;line-height:1;display:block;filter:drop-shadow(0 0 12px gold)}
+#ev-sprite img{width:64px;height:64px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 8px gold)}
 .ev-name{font-size:8px;font-family:var(--fn-px);color:var(--gold);margin-top:4px;white-space:nowrap}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:400;padding:14px;}
 .overlay.on{display:flex}
@@ -357,7 +358,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 <div id="notifs"></div>
 <div id="ev-popup" onclick="clickEvent()" ontouchstart="clickEvent()">
   <div class="ev-inner">
-    <span class="ev-emoji" id="ev-emoji">✨</span>
+    <div id="ev-sprite" style="width:64px;height:64px;margin:0 auto;display:flex;align-items:center;justify-content:center"></div>
     <div class="ev-name" id="ev-name">MEW</div>
     <div id="ev-timer">⏱ --</div>
   </div>
@@ -1683,7 +1684,11 @@ function triggerEvent(forceNum){
   G.evEnd = 0;
   const pop = document.getElementById('ev-popup');
   const isUltra = ev.rarity==='ultra' || ev.rarity==='legendaire';
-  document.getElementById('ev-emoji').textContent = ev.em;
+  // Afficher le sprite
+  const spriteNum = String(ev.num).padStart(3,'0');
+  const spriteEl = document.getElementById('ev-sprite');
+  spriteEl.innerHTML = '<img src="Sprites/'+spriteNum+'.png" alt="'+ev.name+'" '
+    +'onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{textContent:\''+ev.em+'\',style:\'font-size:48px;line-height:1\'}))">';
   document.getElementById('ev-name').textContent = (isUltra?'⭐ ':'')+ev.name;
   pop.style.display = 'block';
   pop.style.left = (15 + Math.random()*50) + '%';
@@ -1699,7 +1704,7 @@ function triggerEvent(forceNum){
   // Timer de disparition si pas cliqué
   clearTimeout(window._evTimeout);
   window._evTimeout = setTimeout(()=>{
-    if(activeEventId===ev.id){
+    if(activeEventId===ev.num){
       // Disparaît sans bonus
       document.getElementById('ev-popup').style.display='none';
       activeEventId = null;
