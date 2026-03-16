@@ -337,6 +337,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <button class="tbtn" onclick="openPearlShop()" style="border-color:#1E88E5;color:#1E88E5;position:relative">🔵 Perles<span id="pearl-shop-badge" class="pearl-shop-badge" style="display:none">!</span></button>
       <button class="tbtn mega" id="mega-btn" onclick="openMegaPrestige()" style="display:none">⭐ MÉGA PRESTIGE</button>
       <button class="tbtn" onclick="openPokedex()" style="border-color:var(--red-l);color:var(--red-l)">📖 Pokédex</button>
+      <button class="tbtn" onclick="openDailies()" style="border-color:var(--blue);color:var(--blue)">🎯 Objectifs</button>
       <button class="tbtn" onclick="openHelp()" style="border-color:#4FC3F7;color:#4FC3F7">❓ Comment jouer</button>
       <button class="tbtn" onclick="hardRefresh()" style="border-color:var(--dim);color:var(--dim)" title="Vide le cache et recharge la page">🔄 Actualiser</button>
       <a href="https://subs.twitch.tv/moifay" target="_blank" style="text-decoration:none">
@@ -381,9 +382,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div id="pearl-bar-wrap">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
         <span style="font-size:8px;color:var(--blue);font-weight:800">
-          <img src="Items/perle.png" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle"> Perles
+          <img src="Items/perle.png" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle"> Prochaine Perle
         </span>
-        <span style="font-size:8px;color:var(--dim)" id="pearl-bar-txt">0 / 30</span>
+        <span style="font-size:8px;color:var(--dim)" id="pearl-bar-txt">0%</span>
       </div>
       <div id="pearl-bar-track"><div id="pearl-bar-fill"></div></div>
       <div id="pearl-counts">
@@ -1920,6 +1921,8 @@ function loadGame(){
     G.sessions = (G.sessions||0)+1;
     // Migre immédiatement vers v3
     saveGame();
+    // Forcer la mise à jour de l'UI perles après chargement
+    setTimeout(()=>updatePearlUI(), 100);
   } catch(e){ console.warn('Load failed',e); }
 }
 
@@ -2315,9 +2318,9 @@ const WILD_POKEMON = POKEMON_GEN1; // alias for compatibility
 // Barre de progression : se remplit en capturant des Pokémon
 // Points par rareté :
 const PEARL_POINTS = {
-  commun:1, peu_commun:2, rare:5, epique:12, legendaire:30, ultra:80
+  commun:2, peu_commun:5, rare:12, epique:25, legendaire:50, ultra:100
 };
-const PEARL_BAR_MAX = 30; // points pour 1 perle
+const PEARL_BAR_MAX = 100; // 100 points = 1 Perle
 
 // Conversion : 30 perles → 1 perle triple | 10 triples → 1 grande perle
 const PEARL_TO_TRIPLE = 30;
@@ -2496,9 +2499,12 @@ function initDailies(){
     // Générer 3 objectifs aléatoires pour aujourd'hui
     const shuffled = [...DAILY_POOL].sort(()=>Math.random()-.5).slice(0,3);
     const diff = Math.floor(Math.random()*4); // 0-3
+    // Récompense scalée : base = 30min de production actuelle (min DAILY_REWARDS[diff])
+    const cpsNow = typeof calcCPS === 'function' ? calcCPS(G) : 0;
+    const scaledReward = Math.max(DAILY_REWARDS[diff], Math.round(cpsNow * 1800));
     G._dailies = shuffled.map(d=>({
       id:d.id, em:d.em, name:d.name, desc:d.desc, type:d.type,
-      target:d.targets[diff], reward:DAILY_REWARDS[diff],
+      target:d.targets[diff], reward:scaledReward,
       progress:0, done:false
     }));
     localStorage.setItem('dailies_'+key, JSON.stringify(G._dailies));
@@ -2573,8 +2579,9 @@ function addPearlPoints(rarity){
   }
   if(gained > 0){
     G.pearls = (G.pearls||0) + gained;
-    notif('🔵 +'+gained+' Perle'+(gained>1?'s':'')+'  !','buy');
+    notif('🔵 +'+gained+' Perle'+(gained>1?'s':'')+' gagnée'+(gained>1?'s':'')+' ! ('+G.pearls+' total)','buy');
     autoConvertPearls();
+    saveGame(); // Sauvegarder immédiatement quand on gagne une perle
   }
   updatePearlUI();
 }
@@ -2609,7 +2616,7 @@ function updatePearlUI(){
   const bar = document.getElementById('pearl-bar-fill');
   const txt = document.getElementById('pearl-bar-txt');
   if(bar) bar.style.width = pct+'%';
-  if(txt) txt.textContent = Math.floor(G.pearlBar||0)+' / '+PEARL_BAR_MAX;
+  if(txt) txt.textContent = Math.round(pct)+'%';
   const p  = document.getElementById('pearl-count');
   const tr = document.getElementById('triple-count');
   const gr = document.getElementById('grande-count');
@@ -2814,6 +2821,7 @@ function updateUI(){
   const now = Date.now();
   const cps = calcCPS(G);
   const cv = calcClickValue(G);
+  updatePearlUI(); // Sync perles à chaque tick
   document.getElementById('c-pd').textContent = fmtP(G.pd);
   document.getElementById('c-cps').textContent = fmtP(cps);
   document.getElementById('c-cp').textContent = fmtP(cv);
@@ -3034,9 +3042,11 @@ function notif(msg, type=''){
 loadGame();
 acCheckBan();
 initSoundBtn();
-initDailies(); // Restaure un éventuel ban actif après refresh
+initDailies();
 renderShop();
 updateUI();
+// Pearl UI : délai 200ms pour que tous les éléments DOM soient rendus
+setTimeout(()=>{ updatePearlUI(); }, 200);
 
 // First launch greeting
 if(G.tc===0 && G.te===0 && !G.tutoDone){
