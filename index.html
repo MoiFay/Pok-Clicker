@@ -290,6 +290,31 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .tuto-btn:hover{ opacity:.85; }
 #tuto-skip{ font-size:9px; color:var(--dim); margin-top:10px;
   cursor:pointer; text-decoration:underline; }
+
+/* ── PEARL SYSTEM ──────────────────────────────────────────── */
+#pearl-bar-wrap{
+  margin-top:8px;padding:0 4px;
+}
+#pearl-bar-track{
+  background:var(--bg);border-radius:6px;height:8px;
+  border:1px solid var(--border);overflow:hidden;position:relative;
+}
+#pearl-bar-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#1E88E5,#29B6F6);
+  border-radius:6px;transition:width .3s;
+}
+#pearl-counts{
+  display:flex;align-items:center;gap:8px;margin-top:4px;
+  font-size:9px;color:var(--dim);
+}
+#pearl-counts img{width:14px;height:14px;image-rendering:pixelated;vertical-align:middle}
+.pearl-shop-badge{
+  background:var(--red-l);color:#fff;border-radius:50%;
+  width:14px;height:14px;font-size:8px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  position:absolute;top:-4px;right:-4px;
+}
 </style>
 </head>
 <body>
@@ -329,6 +354,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <button class="tbtn candy" onclick="openCandyShop();closeDrawer()">🍬 Boutique Bonbons</button>
   <button class="tbtn mega" id="mega-btn-drawer" onclick="openMegaPrestige();closeDrawer()" style="display:none">⭐ MÉGA PRESTIGE</button>
   <button class="tbtn" onclick="openPokedex();closeDrawer()" style="border-color:var(--red-l);color:var(--red-l)">📖 Pokédex</button>
+  <button class="tbtn" onclick="openPearlShop();closeDrawer()" style="border-color:#1E88E5;color:#1E88E5;position:relative">🔵 Boutique Perles<span id="pearl-shop-badge" class="pearl-shop-badge" style="display:none">!</span></button>
   <button class="tbtn" onclick="openDailies();closeDrawer()" style="border-color:var(--blue);color:var(--blue)">🎯 Objectifs du jour</button>
   <button class="tbtn" onclick="openHelp();closeDrawer()" style="border-color:#4FC3F7;color:#4FC3F7">❓ Comment jouer</button>
   <button class="tbtn" onclick="hardRefresh()" style="border-color:var(--dim);color:var(--dim)">🔄 Actualiser</button>
@@ -349,6 +375,22 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <div id="pd-display">0 ₽</div>
       <div id="cps-display">0 ₽/s</div>
       <div id="click-display">Clic = 1 ₽</div>
+    </div>
+    <!-- Barre de Perles -->
+    <div id="pearl-bar-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+        <span style="font-size:8px;color:var(--blue);font-weight:800">
+          <img src="Items/perle.png" style="width:12px;height:12px;image-rendering:pixelated;vertical-align:middle"> Perles
+        </span>
+        <span style="font-size:8px;color:var(--dim)" id="pearl-bar-txt">0 / 30</span>
+      </div>
+      <div id="pearl-bar-track"><div id="pearl-bar-fill"></div></div>
+      <div id="pearl-counts">
+        <img src="Items/perle.png"><span id="pearl-count">0</span>
+        <img src="Items/perle_triple.png"><span id="triple-count">0</span>
+        <img src="Items/grande_perle.png"><span id="grande-count">0</span>
+        <button onclick="convertPearls()" style="margin-left:auto;padding:2px 6px;background:var(--card);border:1px solid var(--blue);border-radius:5px;color:var(--blue);font-size:7px;cursor:pointer">Convertir</button>
+      </div>
     </div>
     <div id="badge-row">
       <div class="badge" id="b-candy" style="display:none">🍬 x<span id="b-pmult">1</span></div>
@@ -1163,6 +1205,13 @@ function newGame(){
     tl:0,        // Earned legitimately (CPS + clics, pas events)
     tc:0,        // Total clicks
     pokedex:{},   // Pokémon capturés
+    pearls:0,     // Perles simples
+    triplets:0,   // Perles triples
+    grandes:0,    // Grandes perles
+    pearlBar:0,   // Barre de progression actuelle
+    // Items actifs (timestamps fin)
+    itemEnd:{},   // {effect: endTimestamp}
+    lastMissed:null, // Dernier Pokémon manqué (pour Rappel)
     wildCpsBoost:0, wildCpsEnd:0, wildClickBoost:0, wildClickEnd:0, wildMult:1, wildMultEnd:0,
     tt:0,        // Total time played (s)
     pc:0,        // Prestige count
@@ -1380,6 +1429,8 @@ function calcCPS(g){
   total *= (1 + g.ach.size * 0.005); // +0.5% par succès
   // Méga Prestige bonus permanent
   if(g.megaMult && g.megaMult > 1) total *= g.megaMult;
+  // Items Pearl Shop
+  total *= getItemCpsMult();
   // Candy shop global bonus
   const csGlobal = 1 + csBonus('global_flat');
   total *= csGlobal;
@@ -1425,6 +1476,8 @@ function calcClickValue(g){
   // Event mult
   // Candy shop click bonus
   base *= (1 + csBonus('click_flat_pct'));
+  // Items Pearl Shop
+  base *= getItemClickMult();
   // Candy shop pokeball flat bonus
   base += csBonus('pb_flat') * (G.b&&G.b.pokeball||0);
   // Wild pokemon click boost
@@ -1548,7 +1601,9 @@ function gameTick(){
   G._wildAcc += dt;
   if(G._wildAcc >= G._wildNext){
     G._wildAcc = 0;
-    G._wildNext = 120 + Math.random()*180; // reset pour le prochain
+    G._wildNext = 120 + Math.random()*180;
+    // Encens : divise le délai par spawnMult
+    G._wildNext /= getItemSpawnMult();
     if(!activeEventId) triggerEvent();
   }
 
@@ -1681,6 +1736,8 @@ function doPrestige(){
     imported:G.imported, sessions:G.sessions, bestPrestige:G.bestPrestige,
     offlineEarned:G.offlineEarned, capturés:G.capturés,
     pokedex: POKE_RESET ? {} : (G.pokedex||{}),  // Reset si toggle ON
+    pearls:G.pearls||0, triplets:G.triplets||0, grandes:G.grandes||0,
+    pearlBar:G.pearlBar||0, itemEnd:G.itemEnd||{}, lastMissed:G.lastMissed||null,
     megaCount:G.megaCount||0, megaMult:G.megaMult||1, megaDone:G.megaDone||false,
     b: Object.fromEntries(BLDGS.map(b=>[b.id,0])),
     bu: new Set(G.bu),     // ← Upgrades CONSERVÉES
@@ -1710,10 +1767,17 @@ function triggerEvent(forceNum){
     ev = POKEMON_GEN1.find(p=>p.num===forceNum);
   } else {
     // Tirer selon les taux de rareté
+    const ultraActive = G.itemEnd && G.itemEnd['ps_encens_u'] === -1;
+    if(ultraActive){
+      // Encens Ultra : forcer légendaire ou ultra
+      G.itemEnd['ps_encens_u'] = 0; // consommer
+      const pool = POKEMON_GEN1.filter(p=>p.rarity==='legendaire'||p.rarity==='ultra');
+      ev = pool[Math.floor(Math.random()*pool.length)];
+    }
     const candidates = POKEMON_GEN1.filter(p=>{
       const baseRate = SPAWN_RATE[p.rarity]||0;
-      const boost = POKE_RESET && !(G.pokedex&&G.pokedex[p.num]) ? (SPAWN_RATE_BOOST[p.rarity]||1) : 1;
-      return Math.random() < baseRate * boost;
+      const resetBoost = POKE_RESET && !(G.pokedex&&G.pokedex[p.num]) ? (SPAWN_RATE_BOOST[p.rarity]||1) : 1;
+      return Math.random() < baseRate * resetBoost;
     });
     ev = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : null;
   }
@@ -1746,12 +1810,13 @@ function triggerEvent(forceNum){
   window._evTimeout = setTimeout(()=>{
     if(activeEventId===ev.num){
       // Disparaît sans bonus
+      G.lastMissed = ev.num; // Mémoriser pour le Rappel
       document.getElementById('ev-popup').style.display='none';
       activeEventId = null;
     }
-  }, (SPAWN_DUR[ev.rarity]||ev.dur||10) * 1000);
-  // Démarrer le compte à rebours affiché
-  startEventTimer(SPAWN_DUR[ev.rarity]||ev.dur||10);
+  const evDurFinal = (SPAWN_DUR[ev.rarity]||ev.dur||10) * getItemStayMult();
+  }, evDurFinal * 1000);
+  startEventTimer(evDurFinal);
   notif(ev.em+' '+(isUltra?'⭐ ULTRA-RARE ! ':'')+ev.name+' apparaît ! Cliquez vite !', 'ev');
 }
 function clickEvent(){
@@ -1764,6 +1829,8 @@ function clickEvent(){
   G.pokedex[ev.num] = (G.pokedex[ev.num]||0) + 1;
   G.ec++;
   updateDailies('events',1);
+  // Barre de perles
+  addPearlPoints(ev.rarity);
   // Appliquer l'effet selon la rareté
   const evDur = SPAWN_DUR[ev.rarity] || ev.dur || 10;
   const cpsNow = calcCPS(G);
@@ -1842,7 +1909,7 @@ function loadGame(){
     const offlineSecs = Math.min((Date.now() - (data.lastSave||Date.now())) / 1000, 86400);
     if(offlineSecs > 5){
       const offCPS = calcCPS(G);
-      const offlineMult = 0.5 + csBonus('offline_bonus');
+      const offlineMult = 0.5 + csBonus('offline_bonus') + getItemOfflineMult();
       const gained = offCPS * offlineSecs * offlineMult;
       G.pd += gained;
       G.te += gained;
@@ -2102,7 +2169,7 @@ const SPAWN_RATE_BOOST = {
 
 
 // ── Tutoriel ───────────────────────────────────────────────────────
-const TUTO_SLIDES = 5;
+const TUTO_SLIDES = 6;
 let tutoStep = 1;
 
 function openTuto(){
@@ -2217,11 +2284,16 @@ function doMegaPrestige(){
   const megaCount = (G.megaCount||0) + 1;
   const megaMult = Math.pow(10, megaCount); // ×10 par méga prestige
   const savedCs = new Set(G.cs||new Set()); // Conserver candy shop
+  const savedPearls = {pearls:G.pearls||0, triplets:G.triplets||0, grandes:G.grandes||0, pearlBar:G.pearlBar||0};
   G = newGame();
   G.megaCount = megaCount;
   G.megaMult = megaMult;
   G.megaDone = false;
   G.cs = savedCs; // Candy shop permanent
+  G.pearls   = savedPearls.pearls;
+  G.triplets = savedPearls.triplets;
+  G.grandes  = savedPearls.grandes;
+  G.pearlBar = savedPearls.pearlBar;
   saveGame();
   closeModal('md-mega');
   notif('⭐ MÉGA PRESTIGE #'+megaCount+' ! Bonus permanent ×'+megaMult+' !','ev');
@@ -2235,6 +2307,48 @@ function doMegaPrestige(){
 // WILD_POKEMON and GEN1_POKEDEX replaced by POKEMON_GEN1 (unified Gen1 system)
 // See POKEMON_GEN1 array in script block 1
 const WILD_POKEMON = POKEMON_GEN1; // alias for compatibility
+
+
+// ============================================================
+// SYSTÈME DE PERLES
+// ============================================================
+// Barre de progression : se remplit en capturant des Pokémon
+// Points par rareté :
+const PEARL_POINTS = {
+  commun:1, peu_commun:2, rare:5, epique:12, legendaire:30, ultra:80
+};
+const PEARL_BAR_MAX = 30; // points pour 1 perle
+
+// Conversion : 30 perles → 1 perle triple | 10 triples → 1 grande perle
+const PEARL_TO_TRIPLE = 30;
+const TRIPLE_TO_GRANDE = 10;
+
+// Boutique perles
+const PEARL_SHOP = [
+  // Prix en perles simples
+  {id:'ps_encens',    img:'Items/encens.png',      name:'Encens Pokémon',   cost:5,  currency:'perle',
+   desc:'×2 taux de spawn pendant 15 min',                   effect:'spawn_mult',  val:2,   dur:15*60},
+  {id:'ps_miel',      img:'Items/miel.png',         name:'Miel',             cost:3,  currency:'perle',
+   desc:'Pokemon reste a l\'ecran 2x plus longtemps',        effect:'stay_mult',   val:2,   dur:0},
+  {id:'ps_rappel',    img:'Items/rappel.png',       name:'Rappel',           cost:8,  currency:'perle',
+   desc:'Refait apparaître le dernier Pokémon manqué',        effect:'recall',      val:1,   dur:0},
+  {id:'ps_superball', img:'Items/superball.png',    name:'Super Ball',       cost:10, currency:'perle',
+   desc:'+50% CPS pendant 10 min',                            effect:'cps_pct',     val:.5,  dur:10*60},
+  // Prix en perles triples
+  {id:'ps_hyperball', img:'Items/hyperball.png',    name:'Hyper Ball',       cost:5,  currency:'triple',
+   desc:'+100% CPS pendant 10 min',                           effect:'cps_pct',     val:1.0, dur:10*60},
+  {id:'ps_pierre_feu',img:'Items/pierre_feu.png',  name:'Pierre Feu',       cost:3,  currency:'triple',
+   desc:'+80% CPS pendant 10 min',                            effect:'cps_pct',     val:.8,  dur:10*60},
+  {id:'ps_pierre_eau',img:'Items/pierre_eau.png',  name:'Pierre Eau',       cost:3,  currency:'triple',
+   desc:'+50% gains hors-ligne pendant 1h',                   effect:'offline_pct', val:.5,  dur:60*60},
+  {id:'ps_pierre_fdr',img:'Items/pierre_foudre.png',name:'Pierre Foudre',   cost:3,  currency:'triple',
+   desc:'+80% puissance de clic pendant 10 min',              effect:'click_pct',   val:.8,  dur:10*60},
+  {id:'ps_encens_u',  img:'Items/encens_ultra.png', name:'Encens Ultra',     cost:8,  currency:'triple',
+   desc:'×10 chance ultra/légendaire au prochain spawn',      effect:'ultra_boost', val:10,  dur:0},
+  // Prix en grandes perles
+  {id:'ps_masterball',img:'Items/masterball.png',   name:'Master Ball',      cost:3,  currency:'grande',
+   desc:'+300% CPS pendant 5 min',                            effect:'cps_pct',     val:3.0, dur:5*60},
+];
 
 const RARITY_COLOR = {
   commun:'#9E9E9E', peu_commun:'#4CAF50', rare:'#2196F3', epique:'#9C27B0', legendaire:'#FFD700', ultra:'#FFFFFF'
@@ -2443,6 +2557,212 @@ function renderDailies(){
       +'<div style="font-size:9px;color:var(--dim);margin-top:3px;text-align:right">'+Math.min(obj.progress,obj.target)+' / '+obj.target+'</div>'
     +'</div>';
   }).join('');
+}
+
+
+// ============================================================
+// SYSTÈME DE PERLES — logique
+// ============================================================
+function addPearlPoints(rarity){
+  const pts = PEARL_POINTS[rarity] || 1;
+  G.pearlBar = (G.pearlBar||0) + pts;
+  let gained = 0;
+  while(G.pearlBar >= PEARL_BAR_MAX){
+    G.pearlBar -= PEARL_BAR_MAX;
+    gained++;
+  }
+  if(gained > 0){
+    G.pearls = (G.pearls||0) + gained;
+    notif('🔵 +'+gained+' Perle'+(gained>1?'s':'')+'  !','buy');
+    autoConvertPearls();
+  }
+  updatePearlUI();
+}
+
+function autoConvertPearls(){
+  // Auto-convert : pas automatique, le joueur choisit
+  // On ne fait que mettre à jour l'UI
+  updatePearlUI();
+}
+
+function convertPearls(){
+  // Perles → Triples
+  const t = Math.floor((G.pearls||0) / PEARL_TO_TRIPLE);
+  if(t > 0){
+    G.pearls -= t * PEARL_TO_TRIPLE;
+    G.triplets = (G.triplets||0) + t;
+    notif('💎 +'+t+' Perle'+(t>1?'s':'')+' Triple'+(t>1?'s':'')+'  !','buy');
+  }
+  // Triples → Grande
+  const g = Math.floor((G.triplets||0) / TRIPLE_TO_GRANDE);
+  if(g > 0){
+    G.triplets -= g * TRIPLE_TO_GRANDE;
+    G.grandes = (G.grandes||0) + g;
+    notif('✨ +'+g+' Grande'+(g>1?'s':'')+' Perle'+(g>1?'s':'')+'  !','buy');
+  }
+  updatePearlUI();
+  renderPearlShop();
+}
+
+function updatePearlUI(){
+  const pct = Math.min(100, ((G.pearlBar||0)/PEARL_BAR_MAX)*100);
+  const bar = document.getElementById('pearl-bar-fill');
+  const txt = document.getElementById('pearl-bar-txt');
+  if(bar) bar.style.width = pct+'%';
+  if(txt) txt.textContent = Math.floor(G.pearlBar||0)+' / '+PEARL_BAR_MAX;
+  const p  = document.getElementById('pearl-count');
+  const tr = document.getElementById('triple-count');
+  const gr = document.getElementById('grande-count');
+  if(p)  p.textContent  = G.pearls||0;
+  if(tr) tr.textContent = G.triplets||0;
+  if(gr) gr.textContent = G.grandes||0;
+  const pm = document.getElementById('pearl-count-modal');
+  const tm = document.getElementById('triple-count-modal');
+  const gm = document.getElementById('grande-count-modal');
+  if(pm) pm.textContent = G.pearls||0;
+  if(tm) tm.textContent = G.triplets||0;
+  if(gm) gm.textContent = G.grandes||0;
+  // Badge boutique
+  const badge = document.getElementById('pearl-shop-badge');
+  if(badge){
+    const canBuy = PEARL_SHOP.some(item=>{
+      const cur = item.currency==='perle'?(G.pearls||0):item.currency==='triple'?(G.triplets||0):(G.grandes||0);
+      return cur >= item.cost;
+    });
+    badge.style.display = canBuy ? '' : 'none';
+  }
+}
+
+function openPearlShop(){
+  renderPearlShop();
+  document.getElementById('md-pearl').classList.add('on');
+}
+
+function renderPearlShop(){
+  const el = document.getElementById('pearl-shop-list');
+  if(!el) return;
+  // Grouper par monnaie
+  const groups = {perle:'🔵 Perles simples', triple:'💎 Perles Triples', grande:'✨ Grandes Perles'};
+  let html = '';
+  for(const [cur, label] of Object.entries(groups)){
+    const items = PEARL_SHOP.filter(i=>i.currency===cur);
+    if(!items.length) continue;
+    const stock = cur==='perle'?(G.pearls||0):cur==='triple'?(G.triplets||0):(G.grandes||0);
+    html += '<div style="font-family:var(--fn-px);font-size:8px;color:var(--gold);margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--border)">'
+      +label+' <span style="color:var(--dim);font-weight:400">('+stock+' disponibles)</span></div>';
+    for(const item of items){
+      const canAfford = stock >= item.cost;
+      // Check si actif
+      const activeEnd = G.itemEnd&&G.itemEnd[item.id];
+      const isActive = activeEnd && Date.now() < activeEnd;
+      const remaining = isActive ? Math.ceil((activeEnd-Date.now())/1000) : 0;
+      html += '<div style="display:flex;align-items:center;gap:8px;background:var(--card);'
+        +'border:1px solid '+(isActive?'var(--green)':canAfford?'var(--border-b)':'var(--border)')+';'
+        +'border-radius:9px;padding:8px;margin-bottom:5px;opacity:'+(canAfford||isActive?1:.5)+';cursor:'+(canAfford?'pointer':'default')+'"'
+        +(canAfford&&!isActive?' onclick="usePearlItem(\''+item.id+'\')"':'')+'>'  
+        +'<img src="'+item.img+'" style="width:28px;height:28px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display=\'none\'">'  
+        +'<div style="flex:1">'
+          +'<div style="font-size:10px;font-weight:900;color:'+(isActive?'var(--green)':'var(--text)')+'">'+item.name+(isActive?' ✅':' ')+'</div>'
+          +'<div style="font-size:9px;color:var(--dim)">'+item.desc+'</div>'
+          +(isActive?'<div style="font-size:8px;color:var(--green)">'+fmtT(remaining)+' restant</div>':'')
+        +'</div>'
+        +'<div style="font-size:10px;font-weight:800;color:'+(isActive?'var(--green)':canAfford?'var(--gold)':'var(--dim)')+'">'+
+          (isActive?'ACTIF':item.cost+'<img src="Items/'+(cur==='perle'?'perle':cur==='triple'?'perle_triple':'grande_perle')+'.png" style="width:16px;vertical-align:middle;margin-left:2px;image-rendering:pixelated">')
+        +'</div>'
+      +'</div>';
+    }
+  }
+  el.innerHTML = html;
+}
+
+function usePearlItem(id){
+  const item = PEARL_SHOP.find(i=>i.id===id);
+  if(!item) return;
+  const stock = item.currency==='perle'?(G.pearls||0):item.currency==='triple'?(G.triplets||0):(G.grandes||0);
+  if(stock < item.cost){ notif('❌ Pas assez de perles !','ev'); return; }
+  // Déduire
+  if(item.currency==='perle')  G.pearls   -= item.cost;
+  if(item.currency==='triple') G.triplets -= item.cost;
+  if(item.currency==='grande') G.grandes  -= item.cost;
+  // Appliquer l'effet
+  if(!G.itemEnd) G.itemEnd = {};
+  if(item.effect==='recall'){
+    // Rappel : refaire apparaître le dernier Pokémon manqué
+    if(G.lastMissed){
+      triggerEvent(G.lastMissed);
+      notif('🔄 Rappel ! Le Pokémon revient !','buy');
+    } else {
+      notif('❌ Aucun Pokémon à rappeler !','ev');
+      // Rembourser
+      if(item.currency==='perle')  G.pearls   += item.cost;
+      if(item.currency==='triple') G.triplets += item.cost;
+      if(item.currency==='grande') G.grandes  += item.cost;
+      return;
+    }
+  } else if(item.effect==='ultra_boost'){
+    G.itemEnd[item.id] = -1; // Usage unique au prochain spawn
+    notif('⭐ Encens Ultra activé ! Prochain spawn : légendaire garanti  !','buy');
+  } else {
+    // Cumul de durée : ajoute au temps restant si déjà actif
+    const existing = G.itemEnd[item.id] || 0;
+    const base = Math.max(existing, Date.now()); // part du temps restant si actif
+    G.itemEnd[item.id] = base + item.dur * 1000;
+    notif('✅ '+item.name+' activé pendant '+Math.round(item.dur/60)+' min !','buy');
+  }
+  playSound('buy');
+  updatePearlUI();
+  renderPearlShop();
+}
+
+// Récupérer le multiplicateur CPS des items actifs
+function getItemCpsMult(){
+  if(!G.itemEnd) return 1;
+  let best = 0; // prend le meilleur boost actif (pas cumulé)
+  const now = Date.now();
+  for(const item of PEARL_SHOP){
+    if(item.effect==='cps_pct' && G.itemEnd[item.id] && now < G.itemEnd[item.id]){
+      if(item.val > best) best = item.val;
+    }
+  }
+  return 1 + best;
+}
+function getItemClickMult(){
+  if(!G.itemEnd) return 1;
+  let best = 0;
+  const now = Date.now();
+  for(const item of PEARL_SHOP){
+    if(item.effect==='click_pct' && G.itemEnd[item.id] && now < G.itemEnd[item.id]){
+      if(item.val > best) best = item.val;
+    }
+  }
+  return 1 + best;
+}
+function getItemSpawnMult(){
+  if(!G.itemEnd) return 1;
+  let best = 1;
+  const now = Date.now();
+  for(const item of PEARL_SHOP){
+    if(item.effect==='spawn_mult' && G.itemEnd[item.id] && now < G.itemEnd[item.id]){
+      if(item.val > best) best = item.val;
+    }
+  }
+  return best;
+}
+function getItemStayMult(){
+  if(!G.itemEnd) return 1;
+  const item = PEARL_SHOP.find(i=>i.id==='ps_miel');
+  return (item && G.itemEnd && G.itemEnd[item.id] && Date.now()<G.itemEnd[item.id]) ? item.val : 1;
+}
+function getItemOfflineMult(){
+  if(!G.itemEnd) return 0;
+  let bonus = 0;
+  const now = Date.now();
+  for(const item of PEARL_SHOP){
+    if(item.effect==='offline_pct' && G.itemEnd[item.id] && now < G.itemEnd[item.id]){
+      bonus += item.val;
+    }
+  }
+  return bonus;
 }
 
 function openStats(){
@@ -2874,6 +3194,23 @@ if(G.tc===0 && G.te===0 && !G.tutoDone){
       </div>
     </div>
 
+
+    <!-- Slide 6 : Perles -->
+    <div class="tuto-slide" id="tuto-s6">
+      <div class="tuto-icon">
+        <img src="Items/perle.png" alt="Perle" style="width:48px;height:48px;image-rendering:pixelated">
+      </div>
+      <div class="tuto-title">6 — LE SYSTÈME DE PERLES</div>
+      <div class="tuto-body">
+        Chaque Pokémon capturé remplit une <strong>barre de progression</strong>.
+        Une fois pleine, vous gagnez une <em>🔵 Perle</em> !<br><br>
+        <strong>30 Perles</strong> → 1 <img src="Items/perle_triple.png" style="width:14px;image-rendering:pixelated;vertical-align:middle"> <em>Perle Triple</em><br>
+        <strong>10 Perles Triples</strong> → 1 <img src="Items/grande_perle.png" style="width:14px;image-rendering:pixelated;vertical-align:middle"> <em>Grande Perle</em><br><br>
+        Dépensez vos perles dans la <strong>🔵 Boutique Perles</strong> pour acheter des
+        objets temporaires : Encens, Balls, Pierres évolutives et plus encore !
+      </div>
+    </div>
+
     <!-- Dots de progression -->
     <div class="tuto-dots">
       <div class="tuto-dot on" id="td1"></div>
@@ -2881,6 +3218,7 @@ if(G.tc===0 && G.te===0 && !G.tutoDone){
       <div class="tuto-dot" id="td3"></div>
       <div class="tuto-dot" id="td4"></div>
       <div class="tuto-dot" id="td5"></div>
+      <div class="tuto-dot" id="td6"></div>
     </div>
 
     <!-- Navigation -->
@@ -2889,6 +3227,38 @@ if(G.tc===0 && G.te===0 && !G.tutoDone){
       <button class="tuto-btn next" id="tuto-next" onclick="tutoNav(1)">Suivant →</button>
     </div>
     <div id="tuto-skip" onclick="closeTuto()">Passer le tutoriel</div>
+  </div>
+</div>
+
+<!-- Pearl Shop Modal -->
+<div class="overlay" id="md-pearl">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title" style="color:#1E88E5">
+      🔵 BOUTIQUE PERLES
+      <button class="mcls" onclick="closeModal('md-pearl')">✕</button>
+    </div>
+    <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:8px">
+      Capturez des Pokémon pour gagner des Perles · Convertissez-les en perles supérieures
+    </div>
+    <!-- Stock -->
+    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:12px;background:var(--card);border-radius:8px;padding:8px">
+      <div style="text-align:center">
+        <img src="Items/perle.png" style="width:20px;image-rendering:pixelated"><br>
+        <span style="font-size:10px;font-weight:800" id="pearl-count-modal">0</span>
+      </div>
+      <div style="text-align:center">
+        <img src="Items/perle_triple.png" style="width:20px;image-rendering:pixelated"><br>
+        <span style="font-size:10px;font-weight:800" id="triple-count-modal">0</span>
+      </div>
+      <div style="text-align:center">
+        <img src="Items/grande_perle.png" style="width:20px;image-rendering:pixelated"><br>
+        <span style="font-size:10px;font-weight:800" id="grande-count-modal">0</span>
+      </div>
+      <button onclick="convertPearls();renderPearlShop()" style="padding:6px 12px;background:var(--card);border:1px solid #1E88E5;border-radius:7px;color:#1E88E5;font-size:9px;cursor:pointer;align-self:center">
+        🔄 Convertir
+      </button>
+    </div>
+    <div id="pearl-shop-list"></div>
   </div>
 </div>
 </body>
