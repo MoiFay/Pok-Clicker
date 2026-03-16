@@ -668,18 +668,18 @@ const BLDGS=[
 // ============================================================
 const UPGRADES=[
   // --- Click flat ---
-  {id:'cf01',em:'⚡',name:'Pikachu',        cost:5e3,    type:'click_flat',  val:5,    desc:'+5 ₽/clic',         cond:g=>g.tc>=200},
-  {id:'cf02',em:'🐭',name:'Raichu',         cost:25e3,   type:'click_flat',  val:15,   desc:'+15 ₽/clic',        cond:g=>g.tc>=800},
-  {id:'cf03',em:'💛',name:'Voltali',         cost:120e3,  type:'click_flat',  val:40,   desc:'+40 ₽/clic',        cond:g=>g.tc>=2e3},
-  {id:'cf04',em:'🔩',name:'Magneton',        cost:200e3,  type:'click_flat',  val:50,   desc:'+50 ₽/clic',        cond:g=>g.tc>=3e3},
-  {id:'cf05',em:'🟡',name:'Élekable',        cost:1e6,    type:'click_flat',  val:150,  desc:'+150 ₽/clic',       cond:g=>g.tc>=8e3},
-  {id:'cf06',em:'🦅',name:'Électhor',        cost:5e6,    type:'click_flat',  val:500,  desc:'+500 ₽/clic',       cond:g=>g.tc>=25e3},
-  {id:'cf07',em:'🐯',name:'Raikou',          cost:25e6,   type:'click_flat',  val:1500, desc:'+1 500 ₽/clic',     cond:g=>g.tc>=80e3},
-  {id:'cf08',em:'🦁',name:'Luxray',          cost:120e6,  type:'click_flat',  val:5e3,  desc:'+5 000 ₽/clic',     cond:g=>g.tc>=300e3},
-  {id:'cf09',em:'☁️',name:'Boréas',          cost:600e6,  type:'click_flat',  val:15e3, desc:'+15 000 ₽/clic',    cond:g=>g.tc>=1e6},
-  {id:'cf10',em:'⚡',name:'Zekrom',          cost:3e9,    type:'click_flat',  val:50e3, desc:'+50 000 ₽/clic',    cond:g=>g.tc>=5e6},
-  {id:'cf11',em:'🌩️',name:'Xurkitree',       cost:15e9,   type:'click_flat',  val:200e3,desc:'+200k ₽/clic',      cond:g=>g.tc>=20e6},
-  {id:'cf12',em:'⚡',name:'Zeraora',         cost:80e9,   type:'click_flat',  val:1e6,  desc:'+1M ₽/clic',        cond:g=>g.tc>=100e6},
+  {id:'cf01',em:'⚡',name:'Éclat de Foudre',        cost:5e3,    type:'click_flat',  val:5,    desc:'+5 ₽/clic',         cond:g=>g.tc>=200},
+  {id:'cf02',em:'🐭',name:'Surge Électrique',         cost:25e3,   type:'click_flat',  val:15,   desc:'+15 ₽/clic',        cond:g=>g.tc>=800},
+  {id:'cf03',em:'💛',name:'Charge Statique',         cost:120e3,  type:'click_flat',  val:40,   desc:'+40 ₽/clic',        cond:g=>g.tc>=2e3},
+  {id:'cf04',em:'🔩',name:'Champ Magnétique',        cost:200e3,  type:'click_flat',  val:50,   desc:'+50 ₽/clic',        cond:g=>g.tc>=3e3},
+  {id:'cf05',em:'🟡',name:'Arc Voltaïque',        cost:1e6,    type:'click_flat',  val:150,  desc:'+150 ₽/clic',       cond:g=>g.tc>=8e3},
+  {id:'cf06',em:'🦅',name:'Tempête Tonnerre',        cost:5e6,    type:'click_flat',  val:500,  desc:'+500 ₽/clic',       cond:g=>g.tc>=25e3},
+  {id:'cf07',em:'🐯',name:'Griffe de Foudre',          cost:25e6,   type:'click_flat',  val:1500, desc:'+1 500 ₽/clic',     cond:g=>g.tc>=80e3},
+  {id:'cf08',em:'🦁',name:'Pression Ionique',          cost:120e6,  type:'click_flat',  val:5e3,  desc:'+5 000 ₽/clic',     cond:g=>g.tc>=300e3},
+  {id:'cf09',em:'☁️',name:'Blizzard Électrique',          cost:600e6,  type:'click_flat',  val:15e3, desc:'+15 000 ₽/clic',    cond:g=>g.tc>=1e6},
+  {id:'cf10',em:'⚡',name:'Fracture Cosmique',          cost:3e9,    type:'click_flat',  val:50e3, desc:'+50 000 ₽/clic',    cond:g=>g.tc>=5e6},
+  {id:'cf11',em:'🌩️',name:'Rayon Solaire',       cost:15e9,   type:'click_flat',  val:200e3,desc:'+200k ₽/clic',      cond:g=>g.tc>=20e6},
+  {id:'cf12',em:'⚡',name:'Impact Zéro',         cost:80e9,   type:'click_flat',  val:1e6,  desc:'+1M ₽/clic',        cond:g=>g.tc>=100e6},
   // --- Upgrades Pokéball (multiplient le +₽/clic par Pokéball) ---
   // Sans upgrade: 1 Pokéball = +1₽/clic  Avec tout: 1 Pokéball = +8₽/clic
   {id:'pb01',em:'🔴',name:'Pokéball Renforcée',    cost:500,    type:'pokeball_mult', val:2,   desc:'×2 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=5},
@@ -687,148 +687,148 @@ const UPGRADES=[
   {id:'pb03',em:'🟡',name:'Hyperball',             cost:200e3,  type:'pokeball_mult', val:4,   desc:'×4 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=50},
   {id:'pb04',em:'🟣',name:'Masterball',            cost:5e6,    type:'pokeball_mult', val:5,   desc:'×5 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=100},
   // --- Click multiplier (valeurs modérées, conditions sévères) ---
-  {id:'cm01',em:'✌️',name:'Double Énergie',  cost:50e3,   type:'click_mult',  val:1.5,  desc:'x1.5 puissance clic',cond:g=>g.tc>=500},
+  {id:'cm01',em:'✌️',name:'Double Frappe',  cost:50e3,   type:'click_mult',  val:1.5,  desc:'x1.5 puissance clic',cond:g=>g.tc>=500},
   {id:'cm02',em:'💪',name:'Frappe Soutenue', cost:800e3,  type:'click_mult',  val:1.5,  desc:'encore x1.5 clic',   cond:g=>g.bu.has('cm01')&&g.tc>=5e3},
-  {id:'cm03',em:'🔮',name:'Psyko Mewtwo',    cost:10e6,   type:'click_mult',  val:2,    desc:'x2 clic',            cond:g=>g.tc>=20e3},
-  {id:'cm04',em:'🥊',name:'Mega Poing',      cost:150e6,  type:'click_mult',  val:2,    desc:'encore x2 clic',     cond:g=>g.bu.has('cm03')&&g.tc>=100e3},
-  {id:'cm05',em:'🌟',name:'Jugement Arceus', cost:5e9,    type:'click_mult',  val:3,    desc:'x3 clic',            cond:g=>g.tc>=500e3},
+  {id:'cm03',em:'🔮',name:'Onde Psychique',    cost:10e6,   type:'click_mult',  val:2,    desc:'x2 clic',            cond:g=>g.tc>=20e3},
+  {id:'cm04',em:'🥊',name:'Poing de Fer',      cost:150e6,  type:'click_mult',  val:2,    desc:'encore x2 clic',     cond:g=>g.bu.has('cm03')&&g.tc>=100e3},
+  {id:'cm05',em:'🌟',name:'Jugement Ultime', cost:5e9,    type:'click_mult',  val:3,    desc:'x3 clic',            cond:g=>g.tc>=500e3},
   {id:'cm06',em:'💎',name:'Frappe Cosmique', cost:100e9,  type:'click_mult',  val:3,    desc:'encore x3 clic',     cond:g=>g.bu.has('cm05')&&g.tc>=2e6},
   {id:'cm07',em:'♾️',name:'Clic Infini',     cost:5e12,   type:'click_mult',  val:4,    desc:'x4 clic',            cond:g=>g.bu.has('cm06')&&g.tc>=10e6},
   // --- Click ratio (% du CPS, valeurs réduites) ---
-  {id:'cr01',em:'🎯',name:'Dresseur Expert', cost:500e6,  type:'click_ratio', val:.005, desc:'Clics = 0.5% prod/s',cond:g=>calcCPS(g)>=5e6},
-  {id:'cr02',em:'🏆',name:'Champion',        cost:5e9,    type:'click_ratio', val:.01,  desc:'Clics = 1% prod/s', cond:g=>g.bu.has('cr01')&&calcCPS(g)>=5e7},
-  {id:'cr03',em:'👑',name:'Maitre Pokemon',  cost:50e9,   type:'click_ratio', val:.02,  desc:'Clics = 2% prod/s', cond:g=>g.bu.has('cr02')&&calcCPS(g)>=5e8},
-  {id:'cr04',em:'✨',name:'Legende Vivante', cost:1e12,   type:'click_ratio', val:.04,  desc:'Clics = 4% prod/s', cond:g=>g.bu.has('cr03')&&calcCPS(g)>=5e10},
+  {id:'cr01',em:'🎯',name:'Technique Avancée', cost:500e6,  type:'click_ratio', val:.005, desc:'Clics = 0.5% prod/s',cond:g=>calcCPS(g)>=5e6},
+  {id:'cr02',em:'🏆',name:'Art du Combat',        cost:5e9,    type:'click_ratio', val:.01,  desc:'Clics = 1% prod/s', cond:g=>g.bu.has('cr01')&&calcCPS(g)>=5e7},
+  {id:'cr03',em:'👑',name:'Maîtrise Totale',  cost:50e9,   type:'click_ratio', val:.02,  desc:'Clics = 2% prod/s', cond:g=>g.bu.has('cr02')&&calcCPS(g)>=5e8},
+  {id:'cr04',em:'✨',name:'Légende Vivante', cost:1e12,   type:'click_ratio', val:.04,  desc:'Clics = 4% prod/s', cond:g=>g.bu.has('cr03')&&calcCPS(g)>=5e10},
   // --- Multiplicateurs globaux (basés sur tl légitime, valeurs modérées) ---
   // Total si tout acheté : ~x35 (au lieu de x5 milliards)
-  {id:'gm01',em:'❤️',name:'Amitie Pokemon',  cost:500e3,  type:'global_mult', val:1.1,  desc:'+10% production',   cond:g=>(g.tl||0)>=200e3},
-  {id:'gm02',em:'🌸',name:'Harmonie',        cost:8e6,    type:'global_mult', val:1.15, desc:'+15% production',   cond:g=>(g.tl||0)>=2e6},
-  {id:'gm03',em:'🐲',name:'Dracaufeu',       cost:80e6,   type:'global_mult', val:1.2,  desc:'+20% production',   cond:g=>(g.tl||0)>=20e6},
-  {id:'gm04',em:'🌀',name:'Mewtwo Amplifie', cost:800e6,  type:'global_mult', val:1.3,  desc:'+30% production',   cond:g=>(g.tl||0)>=200e6},
-  {id:'gm05',em:'🐉',name:'Rayquaza',        cost:8e9,    type:'global_mult', val:1.4,  desc:'+40% production',   cond:g=>(g.tl||0)>=2e9},
-  {id:'gm06',em:'🕊️',name:'Lugia',          cost:80e9,   type:'global_mult', val:1.5,  desc:'+50% production',   cond:g=>(g.tl||0)>=20e9},
-  {id:'gm07',em:'🌟',name:'Arceus Cosmique', cost:800e9,  type:'global_mult', val:1.6,  desc:'+60% production',   cond:g=>(g.tl||0)>=200e9},
-  {id:'gm08',em:'💥',name:'Ultra-Energie',   cost:8e12,   type:'global_mult', val:1.8,  desc:'+80% production',   cond:g=>(g.tl||0)>=2e12},
+  {id:'gm01',em:'❤️',name:'Lien Dresseur',  cost:500e3,  type:'global_mult', val:1.1,  desc:'+10% production',   cond:g=>(g.tl||0)>=200e3},
+  {id:'gm02',em:'🌸',name:'Synergie Parfaite',        cost:8e6,    type:'global_mult', val:1.15, desc:'+15% production',   cond:g=>(g.tl||0)>=2e6},
+  {id:'gm03',em:'🐲',name:'Souffle du Dragon',       cost:80e6,   type:'global_mult', val:1.2,  desc:'+20% production',   cond:g=>(g.tl||0)>=20e6},
+  {id:'gm04',em:'🌀',name:'Amplification Psy', cost:800e6,  type:'global_mult', val:1.3,  desc:'+30% production',   cond:g=>(g.tl||0)>=200e6},
+  {id:'gm05',em:'🐉',name:'Aura Ancestrale',        cost:8e9,    type:'global_mult', val:1.4,  desc:'+40% production',   cond:g=>(g.tl||0)>=2e9},
+  {id:'gm06',em:'🕊️',name:'Vent Sacré',          cost:80e9,   type:'global_mult', val:1.5,  desc:'+50% production',   cond:g=>(g.tl||0)>=20e9},
+  {id:'gm07',em:'🌟',name:'Nexus Cosmique', cost:800e9,  type:'global_mult', val:1.6,  desc:'+60% production',   cond:g=>(g.tl||0)>=200e9},
+  {id:'gm08',em:'💥',name:'Résonance Ultra',   cost:8e12,   type:'global_mult', val:1.8,  desc:'+80% production',   cond:g=>(g.tl||0)>=2e12},
   {id:'gm09',em:'✨',name:'Puissance Divine',cost:80e12,  type:'global_mult', val:2.0,  desc:'x2 production',     cond:g=>(g.tl||0)>=20e12},
   {id:'gm10',em:'♾️',name:'Infini',          cost:1e15,   type:'global_mult', val:2.5,  desc:'x2.5 production',   cond:g=>(g.tl||0)>=200e12},
   // --- Multiplicateurs par batiment (besoin 15 puis 50) ---
-  {id:'bm_ce1',em:'🌱',name:'Bulbizarre',    cost:5e3,    type:'bldg_mult',bId:'centre',    val:2,cond:g=>g.b.centre>=25,   desc:'x2 Centres Pokemon'},
-  {id:'bm_ce2',em:'🌺',name:'Florizarre',    cost:30e3,   type:'bldg_mult',bId:'centre',    val:2,cond:g=>g.b.centre>=75,   desc:'encore x2 Centres'},
-  {id:'bm_bo1',em:'🐢',name:'Carapuce',      cost:35e3,   type:'bldg_mult',bId:'boutique',  val:2,cond:g=>g.b.boutique>=25, desc:'x2 Boutiques'},
-  {id:'bm_bo2',em:'💦',name:'Tortank',       cost:200e3,  type:'bldg_mult',bId:'boutique',  val:2,cond:g=>g.b.boutique>=75, desc:'encore x2 Boutiques'},
-  {id:'bm_la1',em:'🔥',name:'Salamèche',     cost:200e3,  type:'bldg_mult',bId:'labo',      val:2,cond:g=>g.b.labo>=25,    desc:'x2 Laboratoires'},
-  {id:'bm_la2',em:'🐉',name:'Dracaufeu 2',   cost:1.2e6,  type:'bldg_mult',bId:'labo',      val:2,cond:g=>g.b.labo>=75,    desc:'encore x2 Labos'},
-  {id:'bm_ar1',em:'💪',name:'Machoc',        cost:800e3,  type:'bldg_mult',bId:'arene',     val:2,cond:g=>g.b.arene>=25,   desc:'x2 Arènes'},
-  {id:'bm_ar2',em:'🥊',name:'Mackogneur',    cost:5e6,    type:'bldg_mult',bId:'arene',     val:2,cond:g=>g.b.arene>=75,   desc:'encore x2 Arènes'},
-  {id:'bm_ga1',em:'🥚',name:'Leveinard',     cost:3e6,    type:'bldg_mult',bId:'garderie',  val:2,cond:g=>g.b.garderie>=25,desc:'x2 Garderies'},
-  {id:'bm_ga2',em:'💖',name:'Leuphorie',     cost:20e6,   type:'bldg_mult',bId:'garderie',  val:2,cond:g=>g.b.garderie>=75,desc:'encore x2 Garderies'},
-  {id:'bm_sa1',em:'🦘',name:'Kangourex',     cost:12e6,   type:'bldg_mult',bId:'safari',    val:2,cond:g=>g.b.safari>=25,  desc:'x2 Parcs Safari'},
-  {id:'bm_sa2',em:'🐂',name:'Tauros',        cost:70e6,   type:'bldg_mult',bId:'safari',    val:2,cond:g=>g.b.safari>=75,  desc:'encore x2 Safari'},
-  {id:'bm_to1',em:'👻',name:'Spectrum',      cost:50e6,   type:'bldg_mult',bId:'tour',      val:2,cond:g=>g.b.tour>=25,    desc:'x2 Tours Pokemon'},
-  {id:'bm_to2',em:'😈',name:'Gengar',        cost:300e6,  type:'bldg_mult',bId:'tour',      val:2,cond:g=>g.b.tour>=75,    desc:'encore x2 Tours'},
-  {id:'bm_ca1',em:'😺',name:'Miaouss',       cost:180e6,  type:'bldg_mult',bId:'casino',    val:2,cond:g=>g.b.casino>=25,  desc:'x2 Casinos'},
-  {id:'bm_ca2',em:'🐱',name:'Persian',       cost:1e9,    type:'bldg_mult',bId:'casino',    val:2,cond:g=>g.b.casino>=75,  desc:'encore x2 Casinos'},
-  {id:'bm_ss1',em:'🪼',name:'Tentacool',     cost:700e6,  type:'bldg_mult',bId:'ssanne',    val:2,cond:g=>g.b.ssanne>=25,  desc:'x2 SS Anne'},
-  {id:'bm_ss2',em:'🌊',name:'Tentacruel',    cost:4e9,    type:'bldg_mult',bId:'ssanne',    val:2,cond:g=>g.b.ssanne>=75,  desc:'encore x2 SS Anne'},
-  {id:'bm_li1',em:'🌊',name:'Lokhlass',      cost:3e9,    type:'bldg_mult',bId:'ligue',     val:2,cond:g=>g.b.ligue>=25,   desc:'x2 Ligues Pokemon'},
-  {id:'bm_li2',em:'🐲',name:'Dracolosse',    cost:18e9,   type:'bldg_mult',bId:'ligue',     val:2,cond:g=>g.b.ligue>=75,   desc:'encore x2 Ligues'},
-  {id:'bm_ex1',em:'💾',name:'Porygon',       cost:12e9,   type:'bldg_mult',bId:'exchange',  val:2,cond:g=>g.b.exchange>=25,desc:'x2 Stations Echange'},
-  {id:'bm_ex2',em:'🖥️',name:'Porygon-Z',     cost:70e9,   type:'bldg_mult',bId:'exchange',  val:2,cond:g=>g.b.exchange>=75,desc:'encore x2 Stations'},
-  {id:'bm_ro1',em:'🦋',name:'Aeromite',      cost:50e9,   type:'bldg_mult',bId:'rocket',    val:2,cond:g=>g.b.rocket>=25,  desc:'x2 Vaisseaux Rocket'},
-  {id:'bm_ro2',em:'🦅',name:'Skarmory',      cost:300e9,  type:'bldg_mult',bId:'rocket',    val:2,cond:g=>g.b.rocket>=75,  desc:'encore x2 Rocket'},
-  {id:'bm_il1',em:'🔥',name:'Moltres',       cost:200e9,  type:'bldg_mult',bId:'iledawn',   val:2,cond:g=>g.b.iledawn>=25, desc:'x2 Ile Aube'},
-  {id:'bm_il2',em:'❄️',name:'Artikodin',     cost:1.2e12, type:'bldg_mult',bId:'iledawn',   val:2,cond:g=>g.b.iledawn>=75, desc:'encore x2 Ile Aube'},
-  {id:'bm_sq1',em:'🌟',name:'Mimigma',       cost:800e9,  type:'bldg_mult',bId:'square',    val:2,cond:g=>g.b.square>=25,  desc:'x2 Pokemon Square'},
-  {id:'bm_sq2',em:'🎵',name:'Jigglypuff',    cost:5e12,   type:'bldg_mult',bId:'square',    val:2,cond:g=>g.b.square>=75,  desc:'encore x2 Square'},
-  {id:'bm_mg1',em:'🌍',name:'Groudon',       cost:3e12,   type:'bldg_mult',bId:'magma',     val:2,cond:g=>g.b.magma>=25,   desc:'x2 Base Magma'},
-  {id:'bm_mg2',em:'🌋',name:'Volcanion',     cost:18e12,  type:'bldg_mult',bId:'magma',     val:2,cond:g=>g.b.magma>=75,   desc:'encore x2 Magma'},
-  {id:'bm_aq1',em:'🌊',name:'Kyogre',        cost:12e12,  type:'bldg_mult',bId:'aqua',      val:2,cond:g=>g.b.aqua>=25,    desc:'x2 Aqua'},
-  {id:'bm_aq2',em:'💎',name:'Suicune',       cost:70e12,  type:'bldg_mult',bId:'aqua',      val:2,cond:g=>g.b.aqua>=75,    desc:'encore x2 Aqua'},
-  {id:'bm_es1',em:'👽',name:'Deoxys',        cost:50e12,  type:'bldg_mult',bId:'espace',    val:2,cond:g=>g.b.espace>=25,  desc:'x2 Cites Espace'},
-  {id:'bm_es2',em:'⭐',name:'Jirachi',       cost:300e12, type:'bldg_mult',bId:'espace',    val:2,cond:g=>g.b.espace>=75,  desc:'encore x2 Espace'},
-  {id:'bm_me1',em:'🪨',name:'Regirock',      cost:200e12, type:'bldg_mult',bId:'meteor',    val:2,cond:g=>g.b.meteor>=25,  desc:'x2 Forteresses'},
-  {id:'bm_me2',em:'🔩',name:'Registeel',     cost:1.2e15, type:'bldg_mult',bId:'meteor',    val:2,cond:g=>g.b.meteor>=75,  desc:'encore x2 Meteore'},
-  {id:'bm_ho1',em:'💀',name:'Miasmax',       cost:800e12, type:'bldg_mult',bId:'honte',     val:2,cond:g=>g.b.honte>=25,   desc:'x2 Tours Honte'},
-  {id:'bm_ho2',em:'🌙',name:'Noctali',       cost:5e15,   type:'bldg_mult',bId:'honte',     val:2,cond:g=>g.b.honte>=75,   desc:'encore x2 Honte'},
-  {id:'bm_un1',em:'🕊️',name:'Reshiram',      cost:3e15,   type:'bldg_mult',bId:'unys',      val:2,cond:g=>g.b.unys>=25,    desc:'x2 Region Unys'},
-  {id:'bm_un2',em:'✌️',name:'Victini',       cost:18e15,  type:'bldg_mult',bId:'unys',      val:2,cond:g=>g.b.unys>=75,    desc:'encore x2 Unys'},
-  {id:'bm_pl1',em:'🧊',name:'Kyurem',        cost:12e15,  type:'bldg_mult',bId:'plasma',    val:2,cond:g=>g.b.plasma>=25,  desc:'x2 Tours Plasma'},
-  {id:'bm_pl2',em:'⚔️',name:'Cobalion',      cost:70e15,  type:'bldg_mult',bId:'plasma',    val:2,cond:g=>g.b.plasma>=75,  desc:'encore x2 Plasma'},
-  {id:'bm_pw1',em:'🪨',name:'Terrakion',     cost:50e15,  type:'bldg_mult',bId:'pwt',       val:2,cond:g=>g.b.pwt>=25,     desc:'x2 PWT Arenas'},
-  {id:'bm_pw2',em:'🍃',name:'Virizion',      cost:300e15, type:'bldg_mult',bId:'pwt',       val:2,cond:g=>g.b.pwt>=75,     desc:'encore x2 PWT'},
-  {id:'bm_cr1',em:'💎',name:'Diancie',       cost:200e15, type:'bldg_mult',bId:'cristal',   val:2,cond:g=>g.b.cristal>=25, desc:'x2 Grottes Cristal'},
-  {id:'bm_cr2',em:'💠',name:'Carbink',       cost:1.2e18, type:'bldg_mult',bId:'cristal',   val:2,cond:g=>g.b.cristal>=75, desc:'encore x2 Cristal'},
-  {id:'bm_pr1',em:'🦌',name:'Xerneas',       cost:800e15, type:'bldg_mult',bId:'prisme',    val:2,cond:g=>g.b.prisme>=25,  desc:'x2 Tours Prisme'},
-  {id:'bm_pr2',em:'🦅',name:'Yveltal',       cost:5e18,   type:'bldg_mult',bId:'prisme',    val:2,cond:g=>g.b.prisme>=75,  desc:'encore x2 Prisme'},
-  {id:'bm_hy1',em:'🔮',name:'Hoopa',         cost:3e18,   type:'bldg_mult',bId:'hyper',     val:2,cond:g=>g.b.hyper>=25,   desc:'x2 Hyper Espaces'},
-  {id:'bm_hy2',em:'🐍',name:'Zygarde',       cost:18e18,  type:'bldg_mult',bId:'hyper',     val:2,cond:g=>g.b.hyper>=75,   desc:'encore x2 Hyper'},
-  {id:'bm_po1',em:'🦁',name:'Solgaleo',      cost:12e18,  type:'bldg_mult',bId:'portal',    val:2,cond:g=>g.b.portal>=25,  desc:'x2 Portails Ultra'},
-  {id:'bm_po2',em:'🌙',name:'Lunala',        cost:70e18,  type:'bldg_mult',bId:'portal',    val:2,cond:g=>g.b.portal>=75,  desc:'encore x2 Portails'},
-  {id:'bm_us1',em:'💀',name:'Necrologie',    cost:50e18,  type:'bldg_mult',bId:'usine',     val:2,cond:g=>g.b.usine>=25,   desc:'x2 Usines Ultra'},
-  {id:'bm_us2',em:'👤',name:'Marshadow',     cost:300e18, type:'bldg_mult',bId:'usine',     val:2,cond:g=>g.b.usine>=75,   desc:'encore x2 Usines'},
-  {id:'bm_uu',em:'⚡',name:'Zeraora',        cost:200e18, type:'bldg_mult',bId:'univultra', val:2,cond:g=>g.b.univultra>=25,desc:'x2 Univers Ultra'},
-  {id:'bm_mi',em:'🪞',name:'Miroir Onirique',cost:1.2e21, type:'bldg_mult',bId:'miroir',    val:2,cond:g=>g.b.miroir>=25,  desc:'x2 Dimensions Miroir'},
-  {id:'bm_zo',em:'🌑',name:'Darkrai',        cost:8e21,   type:'bldg_mult',bId:'zone',      val:2,cond:g=>g.b.zone>=25,    desc:'x2 Zones Obscures'},
-  {id:'bm_pa',em:'🌙',name:'Cresselia',      cost:50e21,  type:'bldg_mult',bId:'palais',    val:2,cond:g=>g.b.palais>=25,  desc:'x2 Palais Pokemon'},
-  {id:'bm_ga',em:'👻',name:'Giratina',       cost:300e21, type:'bldg_mult',bId:'galactic',  val:2,cond:g=>g.b.galactic>=25,desc:'x2 Bases Galactiques'},
-  {id:'bm_st',em:'⏰',name:'Dialga',         cost:2e24,   type:'bldg_mult',bId:'spacetime', val:2,cond:g=>g.b.spacetime>=25,desc:'x2 Tours Espace-Temps'},
-  {id:'bm_di',em:'💫',name:'Palkia',         cost:12e24,  type:'bldg_mult',bId:'distort',   val:2,cond:g=>g.b.distort>=25, desc:'x2 Distorsions'},
-  {id:'bm_dr',em:'💤',name:'Munna',          cost:80e24,  type:'bldg_mult',bId:'dream',     val:2,cond:g=>g.b.dream>=25,   desc:'x2 Mondes des Reves'},
-  {id:'bm_fo',em:'🌸',name:'Shaymin',        cost:500e24, type:'bldg_mult',bId:'foret',     val:2,cond:g=>g.b.foret>=25,   desc:'x2 Forets Magiques'},
-  {id:'bm_sz',em:'💠',name:'Tapu Koko',      cost:3e27,   type:'bldg_mult',bId:'stationz',  val:2,cond:g=>g.b.stationz>=25,desc:'x2 Stations Z'},
-  {id:'bm_ml',em:'🔮',name:'Mega Mewtwo Y',  cost:20e27,  type:'bldg_mult',bId:'megalab',   val:2,cond:g=>g.b.megalab>=25, desc:'x2 Mega-Labs'},
-  {id:'bm_c2',em:'🤖',name:'Genesect',       cost:120e27, type:'bldg_mult',bId:'crystal2',  val:2,cond:g=>g.b.crystal2>=25,desc:'x2 Tours Cristallines'},
-  {id:'bm_le',em:'🌸',name:'Mew',            cost:800e27, type:'bldg_mult',bId:'legendary', val:2,cond:g=>g.b.legendary>=25,desc:'x2 Centres Legendaires'},
-  {id:'bm_mw',em:'💜',name:'Mega Mewtwo X',  cost:5e30,   type:'bldg_mult',bId:'mewtwolab', val:2,cond:g=>g.b.mewtwolab>=25,desc:'x2 Labos Mewtwo'},
-  {id:'bm_ac',em:'✨',name:'Arceus Multitype',cost:30e30, type:'bldg_mult',bId:'arceus',    val:2,cond:g=>g.b.arceus>=25,  desc:'x2 Temples Arceus'},
-  {id:'bm_so',em:'💧',name:'Manaphy',        cost:200e30, type:'bldg_mult',bId:'source',    val:2,cond:g=>g.b.source>=25,  desc:'x2 Sources'},
-  {id:'bm_te',em:'⏳',name:'Celebri',         cost:1.5e33, type:'bldg_mult',bId:'temporal',  val:2,cond:g=>g.b.temporal>=25,desc:'x2 Cristaux Temporels'},
-  {id:'bm_sn',em:'✌️',name:'Victini Eternel',cost:10e33,  type:'bldg_mult',bId:'sanctu',    val:2,cond:g=>g.b.sanctu>=25,  desc:'x2 Sanctuaires'},
-  {id:'bm_pl2b',em:'☀️',name:'Solgaleo II',  cost:70e33,  type:'bldg_mult',bId:'planete',   val:2,cond:g=>g.b.planete>=25, desc:'x2 Planetes Pokemon'},
-  {id:'bm_ub',em:'💥',name:'Ultra-Necrozma', cost:500e33, type:'bldg_mult',bId:'univball',  val:2,cond:g=>g.b.univball>=25,desc:'x2 Univers Pokeball'},
-  {id:'bm_nx',em:'🌀',name:'Eternatus',      cost:3e36,   type:'bldg_mult',bId:'nexus',     val:2,cond:g=>g.b.nexus>=25,   desc:'x2 Nexus Cosmiques'},
-  {id:'bm_om',em:'🔮',name:'Necrozma',       cost:20e36,  type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=25,   desc:'x2 Omega Pokemon'},
-  {id:'bm_gi',em:'👼',name:'Arceus Alpha',   cost:150e36, type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=25,desc:'x2 DIEU ARCEUS'},
+  {id:'bm_ce1',em:'🌱',name:'Soins Avancés',    cost:5e3,    type:'bldg_mult',bId:'centre',    val:2,cond:g=>g.b.centre>=25,   desc:'x2 Centres Pokemon'},
+  {id:'bm_ce2',em:'🌺',name:'Centre de Crise',    cost:30e3,   type:'bldg_mult',bId:'centre',    val:2,cond:g=>g.b.centre>=75,   desc:'encore x2 Centres'},
+  {id:'bm_bo1',em:'🐢',name:'Stock Premium',      cost:35e3,   type:'bldg_mult',bId:'boutique',  val:2,cond:g=>g.b.boutique>=25, desc:'x2 Boutiques'},
+  {id:'bm_bo2',em:'💦',name:'Méga Boutique',       cost:200e3,  type:'bldg_mult',bId:'boutique',  val:2,cond:g=>g.b.boutique>=75, desc:'encore x2 Boutiques'},
+  {id:'bm_la1',em:'🔥',name:'Recherche Active',     cost:200e3,  type:'bldg_mult',bId:'labo',      val:2,cond:g=>g.b.labo>=25,    desc:'x2 Laboratoires'},
+  {id:'bm_la2',em:'🐉',name:'Laboratoire XL',   cost:1.2e6,  type:'bldg_mult',bId:'labo',      val:2,cond:g=>g.b.labo>=75,    desc:'encore x2 Labos'},
+  {id:'bm_ar1',em:'💪',name:'Entraînement Intensif',        cost:800e3,  type:'bldg_mult',bId:'arene',     val:2,cond:g=>g.b.arene>=25,   desc:'x2 Arènes'},
+  {id:'bm_ar2',em:'🥊',name:'Championnat Pro',    cost:5e6,    type:'bldg_mult',bId:'arene',     val:2,cond:g=>g.b.arene>=75,   desc:'encore x2 Arènes'},
+  {id:'bm_ga1',em:'🥚',name:'Élevage Optimisé',     cost:3e6,    type:'bldg_mult',bId:'garderie',  val:2,cond:g=>g.b.garderie>=25,desc:'x2 Garderies'},
+  {id:'bm_ga2',em:'💖',name:'Dimension Inversée',     cost:20e6,   type:'bldg_mult',bId:'garderie',  val:2,cond:g=>g.b.garderie>=75,desc:'encore x2 Garderies'},
+  {id:'bm_sa1',em:'🦘',name:'Zone Étendue',     cost:12e6,   type:'bldg_mult',bId:'safari',    val:2,cond:g=>g.b.safari>=25,  desc:'x2 Parcs Safari'},
+  {id:'bm_sa2',em:'🐂',name:'Safari Ultra',        cost:70e6,   type:'bldg_mult',bId:'safari',    val:2,cond:g=>g.b.safari>=75,  desc:'encore x2 Safari'},
+  {id:'bm_to1',em:'👻',name:'Rituel Nocturne',      cost:50e6,   type:'bldg_mult',bId:'tour',      val:2,cond:g=>g.b.tour>=25,    desc:'x2 Tours Pokemon'},
+  {id:'bm_to2',em:'😈',name:'Tour Maudite',        cost:300e6,  type:'bldg_mult',bId:'tour',      val:2,cond:g=>g.b.tour>=75,    desc:'encore x2 Tours'},
+  {id:'bm_ca1',em:'😺',name:'Mise Dorée',       cost:180e6,  type:'bldg_mult',bId:'casino',    val:2,cond:g=>g.b.casino>=25,  desc:'x2 Casinos'},
+  {id:'bm_ca2',em:'🐱',name:'Table VIP',       cost:1e9,    type:'bldg_mult',bId:'casino',    val:2,cond:g=>g.b.casino>=75,  desc:'encore x2 Casinos'},
+  {id:'bm_ss1',em:'🪼',name:'Fouilles Profondes',     cost:700e6,  type:'bldg_mult',bId:'ssanne',    val:2,cond:g=>g.b.ssanne>=25,  desc:'x2 SS Anne'},
+  {id:'bm_ss2',em:'🌊',name:'Caverne Secrète',    cost:4e9,    type:'bldg_mult',bId:'ssanne',    val:2,cond:g=>g.b.ssanne>=75,  desc:'encore x2 SS Anne'},
+  {id:'bm_li1',em:'🌊',name:'Élite Confirmée',      cost:3e9,    type:'bldg_mult',bId:'ligue',     val:2,cond:g=>g.b.ligue>=25,   desc:'x2 Ligues Pokemon'},
+  {id:'bm_li2',em:'🐲',name:'Hall of Fame',    cost:18e9,   type:'bldg_mult',bId:'ligue',     val:2,cond:g=>g.b.ligue>=75,   desc:'encore x2 Ligues'},
+  {id:'bm_ex1',em:'💾',name:'Protocole Échange',       cost:12e9,   type:'bldg_mult',bId:'exchange',  val:2,cond:g=>g.b.exchange>=25,desc:'x2 Stations Echange'},
+  {id:'bm_ex2',em:'🖥️',name:'Réseau Quantique',     cost:70e9,   type:'bldg_mult',bId:'exchange',  val:2,cond:g=>g.b.exchange>=75,desc:'encore x2 Stations'},
+  {id:'bm_ro1',em:'🦋',name:'Opération Ombre',      cost:50e9,   type:'bldg_mult',bId:'rocket',    val:2,cond:g=>g.b.rocket>=25,  desc:'x2 Vaisseaux Rocket'},
+  {id:'bm_ro2',em:'🦅',name:'Base Secrète',      cost:300e9,  type:'bldg_mult',bId:'rocket',    val:2,cond:g=>g.b.rocket>=75,  desc:'encore x2 Rocket'},
+  {id:'bm_il1',em:'🔥',name:'Flamme Sacrée',       cost:200e9,  type:'bldg_mult',bId:'iledawn',   val:2,cond:g=>g.b.iledawn>=25, desc:'x2 Ile Aube'},
+  {id:'bm_il2',em:'❄️',name:'Glace Éternelle',     cost:1.2e12, type:'bldg_mult',bId:'iledawn',   val:2,cond:g=>g.b.iledawn>=75, desc:'encore x2 Ile Aube'},
+  {id:'bm_sq1',em:'🌟',name:'Scène Étoilée',       cost:800e9,  type:'bldg_mult',bId:'square',    val:2,cond:g=>g.b.square>=25,  desc:'x2 Pokemon Square'},
+  {id:'bm_sq2',em:'🎵',name:'Concert Légendaire',    cost:5e12,   type:'bldg_mult',bId:'square',    val:2,cond:g=>g.b.square>=75,  desc:'encore x2 Square'},
+  {id:'bm_mg1',em:'🌍',name:'Magma Incandescent',       cost:3e12,   type:'bldg_mult',bId:'magma',     val:2,cond:g=>g.b.magma>=25,   desc:'x2 Base Magma'},
+  {id:'bm_mg2',em:'🌋',name:'Forge Volcanique',     cost:18e12,  type:'bldg_mult',bId:'magma',     val:2,cond:g=>g.b.magma>=75,   desc:'encore x2 Magma'},
+  {id:'bm_aq1',em:'🌊',name:'Courant Abyssal',        cost:12e12,  type:'bldg_mult',bId:'aqua',      val:2,cond:g=>g.b.aqua>=25,    desc:'x2 Aqua'},
+  {id:'bm_aq2',em:'💎',name:'Océan Profond',       cost:70e12,  type:'bldg_mult',bId:'aqua',      val:2,cond:g=>g.b.aqua>=75,    desc:'encore x2 Aqua'},
+  {id:'bm_es1',em:'👽',name:'Anomalie Spatiale',        cost:50e12,  type:'bldg_mult',bId:'espace',    val:2,cond:g=>g.b.espace>=25,  desc:'x2 Cites Espace'},
+  {id:'bm_es2',em:'⭐',name:'Portail Stellaire',       cost:300e12, type:'bldg_mult',bId:'espace',    val:2,cond:g=>g.b.espace>=75,  desc:'encore x2 Espace'},
+  {id:'bm_me1',em:'🪨',name:'Impact Cosmique',      cost:200e12, type:'bldg_mult',bId:'meteor',    val:2,cond:g=>g.b.meteor>=25,  desc:'x2 Forteresses'},
+  {id:'bm_me2',em:'🔩',name:'Noyau Météorique',     cost:1.2e15, type:'bldg_mult',bId:'meteor',    val:2,cond:g=>g.b.meteor>=75,  desc:'encore x2 Meteore'},
+  {id:'bm_ho1',em:'💀',name:'Protocole Noir',       cost:800e12, type:'bldg_mult',bId:'honte',     val:2,cond:g=>g.b.honte>=25,   desc:'x2 Tours Honte'},
+  {id:'bm_ho2',em:'🌙',name:'Brume Nocturne',       cost:5e15,   type:'bldg_mult',bId:'honte',     val:2,cond:g=>g.b.honte>=75,   desc:'encore x2 Honte'},
+  {id:'bm_un1',em:'🕊️',name:'Flamme Noire',      cost:3e15,   type:'bldg_mult',bId:'unys',      val:2,cond:g=>g.b.unys>=25,    desc:'x2 Region Unys'},
+  {id:'bm_un2',em:'✌️',name:'Victoire Absolue',       cost:18e15,  type:'bldg_mult',bId:'unys',      val:2,cond:g=>g.b.unys>=75,    desc:'encore x2 Unys'},
+  {id:'bm_pl1',em:'🧊',name:'Plasma Gelé',        cost:12e15,  type:'bldg_mult',bId:'plasma',    val:2,cond:g=>g.b.plasma>=25,  desc:'x2 Tours Plasma'},
+  {id:'bm_pl2',em:'⚔️',name:'Armure de Glace',      cost:70e15,  type:'bldg_mult',bId:'plasma',    val:2,cond:g=>g.b.plasma>=75,  desc:'encore x2 Plasma'},
+  {id:'bm_pw1',em:'🪨',name:'Maîtrise Roc',     cost:50e15,  type:'bldg_mult',bId:'pwt',       val:2,cond:g=>g.b.pwt>=25,     desc:'x2 PWT Arenas'},
+  {id:'bm_pw2',em:'🍃',name:'Tranchant Vert',      cost:300e15, type:'bldg_mult',bId:'pwt',       val:2,cond:g=>g.b.pwt>=75,     desc:'encore x2 PWT'},
+  {id:'bm_cr1',em:'💎',name:'Éclat de Diamant',       cost:200e15, type:'bldg_mult',bId:'cristal',   val:2,cond:g=>g.b.cristal>=25, desc:'x2 Grottes Cristal'},
+  {id:'bm_cr2',em:'💠',name:'Cristal Brut',       cost:1.2e18, type:'bldg_mult',bId:'cristal',   val:2,cond:g=>g.b.cristal>=75, desc:'encore x2 Cristal'},
+  {id:'bm_pr1',em:'🦌',name:'Lumière Vitale',       cost:800e15, type:'bldg_mult',bId:'prisme',    val:2,cond:g=>g.b.prisme>=25,  desc:'x2 Tours Prisme'},
+  {id:'bm_pr2',em:'🦅',name:'Aile Obscure',       cost:5e18,   type:'bldg_mult',bId:'prisme',    val:2,cond:g=>g.b.prisme>=75,  desc:'encore x2 Prisme'},
+  {id:'bm_hy1',em:'🔮',name:'Anneau Dimensionnel',         cost:3e18,   type:'bldg_mult',bId:'hyper',     val:2,cond:g=>g.b.hyper>=25,   desc:'x2 Hyper Espaces'},
+  {id:'bm_hy2',em:'🐍',name:'Cellule Parfaite',       cost:18e18,  type:'bldg_mult',bId:'hyper',     val:2,cond:g=>g.b.hyper>=75,   desc:'encore x2 Hyper'},
+  {id:'bm_po1',em:'🦁',name:'Soleil Cosmique',      cost:12e18,  type:'bldg_mult',bId:'portal',    val:2,cond:g=>g.b.portal>=25,  desc:'x2 Portails Ultra'},
+  {id:'bm_po2',em:'🌙',name:'Lune Astrale',        cost:70e18,  type:'bldg_mult',bId:'portal',    val:2,cond:g=>g.b.portal>=75,  desc:'encore x2 Portails'},
+  {id:'bm_us1',em:'💀',name:'Chaîne Mortelle',    cost:50e18,  type:'bldg_mult',bId:'usine',     val:2,cond:g=>g.b.usine>=25,   desc:'x2 Usines Ultra'},
+  {id:'bm_us2',em:'👤',name:'Ombre Combattante',     cost:300e18, type:'bldg_mult',bId:'usine',     val:2,cond:g=>g.b.usine>=75,   desc:'encore x2 Usines'},
+  {id:'bm_uu',em:'⚡',name:'Brèche Dimensionnelle',        cost:200e18, type:'bldg_mult',bId:'univultra', val:2,cond:g=>g.b.univultra>=25,desc:'x2 Univers Ultra'},
+  {id:'bm_mi',em:'🪞',name:'Reflet Onirique',cost:1.2e21, type:'bldg_mult',bId:'miroir',    val:2,cond:g=>g.b.miroir>=25,  desc:'x2 Dimensions Miroir'},
+  {id:'bm_zo',em:'🌑',name:'Cauchemar Éternel',        cost:8e21,   type:'bldg_mult',bId:'zone',      val:2,cond:g=>g.b.zone>=25,    desc:'x2 Zones Obscures'},
+  {id:'bm_pa',em:'🌙',name:'Rêve Lunaire',      cost:50e21,  type:'bldg_mult',bId:'palais',    val:2,cond:g=>g.b.palais>=25,  desc:'x2 Palais Pokemon'},
+  {id:'bm_ga',em:'👻',name:'Vortex Giratinien',       cost:300e21, type:'bldg_mult',bId:'galactic',  val:2,cond:g=>g.b.galactic>=25,desc:'x2 Bases Galactiques'},
+  {id:'bm_st',em:'⏰',name:'Distorsion Temporelle',         cost:2e24,   type:'bldg_mult',bId:'spacetime', val:2,cond:g=>g.b.spacetime>=25,desc:'x2 Tours Espace-Temps'},
+  {id:'bm_di',em:'💫',name:'Fissure Spatiale',         cost:12e24,  type:'bldg_mult',bId:'distort',   val:2,cond:g=>g.b.distort>=25, desc:'x2 Distorsions'},
+  {id:'bm_dr',em:'💤',name:'Songe Profond',          cost:80e24,  type:'bldg_mult',bId:'dream',     val:2,cond:g=>g.b.dream>=25,   desc:'x2 Mondes des Reves'},
+  {id:'bm_fo',em:'🌸',name:'Sanctuaire Fleuri',        cost:500e24, type:'bldg_mult',bId:'foret',     val:2,cond:g=>g.b.foret>=25,   desc:'x2 Forets Magiques'},
+  {id:'bm_sz',em:'💠',name:'Éclat Z',      cost:3e27,   type:'bldg_mult',bId:'stationz',  val:2,cond:g=>g.b.stationz>=25,desc:'x2 Stations Z'},
+  {id:'bm_ml',em:'🔮',name:'Méga-Évolution X',  cost:20e27,  type:'bldg_mult',bId:'megalab',   val:2,cond:g=>g.b.megalab>=25, desc:'x2 Mega-Labs'},
+  {id:'bm_c2',em:'🤖',name:'Circuit Nano',       cost:120e27, type:'bldg_mult',bId:'crystal2',  val:2,cond:g=>g.b.crystal2>=25,desc:'x2 Tours Cristallines'},
+  {id:'bm_le',em:'🌸',name:'Sanctuaire des Dieux',            cost:800e27, type:'bldg_mult',bId:'legendary', val:2,cond:g=>g.b.legendary>=25,desc:'x2 Centres Legendaires'},
+  {id:'bm_mw',em:'💜',name:'ADN Reconstruit',  cost:5e30,   type:'bldg_mult',bId:'mewtwolab', val:2,cond:g=>g.b.mewtwolab>=25,desc:'x2 Labos Mewtwo'},
+  {id:'bm_ac',em:'✨',name:'Tablette Divine',cost:30e30, type:'bldg_mult',bId:'arceus',    val:2,cond:g=>g.b.arceus>=25,  desc:'x2 Temples Arceus'},
+  {id:'bm_so',em:'💧',name:'Source Cristalline',        cost:200e30, type:'bldg_mult',bId:'source',    val:2,cond:g=>g.b.source>=25,  desc:'x2 Sources'},
+  {id:'bm_te',em:'⏳',name:'Cristal du Temps',         cost:1.5e33, type:'bldg_mult',bId:'temporal',  val:2,cond:g=>g.b.temporal>=25,desc:'x2 Cristaux Temporels'},
+  {id:'bm_sn',em:'✌️',name:'Lumière du Passé',cost:10e33,  type:'bldg_mult',bId:'sanctu',    val:2,cond:g=>g.b.sanctu>=25,  desc:'x2 Sanctuaires'},
+  {id:'bm_pl2b',em:'☀️',name:'Orbite Cosmique',  cost:70e33,  type:'bldg_mult',bId:'planete',   val:2,cond:g=>g.b.planete>=25, desc:'x2 Planetes Pokemon'},
+  {id:'bm_ub',em:'💥',name:'Ultra Singularité', cost:500e33, type:'bldg_mult',bId:'univball',  val:2,cond:g=>g.b.univball>=25,desc:'x2 Univers Pokeball'},
+  {id:'bm_nx',em:'🌀',name:'Fusion Ultime',      cost:3e36,   type:'bldg_mult',bId:'nexus',     val:2,cond:g=>g.b.nexus>=25,   desc:'x2 Nexus Cosmiques'},
+  {id:'bm_om',em:'🔮',name:'Lumière Absorbée',       cost:20e36,  type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=25,   desc:'x2 Omega Pokemon'},
+  {id:'bm_gi',em:'👼',name:'Création Divine',   cost:150e36, type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=25,desc:'x2 DIEU ARCEUS'},
   // --- Upgrades taux d'événements rares ---
-  {id:'er01',em:'🍀',name:'Encens Pokémon',      cost:200e3,  type:'ev_rate', val:.002, desc:'+0.2% chance événement',   cond:g=>g.ec>=1},
-  {id:'er02',em:'🌸',name:'Fleur Safran',         cost:2e6,    type:'ev_rate', val:.003, desc:'+0.3% chance événement',   cond:g=>g.bu.has('er01')&&g.ec>=5},
-  {id:'er03',em:'🔮',name:'Orbe Mystérieuse',     cost:20e6,   type:'ev_rate', val:.004, desc:'+0.4% chance événement',   cond:g=>g.bu.has('er02')&&g.ec>=15},
-  {id:'er04',em:'⭐',name:'Fragment Etoile',      cost:200e6,  type:'ev_rate', val:.005, desc:'+0.5% chance evenement',   cond:g=>g.bu.has('er03')&&g.ec>=30},
-  {id:'er05',em:'💫',name:'Poudre de Comète',     cost:2e9,    type:'ev_rate', val:.006, desc:'+0.6% chance événement',   cond:g=>g.bu.has('er04')&&g.ec>=60},
-  {id:'er06',em:'🌟',name:'Cristal Légendaire',   cost:20e9,   type:'ev_rate', val:.007, desc:'+0.7% chance événement',   cond:g=>g.bu.has('er05')&&g.ec>=100},
+  {id:'er01',em:'🍀',name:'Radar Pokémon',      cost:200e3,  type:'ev_rate', val:.002, desc:'+0.2% chance événement',   cond:g=>g.ec>=1},
+  {id:'er02',em:'🌸',name:'Détecteur Avancé',         cost:2e6,    type:'ev_rate', val:.003, desc:'+0.3% chance événement',   cond:g=>g.bu.has('er01')&&g.ec>=5},
+  {id:'er03',em:'🔮',name:'Scanner Mystique',     cost:20e6,   type:'ev_rate', val:.004, desc:'+0.4% chance événement',   cond:g=>g.bu.has('er02')&&g.ec>=15},
+  {id:'er04',em:'⭐',name:'Capteur Stellaire',      cost:200e6,  type:'ev_rate', val:.005, desc:'+0.5% chance evenement',   cond:g=>g.bu.has('er03')&&g.ec>=30},
+  {id:'er05',em:'💫',name:'Radar Légendaire',     cost:2e9,    type:'ev_rate', val:.006, desc:'+0.6% chance événement',   cond:g=>g.bu.has('er04')&&g.ec>=60},
+  {id:'er06',em:'🌟',name:'Cristal Détecteur',   cost:20e9,   type:'ev_rate', val:.007, desc:'+0.7% chance événement',   cond:g=>g.bu.has('er05')&&g.ec>=100},
 
   // --- 2ème upgrade pour les bâtiments mid/late qui en avaient qu'une ---
-  {id:'bm_uu2',em:'🌐',name:'Univers II',      cost:1e21,   type:'bldg_mult',bId:'univultra', val:2,cond:g=>g.b.univultra>=50, desc:'encore x2 Univers Ultra'},
+  {id:'bm_uu2',em:'🌐',name:'Nexus Alternatif',      cost:1e21,   type:'bldg_mult',bId:'univultra', val:2,cond:g=>g.b.univultra>=50, desc:'encore x2 Univers Ultra'},
   {id:'bm_mi2',em:'🪞',name:'Double Miroir',   cost:6e21,   type:'bldg_mult',bId:'miroir',    val:2,cond:g=>g.b.miroir>=50,   desc:'encore x2 Miroir'},
-  {id:'bm_zo2',em:'🌑',name:'Darkrai II',      cost:40e21,  type:'bldg_mult',bId:'zone',      val:2,cond:g=>g.b.zone>=50,    desc:'encore x2 Zone Obscure'},
-  {id:'bm_pa2',em:'☀️',name:'Cresselia II',    cost:250e21, type:'bldg_mult',bId:'palais',    val:2,cond:g=>g.b.palais>=50,  desc:'encore x2 Palais'},
-  {id:'bm_ga2',em:'👻',name:'Giratina II',     cost:1.5e24, type:'bldg_mult',bId:'galactic',  val:2,cond:g=>g.b.galactic>=50,desc:'encore x2 Galactique'},
-  {id:'bm_st2',em:'⏰',name:'Dialga II',       cost:10e24,  type:'bldg_mult',bId:'spacetime', val:2,cond:g=>g.b.spacetime>=50,desc:'encore x2 Espace-Temps'},
-  {id:'bm_di2',em:'💫',name:'Palkia II',       cost:65e24,  type:'bldg_mult',bId:'distort',   val:2,cond:g=>g.b.distort>=50, desc:'encore x2 Distorsion'},
-  {id:'bm_dr2',em:'💤',name:'Munna II',        cost:400e24, type:'bldg_mult',bId:'dream',     val:2,cond:g=>g.b.dream>=50,   desc:'encore x2 Reves'},
-  {id:'bm_fo2',em:'🌸',name:'Shaymin II',      cost:2.5e27, type:'bldg_mult',bId:'foret',     val:2,cond:g=>g.b.foret>=50,   desc:'encore x2 Foret'},
-  {id:'bm_sz2',em:'💠',name:'Tapu II',         cost:15e27,  type:'bldg_mult',bId:'stationz',  val:2,cond:g=>g.b.stationz>=50,desc:'encore x2 Station Z'},
-  {id:'bm_ml2',em:'🔮',name:'Mega Mewtwo II',  cost:100e27, type:'bldg_mult',bId:'megalab',   val:2,cond:g=>g.b.megalab>=50, desc:'encore x2 Mega-Lab'},
-  {id:'bm_c22',em:'🤖',name:'Genesect II',     cost:600e27, type:'bldg_mult',bId:'crystal2',  val:2,cond:g=>g.b.crystal2>=50,desc:'encore x2 Tour Cristalline'},
-  {id:'bm_le2',em:'🌸',name:'Mew II',          cost:4e30,   type:'bldg_mult',bId:'legendary', val:2,cond:g=>g.b.legendary>=50,desc:'encore x2 Centre Legendaire'},
-  {id:'bm_mw2',em:'💜',name:'MegaMewtwo X II', cost:25e30,  type:'bldg_mult',bId:'mewtwolab', val:2,cond:g=>g.b.mewtwolab>=50,desc:'encore x2 Labo Mewtwo'},
-  {id:'bm_ac2',em:'✨',name:'Arceus II',       cost:150e30, type:'bldg_mult',bId:'arceus',    val:2,cond:g=>g.b.arceus>=50,  desc:'encore x2 Temple Arceus'},
-  {id:'bm_so2',em:'💧',name:'Manaphy II',      cost:1e33,   type:'bldg_mult',bId:'source',    val:2,cond:g=>g.b.source>=50,  desc:'encore x2 Source'},
-  {id:'bm_te2',em:'⏳',name:'Celebi II',       cost:7e33,   type:'bldg_mult',bId:'temporal',  val:2,cond:g=>g.b.temporal>=50,desc:'encore x2 Cristal Temporel'},
-  {id:'bm_sn2',em:'✌️',name:'Victini II',      cost:50e33,  type:'bldg_mult',bId:'sanctu',    val:2,cond:g=>g.b.sanctu>=50,  desc:'encore x2 Sanctuaire'},
-  {id:'bm_pl2c',em:'🪐',name:'Solgaleo III',   cost:350e33, type:'bldg_mult',bId:'planete',   val:2,cond:g=>g.b.planete>=50, desc:'encore x2 Planete'},
-  {id:'bm_ub2',em:'💥',name:'Ultra-Nec II',    cost:2.5e36, type:'bldg_mult',bId:'univball',  val:2,cond:g=>g.b.univball>=50,desc:'encore x2 Univers Pokeball'},
-  {id:'bm_nx2',em:'🌀',name:'Eternatus II',    cost:17e36,  type:'bldg_mult',bId:'nexus',     val:2,cond:g=>g.b.nexus>=50,   desc:'encore x2 Nexus'},
-  {id:'bm_om2',em:'🔮',name:'Necrozma II',     cost:120e36, type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=50,   desc:'encore x2 Omega'},
-  {id:'bm_gi2',em:'👼',name:'Arceus God II',   cost:1e39,   type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=50,desc:'encore x2 DIEU ARCEUS'},
+  {id:'bm_zo2',em:'🌑',name:'Nuit Sans Fin',      cost:40e21,  type:'bldg_mult',bId:'zone',      val:2,cond:g=>g.b.zone>=50,    desc:'encore x2 Zone Obscure'},
+  {id:'bm_pa2',em:'☀️',name:'Trêve Étoilée',    cost:250e21, type:'bldg_mult',bId:'palais',    val:2,cond:g=>g.b.palais>=50,  desc:'encore x2 Palais'},
+  {id:'bm_ga2',em:'👻',name:'Dimension Inversée',     cost:1.5e24, type:'bldg_mult',bId:'galactic',  val:2,cond:g=>g.b.galactic>=50,desc:'encore x2 Galactique'},
+  {id:'bm_st2',em:'⏰',name:'Horloge Éternelle',       cost:10e24,  type:'bldg_mult',bId:'spacetime', val:2,cond:g=>g.b.spacetime>=50,desc:'encore x2 Espace-Temps'},
+  {id:'bm_di2',em:'💫',name:'Vide Cosmique',       cost:65e24,  type:'bldg_mult',bId:'distort',   val:2,cond:g=>g.b.distort>=50, desc:'encore x2 Distorsion'},
+  {id:'bm_dr2',em:'💤',name:'Rêve Infini',        cost:400e24, type:'bldg_mult',bId:'dream',     val:2,cond:g=>g.b.dream>=50,   desc:'encore x2 Reves'},
+  {id:'bm_fo2',em:'🌸',name:'Forêt Éternelle',      cost:2.5e27, type:'bldg_mult',bId:'foret',     val:2,cond:g=>g.b.foret>=50,   desc:'encore x2 Foret'},
+  {id:'bm_sz2',em:'💠',name:'Cristal Z Ultime',         cost:15e27,  type:'bldg_mult',bId:'stationz',  val:2,cond:g=>g.b.stationz>=50,desc:'encore x2 Station Z'},
+  {id:'bm_ml2',em:'🔮',name:'Méga-Évolution Y',  cost:100e27, type:'bldg_mult',bId:'megalab',   val:2,cond:g=>g.b.megalab>=50, desc:'encore x2 Mega-Lab'},
+  {id:'bm_c22',em:'🤖',name:'Protocole Final',     cost:600e27, type:'bldg_mult',bId:'crystal2',  val:2,cond:g=>g.b.crystal2>=50,desc:'encore x2 Tour Cristalline'},
+  {id:'bm_le2',em:'🌸',name:'Temple Éternel',          cost:4e30,   type:'bldg_mult',bId:'legendary', val:2,cond:g=>g.b.legendary>=50,desc:'encore x2 Centre Legendaire'},
+  {id:'bm_mw2',em:'💜',name:'Clone Parfait', cost:25e30,  type:'bldg_mult',bId:'mewtwolab', val:2,cond:g=>g.b.mewtwolab>=50,desc:'encore x2 Labo Mewtwo'},
+  {id:'bm_ac2',em:'✨',name:'Volonté Créatrice',       cost:150e30, type:'bldg_mult',bId:'arceus',    val:2,cond:g=>g.b.arceus>=50,  desc:'encore x2 Temple Arceus'},
+  {id:'bm_so2',em:'💧',name:'Marée Éternelle',      cost:1e33,   type:'bldg_mult',bId:'source',    val:2,cond:g=>g.b.source>=50,  desc:'encore x2 Source'},
+  {id:'bm_te2',em:'⏳',name:'Boucle Temporelle',       cost:7e33,   type:'bldg_mult',bId:'temporal',  val:2,cond:g=>g.b.temporal>=50,desc:'encore x2 Cristal Temporel'},
+  {id:'bm_sn2',em:'✌️',name:'Victoire Immortelle',      cost:50e33,  type:'bldg_mult',bId:'sanctu',    val:2,cond:g=>g.b.sanctu>=50,  desc:'encore x2 Sanctuaire'},
+  {id:'bm_pl2c',em:'🪐',name:'Système Stellaire',   cost:350e33, type:'bldg_mult',bId:'planete',   val:2,cond:g=>g.b.planete>=50, desc:'encore x2 Planete'},
+  {id:'bm_ub2',em:'💥',name:'Big Bang',    cost:2.5e36, type:'bldg_mult',bId:'univball',  val:2,cond:g=>g.b.univball>=50,desc:'encore x2 Univers Pokeball'},
+  {id:'bm_nx2',em:'🌀',name:'Éternité',    cost:17e36,  type:'bldg_mult',bId:'nexus',     val:2,cond:g=>g.b.nexus>=50,   desc:'encore x2 Nexus'},
+  {id:'bm_om2',em:'🔮',name:'Ultime Noirceur',     cost:120e36, type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=50,   desc:'encore x2 Omega'},
+  {id:'bm_gi2',em:'👼',name:'Au-delà du Dieu',   cost:1e39,   type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=50,desc:'encore x2 DIEU ARCEUS'},
   // Pokéball upgrade pour cohérence
-  {id:'bm_pb1',em:'🔴',name:'Pokéball Forge',  cost:200,    type:'bldg_mult',bId:'pokeball',  val:1, cond:g=>g.b.pokeball>=10, desc:'Augmente la valeur de base des Pokéballs'},
+  {id:'bm_pb1',em:'🔴',name:'Alliage Spécial',  cost:200,    type:'bldg_mult',bId:'pokeball',  val:1, cond:g=>g.b.pokeball>=10, desc:'Augmente la valeur de base des Pokéballs'},
 
   // --- Upgrades Prestige ---
-  {id:'pm01',em:'🍬',name:'Bonbon Rare+ x2', cost:20e6,   type:'prestige_mult',val:2, desc:'Double le bonus Prestige',   cond:g=>g.rc>=5},
-  {id:'pm02',em:'🍭',name:'Bonbon Max x3',   cost:200e6,  type:'prestige_mult',val:3, desc:'Triple le bonus Prestige',   cond:g=>g.rc>=20},
-  {id:'pm03',em:'🌈',name:'Super Bonbon x5', cost:2e9,    type:'prestige_mult',val:5, desc:'Quintuple le bonus Prestige', cond:g=>g.rc>=50},
-  {id:'pm04',em:'♾️',name:'Bonbon Cosmique', cost:50e9,   type:'prestige_mult',val:10,desc:'x10 bonus Prestige',         cond:g=>g.rc>=200},
+  {id:'pm01',em:'🍬',name:'Sucre de Prestige', cost:20e6,   type:'prestige_mult',val:2, desc:'Double le bonus Prestige',   cond:g=>g.rc>=5},
+  {id:'pm02',em:'🍭',name:'Essence Rare',   cost:200e6,  type:'prestige_mult',val:3, desc:'Triple le bonus Prestige',   cond:g=>g.rc>=20},
+  {id:'pm03',em:'🌈',name:'Néctar Légendaire', cost:2e9,    type:'prestige_mult',val:5, desc:'Quintuple le bonus Prestige', cond:g=>g.rc>=50},
+  {id:'pm04',em:'♾️',name:'Ambroisie Divine', cost:50e9,   type:'prestige_mult',val:10,desc:'x10 bonus Prestige',         cond:g=>g.rc>=200},
 ];
 
 // ============================================================
@@ -1215,6 +1215,7 @@ function newGame(){
     itemEnd:{},   // {effect: endTimestamp}
     lastMissed:null, // Dernier Pokémon manqué (pour Rappel)
     wildCpsBoost:0, wildCpsEnd:0, wildClickBoost:0, wildClickEnd:0, wildMult:1, wildMultEnd:0,
+    _autoClickEnd:0, // Autoclicker légit
     tt:0,        // Total time played (s)
     pc:0,        // Prestige count
     rc:0,        // Rare candies total
@@ -1476,6 +1477,7 @@ function calcClickValue(g){
   const presBonus = Math.pow(1 + candyRate, G.rc||0);
   base *= presBonus;
   // Event mult
+  if(g.evEnd > Date.now()) base *= g.evMult;
   // Candy shop click bonus
   base *= (1 + csBonus('click_flat_pct'));
   // Items Pearl Shop
@@ -1485,6 +1487,8 @@ function calcClickValue(g){
   // Wild pokemon click boost
   if(g.wildClickBoost && g.wildClickEnd && Date.now() < g.wildClickEnd) base *= (1 + g.wildClickBoost);
   if(g.evEnd > Date.now()) base *= g.evMult;
+  // Wild global mult affecte aussi les clics
+  if(g.wildMult && g.wildMultEnd && Date.now() < g.wildMultEnd) base *= g.wildMult;
   return Math.max(1, base);
 }
 
@@ -1729,6 +1733,7 @@ function doPrestige(){
   for(let i=0; i<gained; i++) tlConsumed += presThreshold((G.pc||0) + 1 + i);
   const tlLeft = Math.max(0, (G.tl||0) - tlConsumed);
   G.rc += gained;         // ← Donner les bonbons
+  updateDailies('prestige', 1);
   G.pc += gained;
   G.bestPrestige = Math.max(G.bestPrestige||0, gained);
   const keep = {
@@ -1748,6 +1753,7 @@ function doPrestige(){
     evMult:1, evEnd:0, timeWarpMult:1, timeWarpEnd:0,
     lastSave:Date.now(), startTime:Date.now(),
   };
+  stopLegitAutoClick();
   G = keep;
   saveGame();
   POKE_RESET = false; togglePokedexReset(); // reset le toggle
@@ -1829,16 +1835,24 @@ function clickEvent(){
   if(!G.pokedex) G.pokedex = {};
   G.pokedex[ev.num] = (G.pokedex[ev.num]||0) + 1;
   G.ec++;
-  updateDailies('events',1);
+  // Différencier events (légendaires/ultra) et wilds (autres raretés)
+  if(ev.rarity === 'legendaire' || ev.rarity === 'ultra'){
+    updateDailies('events', 1);
+  } else {
+    updateDailies('wilds', 1);
+  }
   // Barre de perles
   addPearlPoints(ev.rarity);
   // Appliquer l'effet selon la rareté
   const evDur = SPAWN_DUR[ev.rarity] || ev.dur || 10;
   const cpsNow = calcCPS(G);
   if(ev.effect === 'instant_pd'){
-    const gain = Math.max(cpsNow * ev.val, cpsNow * 2);
+    // Commun (val=1) → autoclick 8s | Peu commun (val=3) → autoclick 13s
+    const autoSec = ev.rarity === 'peu_commun' ? 13 : 8;
+    startLegitAutoClick(autoSec);
+    const gain = cpsNow * 2; // petit bonus instantané en plus
     G.pd += gain; G.te += gain;
-    spawnParticle(window.innerWidth/2, window.innerHeight/2, '+'+fmtP(gain));
+    spawnParticle(window.innerWidth/2, window.innerHeight/2, '⚡ Auto-clic '+autoSec+'s !');
   } else if(ev.effect === 'cps_boost'){
     G.wildCpsBoost = (G.wildCpsBoost||0) + ev.val;
     G.wildCpsEnd = Date.now() + evDur * 1000;
@@ -2206,6 +2220,40 @@ function updateTutoSlide(){
   if(next) next.textContent = tutoStep === TUTO_SLIDES ? 'Commencer ! ⚡' : 'Suivant →';
 }
 
+
+// ── Autoclicker légit (déclenché par commun/peu_commun) ────────────
+// Bypasse complètement l'anti-AC car c'est un effet de jeu officiel
+let _autoClickInterval = null;
+
+function startLegitAutoClick(durationSec){
+  stopLegitAutoClick(); // annule si déjà actif
+  G._autoClickEnd = Date.now() + durationSec * 1000;
+  const rate = 6; // 6 clics/s — naturel, pas suspect
+  _autoClickInterval = setInterval(()=>{
+    if(!G._autoClickEnd || Date.now() > G._autoClickEnd){
+      stopLegitAutoClick();
+      return;
+    }
+    // Clic légit : même valeur que le vrai clic mais sans anti-AC
+    const val = calcClickValue(G);
+    G.pd += val;
+    G.te += val;
+    G.tl += val;
+    G.tc++;
+    updateDailies('clicks', 1);
+    spawnParticle(
+      window.innerWidth * 0.35 + Math.random() * 60 - 30,
+      window.innerHeight * 0.42 + Math.random() * 60 - 30,
+      '+' + fmtP(val)
+    );
+  }, Math.round(1000/rate));
+}
+
+function stopLegitAutoClick(){
+  if(_autoClickInterval){ clearInterval(_autoClickInterval); _autoClickInterval = null; }
+  G._autoClickEnd = 0;
+}
+
 function openHelp(){ document.getElementById('md-help').classList.add('on'); }
 
 function hardRefresh(){
@@ -2475,15 +2523,56 @@ function renderPokedex(){
 // OBJECTIFS JOURNALIERS
 // ============================================================
 const DAILY_POOL = [
-  {id:'d_click',   em:'👆', name:'Cliqueur Assidu',    desc:'Cliquez X fois',          type:'clicks',    targets:[100,500,1000,5000]},
-  {id:'d_buy',     em:'🏢', name:'Constructeur',       desc:'Achetez X bâtiments',     type:'buys',      targets:[5,15,30,50]},
-  {id:'d_earn',    em:'💰', name:'Accumulateur',       desc:'Gagnez X ₽',              type:'earn',      targets:[1e3,10e3,1e6,1e9]},
-  {id:'d_event',   em:'✨', name:'Chasseur Events', desc:'Capturez X events',       type:'events',    targets:[1,3,5,10]},
-  {id:'d_upgrade', em:'⬆️', name:'Améliorateur',       desc:'Achetez X améliorations', type:'upgrades',  targets:[1,3,5,10]},
-  {id:'d_wild',    em:'🐾', name:'Dresseur',           desc:'Capturez X Pokémon sauvages', type:'wilds', targets:[1,2,5,10]},
+  // type 'clicks' — cible = % des clics moyens/jour selon tc
+  {id:'d_click',   em:'👆', name:'Cliqueur Assidu',    desc:'Cliquez X fois',              type:'clicks'},
+  // type 'buys' — cible fixe, toujours faisable peu importe le stade
+  {id:'d_buy',     em:'🏢', name:'Constructeur',       desc:'Achetez X bâtiments',         type:'buys'},
+  // type 'earn' — cible = fraction du CPS journalier
+  {id:'d_earn',    em:'💰', name:'Accumulateur',       desc:'Gagnez X ₽',                  type:'earn'},
+  // type 'events' — légendaires/ultra : max 1 par jour, on demande juste 1
+  {id:'d_event',   em:'✨', name:'Chasseur Légendaire', desc:'Capturez X Légendaire/Ultra', type:'events'},
+  // type 'upgrades' — faisable à tout stade
+  {id:'d_upgrade', em:'⬆️', name:'Améliorateur',       desc:'Achetez X améliorations',     type:'upgrades'},
+  // type 'wilds' — commun→épique : ~50-80 par jour, on demande 3-15
+  {id:'d_wild',    em:'🐾', name:'Dresseur',           desc:'Capturez X Pokémon',          type:'wilds'},
+  // type 'pearls' — toujours faisable via captures
+  {id:'d_pearl',   em:'🔵', name:'Collecteur de Perles', desc:'Gagnez X Perles',           type:'pearls'},
 ];
 
-const DAILY_REWARDS = [500, 5e3, 50e3, 1e6]; // récompense en ₽ selon difficulté
+// Calcule des cibles dynamiques selon la progression du joueur
+function getDailyTarget(type){
+  const cps = calcCPS(G);
+  const tc  = G.tc || 0;
+  const pc  = G.pc || 0;
+  switch(type){
+    case 'clicks':
+      // 5-20% des clics faits en 1 session normale (~500 clics/min)
+      // Cible : facile=200, moyen=500, dur=1000, expert=2000
+      return [200, 500, 1000, 2000][Math.floor(Math.random()*4)];
+    case 'buys':
+      return [3, 5, 10, 20][Math.floor(Math.random()*4)];
+    case 'earn':
+      // 10-60 min de production selon difficulté
+      const mins = [10, 20, 40, 60][Math.floor(Math.random()*4)];
+      const base = Math.max(1000, Math.round(cps * mins * 60));
+      return base;
+    case 'events':
+      // Légendaires/ultra : ~0.8-0.2/jour → toujours 1 seul
+      return 1;
+    case 'upgrades':
+      return [1, 2, 3, 5][Math.floor(Math.random()*4)];
+    case 'wilds':
+      // Commun→épique : ~50-80/jour → 5 à 25 selon diff
+      return [5, 10, 15, 25][Math.floor(Math.random()*4)];
+    case 'pearls':
+      // ~2-10 perles/jour selon rareté capturée
+      return [2, 3, 5, 8][Math.floor(Math.random()*4)];
+    default:
+      return 5;
+  }
+}
+
+const DAILY_BASE_REWARD = 500; // minimum garanti
 
 function getDailyKey(){
   const d = new Date();
@@ -2497,14 +2586,15 @@ function initDailies(){
     G._dailies = JSON.parse(stored);
   } else {
     // Générer 3 objectifs aléatoires pour aujourd'hui
-    const shuffled = [...DAILY_POOL].sort(()=>Math.random()-.5).slice(0,3);
-    const diff = Math.floor(Math.random()*4); // 0-3
-    // Récompense scalée : base = 30min de production actuelle (min DAILY_REWARDS[diff])
-    const cpsNow = typeof calcCPS === 'function' ? calcCPS(G) : 0;
-    const scaledReward = Math.max(DAILY_REWARDS[diff], Math.round(cpsNow * 1800));
+    const available = DAILY_POOL.filter(d=>{
+      const t = getDailyTarget(d.type);
+      return t !== null; // exclut prestige si pas assez avancé
+    });
+    const shuffled = available.sort(()=>Math.random()-.5).slice(0,3);
     G._dailies = shuffled.map(d=>({
       id:d.id, em:d.em, name:d.name, desc:d.desc, type:d.type,
-      target:d.targets[diff], reward:scaledReward,
+      target:getDailyTarget(d.type),
+      reward:DAILY_BASE_REWARD, // sera recalculé dynamiquement à l'affichage
       progress:0, done:false
     }));
     localStorage.setItem('dailies_'+key, JSON.stringify(G._dailies));
@@ -2521,6 +2611,9 @@ function updateDailies(type, amount){
       obj.progress = Math.min(obj.target, (obj.progress||0) + (amount||1));
       if(obj.progress >= obj.target){
         obj.done = true;
+        // Récompense = 30 min de CPS au moment de complétion
+        const cpsAtComplete = calcCPS(G);
+        obj.reward = Math.max(obj.reward, Math.round(cpsAtComplete * 1800));
         G.pd += obj.reward;
         G.te += obj.reward;
         playSound('ach');
@@ -2546,8 +2639,12 @@ function renderDailies(){
   const key = getDailyKey();
   // Reset si nouveau jour
   if(G._dailyKey && G._dailyKey !== key){ initDailies(); }
+  // Récompense dynamique : 30 min de CPS actuel (min = reward stocké)
+  const cpsNow = calcCPS(G);
+  const dynamicReward = Math.max(G._dailies[0]&&G._dailies[0].reward||0, Math.round(cpsNow * 1800));
   el.innerHTML = G._dailies.map(obj=>{
     const pct = Math.min(100,(obj.progress/obj.target)*100);
+    const reward = obj.done ? obj.reward : dynamicReward; // garde la valeur au moment où c'était complété
     return '<div style="background:var(--card);border:1px solid '+(obj.done?'var(--green)':'var(--border)')+';border-radius:10px;padding:12px;margin-bottom:8px">'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
         +'<span style="font-size:20px">'+obj.em+'</span>'
@@ -2555,7 +2652,7 @@ function renderDailies(){
           +'<div style="font-size:11px;font-weight:900;color:'+(obj.done?'var(--green)':'var(--text)')+'">'+obj.name+(obj.done?' ✅':'')+'</div>'
           +'<div style="font-size:9px;color:var(--dim)">'+obj.desc.replace('X', String(obj.target))+'</div>'
         +'</div>'
-        +'<div style="font-size:10px;font-weight:800;color:var(--gold)">+'+fmtP(obj.reward)+'</div>'
+        +'<div style="font-size:10px;font-weight:800;color:var(--gold)">+'+fmtP(obj.done?reward:dynamicReward)+'</div>'
       +'</div>'
       +'<div style="background:var(--bg);border-radius:4px;height:6px;overflow:hidden">'
         +'<div style="height:100%;width:'+pct+'%;background:'+(obj.done?'var(--green)':'linear-gradient(90deg,var(--purp-d),var(--gold))')+';border-radius:4px;transition:width .3s"></div>'
@@ -2579,6 +2676,7 @@ function addPearlPoints(rarity){
   }
   if(gained > 0){
     G.pearls = (G.pearls||0) + gained;
+    updateDailies('pearls', gained);
     notif('🔵 +'+gained+' Perle'+(gained>1?'s':'')+' gagnée'+(gained>1?'s':'')+' ! ('+G.pearls+' total)','buy');
     autoConvertPearls();
     saveGame(); // Sauvegarder immédiatement quand on gagne une perle
