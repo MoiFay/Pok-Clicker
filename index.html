@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%23E53935' stroke='%23111' stroke-width='4'/><rect x='2' y='44' width='96' height='12' fill='%23111'/><circle cx='50' cy='50' r='14' fill='white' stroke='%23111' stroke-width='4'/><circle cx='50' cy='50' r='7' fill='%23eee' stroke='%23111' stroke-width='3'/><path d='M2 50 a48 48 0 0 1 96 0' fill='%23E53935'/><path d='M2 50 a48 48 0 0 0 96 0' fill='%23f5f5f5'/></svg>">
 <title>Pokémon Clicker ⚡</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -145,15 +149,32 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 #stats-tbl div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px}
 #stats-tbl .lbl{color:var(--dim)} #stats-tbl .val{font-weight:800}
 @media(max-width:820px){
-  #app{grid-template-columns:1fr;grid-template-rows:auto 185px 1fr}
+  #app{grid-template-columns:1fr;grid-template-rows:auto 230px 1fr}
   #left{flex-direction:row;align-items:center;justify-content:space-around;padding:9px 12px;border-right:none;border-bottom:2px solid var(--border);gap:10px;}
   #pb{width:100px;height:100px} .pb-dot{width:22px;height:22px;border-width:4px} .pb-band{height:9px}
-  #pd-display{font-size:11px} #badge-row,#pbar-wrap,#qty-btn{display:none!important}
+  #pd-display{font-size:11px} #badge-row,#qty-btn{display:none!important}
+  #pbar-wrap{max-width:100% !important;width:100% !important;padding:0 8px;}
 }
 @media(max-width:480px){
   #left{max-height:160px} #pb{width:85px;height:85px} .pb-dot{width:18px;height:18px;border-width:3px}
 }
 
+
+/* Sound toggle button */
+#sound-btn{
+  padding:5px 9px;background:var(--card);border:1px solid var(--border);
+  border-radius:7px;color:var(--dim);cursor:pointer;font-size:13px;
+  transition:var(--ease);
+}
+#sound-btn:hover{background:var(--card-h);border-color:var(--border-b)}
+#sound-btn.on{border-color:var(--gold);color:var(--gold)}
+
+/* Event timer countdown */
+#ev-timer{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  color:var(--gold);margin-top:5px;text-align:center;
+  display:none;
+}
 /* Candy shop button */
 .tbtn.candy{border-color:#CE93D8;color:#CE93D8}
 .tbtn.candy:hover{background:rgba(206,147,216,.2);box-shadow:0 0 18px rgba(156,39,176,.35)}
@@ -162,11 +183,82 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .tbtn.mega:hover{background:rgba(255,215,0,.2);box-shadow:0 0 18px rgba(255,215,0,.5)}
 /* Ultra rare glow */
 @keyframes ultraGlow{0%,100%{box-shadow:0 0 20px gold,0 0 50px gold}50%{box-shadow:0 0 40px white,0 0 80px gold}}
+
+/* ===== HAMBURGER MENU MOBILE ===== */
+#burger{display:none;background:none;border:1px solid var(--border);border-radius:7px;
+  padding:6px 9px;cursor:pointer;flex-direction:column;gap:4px;min-width:36px;}
+#burger span{display:block;width:18px;height:2px;background:var(--text);border-radius:2px;transition:var(--ease);}
+#burger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+#burger.open span:nth-child(2){opacity:0}
+#burger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+/* Drawer */
+#drawer{
+  position:fixed;top:0;right:-260px;width:250px;height:100vh;
+  background:var(--panel);border-left:2px solid var(--border);
+  z-index:600;transition:right .25s ease;overflow-y:auto;
+  padding:16px 12px;display:flex;flex-direction:column;gap:8px;
+  box-shadow:-8px 0 30px rgba(0,0,0,.6);
+}
+#drawer.open{right:0}
+#drawer-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:599;backdrop-filter:blur(2px);
+}
+#drawer-overlay.open{display:block}
+#drawer .drawer-title{
+  font-family:var(--fn-px);font-size:9px;color:var(--gold);
+  text-shadow:var(--glow-g);margin-bottom:6px;padding-bottom:8px;
+  border-bottom:1px solid var(--border);
+}
+#drawer .tbtn{width:100%;text-align:left;padding:10px 12px;font-size:12px;}
+/* Qty buttons mobile */
+#qty-mobile{
+  display:none;
+  gap:5px;padding:6px 10px;
+  background:var(--panel);border-top:1px solid var(--border);
+  position:sticky;bottom:0;z-index:50;
+}
+.qty-mb{
+  flex:1;padding:7px 4px;background:var(--card);border:1px solid var(--border);
+  border-radius:7px;color:var(--dim);cursor:pointer;
+  font-family:var(--fn-px);font-size:8px;text-align:center;
+  transition:var(--ease);
+}
+.qty-mb.on{border-color:var(--gold);color:var(--gold);background:rgba(255,215,0,.08)}
+.qty-mb:hover{border-color:var(--border-b);color:var(--text)}
+@media(max-width:820px){
+  #burger{display:flex}
+  #bar-btns{display:none !important}
+  #qty-mobile{display:flex}
+  /* Topbar compact : title + chips + burger */
+  #topbar{gap:6px}
+  #title{font-size:8px}
+  .chip{padding:3px 7px;font-size:10px}
+}
+
+/* Pokédex reset toggle */
+.poke-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(0,0,0,.2);border:1px solid var(--border);
+  border-radius:9px;padding:10px 12px;margin:10px 0;gap:10px;
+}
+.poke-toggle .tog-lbl{font-size:10px;color:var(--text);line-height:1.4;flex:1}
+.poke-toggle .tog-lbl small{color:var(--dim);font-size:9px}
+.tog-btn{
+  min-width:52px;padding:5px 10px;border-radius:20px;border:none;cursor:pointer;
+  font-family:var(--fn-px);font-size:8px;font-weight:800;transition:.2s;
+}
+.tog-btn.off{background:var(--card);color:var(--dim);border:1px solid var(--border)}
+.tog-btn.on{background:var(--red-l);color:#fff;box-shadow:0 0 10px rgba(229,57,53,.4)}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="topbar">
+    <button id="sound-btn" onclick="toggleSound()" title="Sons">🔇</button>
+    <button id="burger" onclick="toggleDrawer()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <span id="title">⚡ POKÉMON CLICKER</span>
     <div class="chip gold"><span class="lbl">₽</span><span class="val" id="c-pd">0</span></div>
     <div class="chip blue"><span class="lbl">⚡/s</span><span class="val" id="c-cps">0</span></div>
@@ -185,6 +277,26 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         <button class="tbtn" style="border-color:#9146FF;color:#9146FF;background:rgba(145,70,255,.1)">💜 Me soutenir</button>
       </a>
     </div>
+  
+<!-- Drawer overlay -->
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<!-- Drawer -->
+<div id="drawer">
+  <div class="drawer-title">⚡ MENU</div>
+  <button class="tbtn pres" onclick="openPrestige();closeDrawer()">✨ Prestige</button>
+  <button class="tbtn" onclick="openSave();closeDrawer()">💾 Save</button>
+  <button class="tbtn" onclick="openStats();closeDrawer()">📊 Stats</button>
+  <button class="tbtn candy" onclick="openCandyShop();closeDrawer()">🍬 Boutique Bonbons</button>
+  <button class="tbtn mega" id="mega-btn-drawer" onclick="openMegaPrestige();closeDrawer()" style="display:none">⭐ MÉGA PRESTIGE</button>
+  <button class="tbtn" onclick="openPokedex();closeDrawer()" style="border-color:var(--red-l);color:var(--red-l)">📖 Pokédex</button>
+  <button class="tbtn" onclick="openDailies();closeDrawer()" style="border-color:var(--blue);color:var(--blue)">🎯 Objectifs du jour</button>
+  <button class="tbtn" onclick="openHelp();closeDrawer()" style="border-color:#4FC3F7;color:#4FC3F7">❓ Comment jouer</button>
+  <button class="tbtn" onclick="hardRefresh()" style="border-color:var(--dim);color:var(--dim)">🔄 Actualiser</button>
+  <a href="https://subs.twitch.tv/moifay" target="_blank" style="text-decoration:none">
+    <button class="tbtn" style="border-color:#9146FF;color:#9146FF;background:rgba(145,70,255,.1)">💜 Me soutenir</button>
+  </a>
+</div>
+
   </div>
   <div id="left">
     <div id="pb-wrap">
@@ -232,6 +344,12 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
       <button class="tab" onclick="setTab('u')">⬆️ Amélios <span class="tbadge" id="u-badge">0</span></button>
       <button class="tab" onclick="setTab('a')">🏆 Succès <span class="tbadge" id="a-badge">0</span></button>
     </div>
+    <div id="qty-mobile">
+      <button class="qty-mb on" id="qm-1"   onclick="setQtyMobile(0)">×1</button>
+      <button class="qty-mb"    id="qm-10"  onclick="setQtyMobile(1)">×10</button>
+      <button class="qty-mb"    id="qm-100" onclick="setQtyMobile(2)">×100</button>
+      <button class="qty-mb"    id="qm-max" onclick="setQtyMobile(3)">MAX</button>
+    </div>
     <div id="shop"></div>
   </div>
 </div>
@@ -241,6 +359,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   <div class="ev-inner">
     <span class="ev-emoji" id="ev-emoji">✨</span>
     <div class="ev-name" id="ev-name">MEW</div>
+    <div id="ev-timer">⏱ --</div>
   </div>
 </div>
 <div class="overlay" id="md-pres">
@@ -253,6 +372,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     </div>
     <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:8px" id="pres-info">
       <!-- rempli dynamiquement par openPrestige() -->
+    </div>
+    <div class="poke-toggle">
+      <div class="tog-lbl">
+        🗑️ <strong>Réinitialiser le Pokédex</strong><br>
+        <small>OFF → Pokédex conservé après prestige<br>ON → Pokédex remis à 0 + <span style="color:var(--gold)">taux de rareté boostés</span></small>
+      </div>
+      <button class="tog-btn off" id="poke-reset-tog" onclick="togglePokedexReset()">OFF</button>
+    </div>
+    <div id="poke-reset-bonus" style="display:none;font-size:9px;color:var(--gold);text-align:center;margin-bottom:8px">
+      ⬆️ Commun ×1.5 · Peu commun ×2 · Rare ×3 · Épique ×4 · Légendaire ×5 · Ultra ×6
     </div>
     <button class="pres-go" id="pres-btn" onclick="doPrestige()">⭐ EFFECTUER LE PRESTIGE</button>
   </div>
@@ -396,7 +525,8 @@ function fmtT(s){s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor((s%3600
 // BUILDINGS (50)
 // ============================================================
 const BLDGS=[
-  // Coût remboursé en ~5-10 min pour le 1er exemplaire
+  // ★ BÂTIMENT DE BASE — chaque Pokéball = +1 ₽ par clic (pas de CPS)
+  {id:'pokeball',  em:'🔴',name:'Pokéball',                cost:50,      cps:0,      desc:'+1 ₽ par clic — la base de tout dresseur'},
   {id:'centre',    em:'🏥',name:'Centre Pokémon',           cost:300,     cps:1,      desc:'Soigne les Pokémon et génère des ₽'},
   {id:'boutique',  em:'🛍️',name:'Boutique Pokémon',          cost:2500,    cps:6,      desc:'Vend potions et Pokéballs'},
   {id:'labo',      em:'🔬',name:'Laboratoire du Professeur', cost:15e3,    cps:22,     desc:'Le Prof. Oak analyse vos Pokémon'},
@@ -454,9 +584,9 @@ const BLDGS=[
 // ============================================================
 const UPGRADES=[
   // --- Click flat ---
-  {id:'cf01',em:'⚡',name:'Pikachu',        cost:1500,   type:'click_flat',  val:1,    desc:'+1 ₽/clic',         cond:g=>g.tc>=50},
-  {id:'cf02',em:'🐭',name:'Raichu',         cost:8e3,    type:'click_flat',  val:5,    desc:'+5 ₽/clic',         cond:g=>g.tc>=300},
-  {id:'cf03',em:'💛',name:'Voltali',         cost:40e3,   type:'click_flat',  val:15,   desc:'+15 ₽/clic',        cond:g=>g.tc>=1e3},
+  {id:'cf01',em:'⚡',name:'Pikachu',        cost:5e3,    type:'click_flat',  val:5,    desc:'+5 ₽/clic',         cond:g=>g.tc>=200},
+  {id:'cf02',em:'🐭',name:'Raichu',         cost:25e3,   type:'click_flat',  val:15,   desc:'+15 ₽/clic',        cond:g=>g.tc>=800},
+  {id:'cf03',em:'💛',name:'Voltali',         cost:120e3,  type:'click_flat',  val:40,   desc:'+40 ₽/clic',        cond:g=>g.tc>=2e3},
   {id:'cf04',em:'🔩',name:'Magneton',        cost:200e3,  type:'click_flat',  val:50,   desc:'+50 ₽/clic',        cond:g=>g.tc>=3e3},
   {id:'cf05',em:'🟡',name:'Élekable',        cost:1e6,    type:'click_flat',  val:150,  desc:'+150 ₽/clic',       cond:g=>g.tc>=8e3},
   {id:'cf06',em:'🦅',name:'Électhor',        cost:5e6,    type:'click_flat',  val:500,  desc:'+500 ₽/clic',       cond:g=>g.tc>=25e3},
@@ -466,6 +596,12 @@ const UPGRADES=[
   {id:'cf10',em:'⚡',name:'Zekrom',          cost:3e9,    type:'click_flat',  val:50e3, desc:'+50 000 ₽/clic',    cond:g=>g.tc>=5e6},
   {id:'cf11',em:'🌩️',name:'Xurkitree',       cost:15e9,   type:'click_flat',  val:200e3,desc:'+200k ₽/clic',      cond:g=>g.tc>=20e6},
   {id:'cf12',em:'⚡',name:'Zeraora',         cost:80e9,   type:'click_flat',  val:1e6,  desc:'+1M ₽/clic',        cond:g=>g.tc>=100e6},
+  // --- Upgrades Pokéball (multiplient le +₽/clic par Pokéball) ---
+  // Sans upgrade: 1 Pokéball = +1₽/clic  Avec tout: 1 Pokéball = +8₽/clic
+  {id:'pb01',em:'🔴',name:'Pokéball Renforcée',    cost:500,    type:'pokeball_mult', val:2,   desc:'×2 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=5},
+  {id:'pb02',em:'⚪',name:'Superball',             cost:15e3,   type:'pokeball_mult', val:3,   desc:'×3 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=20},
+  {id:'pb03',em:'🟡',name:'Hyperball',             cost:200e3,  type:'pokeball_mult', val:4,   desc:'×4 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=50},
+  {id:'pb04',em:'🟣',name:'Masterball',            cost:5e6,    type:'pokeball_mult', val:5,   desc:'×5 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=100},
   // --- Click multiplier (valeurs modérées, conditions sévères) ---
   {id:'cm01',em:'✌️',name:'Double Énergie',  cost:50e3,   type:'click_mult',  val:1.5,  desc:'x1.5 puissance clic',cond:g=>g.tc>=500},
   {id:'cm02',em:'💪',name:'Frappe Soutenue', cost:800e3,  type:'click_mult',  val:1.5,  desc:'encore x1.5 clic',   cond:g=>g.bu.has('cm01')&&g.tc>=5e3},
@@ -576,6 +712,34 @@ const UPGRADES=[
   {id:'er04',em:'⭐',name:'Fragment Etoile',      cost:200e6,  type:'ev_rate', val:.005, desc:'+0.5% chance evenement',   cond:g=>g.bu.has('er03')&&g.ec>=30},
   {id:'er05',em:'💫',name:'Poudre de Comète',     cost:2e9,    type:'ev_rate', val:.006, desc:'+0.6% chance événement',   cond:g=>g.bu.has('er04')&&g.ec>=60},
   {id:'er06',em:'🌟',name:'Cristal Légendaire',   cost:20e9,   type:'ev_rate', val:.007, desc:'+0.7% chance événement',   cond:g=>g.bu.has('er05')&&g.ec>=100},
+
+  // --- 2ème upgrade pour les bâtiments mid/late qui en avaient qu'une ---
+  {id:'bm_uu2',em:'🌐',name:'Univers II',      cost:1e21,   type:'bldg_mult',bId:'univultra', val:2,cond:g=>g.b.univultra>=50, desc:'encore x2 Univers Ultra'},
+  {id:'bm_mi2',em:'🪞',name:'Double Miroir',   cost:6e21,   type:'bldg_mult',bId:'miroir',    val:2,cond:g=>g.b.miroir>=50,   desc:'encore x2 Miroir'},
+  {id:'bm_zo2',em:'🌑',name:'Darkrai II',      cost:40e21,  type:'bldg_mult',bId:'zone',      val:2,cond:g=>g.b.zone>=50,    desc:'encore x2 Zone Obscure'},
+  {id:'bm_pa2',em:'☀️',name:'Cresselia II',    cost:250e21, type:'bldg_mult',bId:'palais',    val:2,cond:g=>g.b.palais>=50,  desc:'encore x2 Palais'},
+  {id:'bm_ga2',em:'👻',name:'Giratina II',     cost:1.5e24, type:'bldg_mult',bId:'galactic',  val:2,cond:g=>g.b.galactic>=50,desc:'encore x2 Galactique'},
+  {id:'bm_st2',em:'⏰',name:'Dialga II',       cost:10e24,  type:'bldg_mult',bId:'spacetime', val:2,cond:g=>g.b.spacetime>=50,desc:'encore x2 Espace-Temps'},
+  {id:'bm_di2',em:'💫',name:'Palkia II',       cost:65e24,  type:'bldg_mult',bId:'distort',   val:2,cond:g=>g.b.distort>=50, desc:'encore x2 Distorsion'},
+  {id:'bm_dr2',em:'💤',name:'Munna II',        cost:400e24, type:'bldg_mult',bId:'dream',     val:2,cond:g=>g.b.dream>=50,   desc:'encore x2 Reves'},
+  {id:'bm_fo2',em:'🌸',name:'Shaymin II',      cost:2.5e27, type:'bldg_mult',bId:'foret',     val:2,cond:g=>g.b.foret>=50,   desc:'encore x2 Foret'},
+  {id:'bm_sz2',em:'💠',name:'Tapu II',         cost:15e27,  type:'bldg_mult',bId:'stationz',  val:2,cond:g=>g.b.stationz>=50,desc:'encore x2 Station Z'},
+  {id:'bm_ml2',em:'🔮',name:'Mega Mewtwo II',  cost:100e27, type:'bldg_mult',bId:'megalab',   val:2,cond:g=>g.b.megalab>=50, desc:'encore x2 Mega-Lab'},
+  {id:'bm_c22',em:'🤖',name:'Genesect II',     cost:600e27, type:'bldg_mult',bId:'crystal2',  val:2,cond:g=>g.b.crystal2>=50,desc:'encore x2 Tour Cristalline'},
+  {id:'bm_le2',em:'🌸',name:'Mew II',          cost:4e30,   type:'bldg_mult',bId:'legendary', val:2,cond:g=>g.b.legendary>=50,desc:'encore x2 Centre Legendaire'},
+  {id:'bm_mw2',em:'💜',name:'MegaMewtwo X II', cost:25e30,  type:'bldg_mult',bId:'mewtwolab', val:2,cond:g=>g.b.mewtwolab>=50,desc:'encore x2 Labo Mewtwo'},
+  {id:'bm_ac2',em:'✨',name:'Arceus II',       cost:150e30, type:'bldg_mult',bId:'arceus',    val:2,cond:g=>g.b.arceus>=50,  desc:'encore x2 Temple Arceus'},
+  {id:'bm_so2',em:'💧',name:'Manaphy II',      cost:1e33,   type:'bldg_mult',bId:'source',    val:2,cond:g=>g.b.source>=50,  desc:'encore x2 Source'},
+  {id:'bm_te2',em:'⏳',name:'Celebi II',       cost:7e33,   type:'bldg_mult',bId:'temporal',  val:2,cond:g=>g.b.temporal>=50,desc:'encore x2 Cristal Temporel'},
+  {id:'bm_sn2',em:'✌️',name:'Victini II',      cost:50e33,  type:'bldg_mult',bId:'sanctu',    val:2,cond:g=>g.b.sanctu>=50,  desc:'encore x2 Sanctuaire'},
+  {id:'bm_pl2c',em:'🪐',name:'Solgaleo III',   cost:350e33, type:'bldg_mult',bId:'planete',   val:2,cond:g=>g.b.planete>=50, desc:'encore x2 Planete'},
+  {id:'bm_ub2',em:'💥',name:'Ultra-Nec II',    cost:2.5e36, type:'bldg_mult',bId:'univball',  val:2,cond:g=>g.b.univball>=50,desc:'encore x2 Univers Pokeball'},
+  {id:'bm_nx2',em:'🌀',name:'Eternatus II',    cost:17e36,  type:'bldg_mult',bId:'nexus',     val:2,cond:g=>g.b.nexus>=50,   desc:'encore x2 Nexus'},
+  {id:'bm_om2',em:'🔮',name:'Necrozma II',     cost:120e36, type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=50,   desc:'encore x2 Omega'},
+  {id:'bm_gi2',em:'👼',name:'Arceus God II',   cost:1e39,   type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=50,desc:'encore x2 DIEU ARCEUS'},
+  // Pokéball upgrade pour cohérence
+  {id:'bm_pb1',em:'🔴',name:'Pokéball Forge',  cost:200,    type:'bldg_mult',bId:'pokeball',  val:1, cond:g=>g.b.pokeball>=10, desc:'Augmente la valeur de base des Pokéballs'},
+
   // --- Upgrades Prestige ---
   {id:'pm01',em:'🍬',name:'Bonbon Rare+ x2', cost:20e6,   type:'prestige_mult',val:2, desc:'Double le bonus Prestige',   cond:g=>g.rc>=5},
   {id:'pm02',em:'🍭',name:'Bonbon Max x3',   cost:200e6,  type:'prestige_mult',val:3, desc:'Triple le bonus Prestige',   cond:g=>g.rc>=20},
@@ -614,6 +778,16 @@ const ACHIEV=[
   {id:'bt5',em:'🏰',name:'Méga Propriétaire',   desc:'Possédez 5 000 bâtiments',      cond:g=>totB(g)>=5e3},
   {id:'bt6',em:'🌍',name:'Pokémon Empire',      desc:'Possédez 10 000 bâtiments',     cond:g=>totB(g)>=1e4},
   {id:'bc1',em:'🏥',name:'Premier Centre',      desc:'Achetez 1 Centre Pokémon',      cond:g=>g.b.centre>=1},
+  // --- Succès Pokéball ---
+  {id:'pb_a1',em:'🔴',name:'Première Pokéball',   desc:'Achetez votre 1ère Pokéball',   cond:g=>(g.b.pokeball||0)>=1},
+  {id:'pb_a2',em:'🔴',name:'Lanceur Débutant',    desc:'Possédez 10 Pokéballs',         cond:g=>(g.b.pokeball||0)>=10},
+  {id:'pb_a3',em:'⚪',name:'Lanceur Confirmé',    desc:'Possédez 25 Pokéballs',         cond:g=>(g.b.pokeball||0)>=25},
+  {id:'pb_a4',em:'🟡',name:'Expert Pokéball',     desc:'Possédez 50 Pokéballs',         cond:g=>(g.b.pokeball||0)>=50},
+  {id:'pb_a5',em:'🔵',name:'Master Pokéball',     desc:'Possédez 100 Pokéballs',        cond:g=>(g.b.pokeball||0)>=100},
+  {id:'pb_a6',em:'✨',name:'Collection Légendaire',desc:'Possédez 200 Pokéballs',       cond:g=>(g.b.pokeball||0)>=200},
+  {id:'pb_u1',em:'⚪',name:'Upgrade Superball',   desc:'Achetez l\'upgrade Superball',  cond:g=>g.bu.has('pb02')},
+  {id:'pb_u2',em:'🟡',name:'Upgrade Hyperball',   desc:'Achetez l\'upgrade Hyperball',  cond:g=>g.bu.has('pb03')},
+  {id:'pb_c1',em:'💪',name:'Clic Renforcé',       desc:'Atteignez +50 ₽ par clic (Pokéballs)', cond:g=>(g.b.pokeball||0)*8>=50},
   {id:'bc2',em:'💊',name:'Réseau de Soins',     desc:'10 Centres Pokémon',            cond:g=>g.b.centre>=10},
   {id:'bc3',em:'🏥',name:'Empire Médical',      desc:'50 Centres Pokémon',            cond:g=>g.b.centre>=50},
   {id:'bc4',em:'🏥',name:'Monopole Pokémon',    desc:'100 Centres Pokémon',           cond:g=>g.b.centre>=100},
@@ -646,9 +820,9 @@ const ACHIEV=[
   {id:'ca3',em:'🏭',name:'Usine à Bonbons',     desc:'Obtenez 100 Bonbons Rares',     cond:g=>g.rc>=100},
   {id:'ca4',em:'👑',name:'Roi des Bonbons',     desc:'Obtenez 500 Bonbons Rares',     cond:g=>g.rc>=500},
   {id:'ev1',em:'✨',name:'Rencontre Rare',       desc:'Capturez 1 Pokémon rare',       cond:g=>g.ec>=1},
-  {id:'ev2',em:'🎯',name:'Chasseur Légendaire', desc:'Capturez 10 Pokémon rares',     cond:g=>g.ec>=10},
-  {id:'ev3',em:'🌟',name:'Expert Légendaire',   desc:'Capturez 50 Pokémon rares',     cond:g=>g.ec>=50},
-  {id:'ev4',em:'👑',name:'Maître Légendaire',   desc:'Capturez 100 Pokémon rares',    cond:g=>g.ec>=100},
+  {id:'ev2',em:'🎯',name:'Chasseur Assidu',     desc:'Capturez 10 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=10},
+  {id:'ev3',em:'🌟',name:'Expert Légendaire',   desc:'Capturez 50 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=50},
+  {id:'ev4',em:'👑',name:'Maître Légendaire',   desc:'Capturez 100 Pokémon uniques',  cond:g=>Object.keys(g.pokedex||{}).length>=100},
   {id:'sp1',em:'🎒',name:'Dresseur Débutant',   desc:'Commencez votre aventure',      cond:g=>g.te>=1},
   {id:'sp2',em:'😤',name:'Workaholic',          desc:'Cliquez 50 000 fois',           cond:g=>g.tc>=5e4},
   {id:'sp3',em:'😱',name:'Pokémaniaque',        desc:'25 types de bâtiments',         cond:g=>uniqB(g)>=25},
@@ -680,12 +854,47 @@ const ACHIEV=[
   // Prestige milestones
   {id:'prc1',em:'💜',name:'Bonbons x10',         desc:'Obtenez 10 bonbons en 1 prestige',cond:g=>g.bestPrestige>=10},
   {id:'prc2',em:'🌈',name:'Bonbons x100',        desc:'Obtenez 100 bonbons en 1 prestige',cond:g=>g.bestPrestige>=100},
-  // Event captures
-  {id:'ecap1',em:'✨',name:'Mew Capturé',        desc:'Capturez Mew',                   cond:g=>g.capturés&&g.capturés.mew>=1},
-  {id:'ecap2',em:'🌟',name:'Lugia Capturé',      desc:'Capturez Lugia',                 cond:g=>g.capturés&&g.capturés.lugia>=1},
-  {id:'ecap3',em:'🎉',name:'Jirachi Capturé',    desc:'Capturez Jirachi',               cond:g=>g.capturés&&g.capturés.jirachi>=1},
-  {id:'ecap4',em:'💫',name:'Victini Capturé',    desc:'Capturez Victini',               cond:g=>g.capturés&&g.capturés.victini>=1},
-  {id:'ecap5',em:'🌿',name:'Celebi Capturé',     desc:'Capturez Celebi',                cond:g=>g.capturés&&g.capturés.celebi>=1},
+  // ── Pokémon Capturés (Gen 1 — G.pokedex[num]) ───────────────────────
+  // Premiers pas
+  {id:'pk1',  em:'🎒',name:'Première Capture',    desc:'Capturez votre 1er Pokémon',    cond:g=>Object.keys(g.pokedex||{}).length>=1},
+  {id:'pk2',  em:'🐾',name:'Dresseur Débutant',   desc:'Capturez 5 Pokémon uniques',    cond:g=>Object.keys(g.pokedex||{}).length>=5},
+  {id:'pk3',  em:'🎯',name:'Vrai Dresseur',        desc:'Capturez 10 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=10},
+  {id:'pk4',  em:'🌟',name:'Chasseur Confirmé',   desc:'Capturez 25 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=25},
+  {id:'pk5',  em:'💫',name:'Expert Pokémon',       desc:'Capturez 50 Pokémon uniques',   cond:g=>Object.keys(g.pokedex||{}).length>=50},
+  {id:'pk6',  em:'💎',name:'Maître Pokémon',       desc:'Capturez 100 Pokémon uniques',  cond:g=>Object.keys(g.pokedex||{}).length>=100},
+  {id:'pk7',  em:'👑',name:'Pokédex Légendaire',  desc:'Capturez 140 Pokémon uniques',  cond:g=>Object.keys(g.pokedex||{}).length>=140},
+  {id:'pk8',  em:'✨',name:'Pokédex Complet !',   desc:'Capturez les 151 Pokémon',      cond:g=>Object.keys(g.pokedex||{}).length>=151},
+  // Total captures (avec doublons)
+  {id:'pt1',  em:'🔴',name:'100 Captures',         desc:'Capturez 100 Pokémon au total', cond:g=>Object.values(g.pokedex||{}).reduce((a,b)=>a+b,0)>=100},
+  {id:'pt2',  em:'🔴',name:'500 Captures',         desc:'Capturez 500 Pokémon au total', cond:g=>Object.values(g.pokedex||{}).reduce((a,b)=>a+b,0)>=500},
+  // Starters
+  {id:'st1',  em:'🌱',name:'Bulbizarre Capturé',   desc:'Capturez Bulbizarre (#1)',       cond:g=>(g.pokedex&&g.pokedex[1]||0)>=1},
+  {id:'st2',  em:'🔥',name:'Salamèche Capturé',    desc:'Capturez Salamèche (#4)',        cond:g=>(g.pokedex&&g.pokedex[4]||0)>=1},
+  {id:'st3',  em:'💦',name:'Carapuce Capturé',     desc:'Capturez Carapuce (#7)',         cond:g=>(g.pokedex&&g.pokedex[7]||0)>=1},
+  {id:'st4',  em:'⚡',name:'Pikachu Capturé',      desc:'Capturez Pikachu (#25)',         cond:g=>(g.pokedex&&g.pokedex[25]||0)>=1},
+  {id:'st5',  em:'🐉',name:'Dracaufeu Capturé',    desc:'Capturez Dracaufeu (#6)',        cond:g=>(g.pokedex&&g.pokedex[6]||0)>=1},
+  {id:'st6',  em:'💪',name:'Tortank Capturé',      desc:'Capturez Tortank (#9)',          cond:g=>(g.pokedex&&g.pokedex[9]||0)>=1},
+  {id:'st7',  em:'🌺',name:'Florizarre Capturé',   desc:'Capturez Florizarre (#3)',       cond:g=>(g.pokedex&&g.pokedex[3]||0)>=1},
+  {id:'st8',  em:'😈',name:'Gengar Capturé',       desc:'Capturez Gengar (#94)',          cond:g=>(g.pokedex&&g.pokedex[94]||0)>=1},
+  {id:'st9',  em:'🦁',name:'Dracolosse Capturé',   desc:'Capturez Dracolosse (#149)',     cond:g=>(g.pokedex&&g.pokedex[149]||0)>=1},
+  // Légendaires
+  {id:'lg1',  em:'❄️',name:'Artikodin Capturé',    desc:'Capturez Artikodin (#144)',      cond:g=>(g.pokedex&&g.pokedex[144]||0)>=1},
+  {id:'lg2',  em:'⚡',name:'Électhor Capturé',     desc:'Capturez Électhor (#145)',       cond:g=>(g.pokedex&&g.pokedex[145]||0)>=1},
+  {id:'lg3',  em:'🔥',name:'Sulfura Capturé',      desc:'Capturez Sulfura (#146)',        cond:g=>(g.pokedex&&g.pokedex[146]||0)>=1},
+  {id:'lg4',  em:'🔱',name:'Trio Légendaire',      desc:'Capturez les 3 oiseaux légendaires',cond:g=>(g.pokedex&&g.pokedex[144]&&g.pokedex[145]&&g.pokedex[146])},
+  // Ultra
+  {id:'ul1',  em:'💜',name:'Mewtwo Capturé',       desc:'Capturez Mewtwo (#150)',         cond:g=>(g.pokedex&&g.pokedex[150]||0)>=1},
+  {id:'ul2',  em:'✨',name:'Mew Capturé',           desc:'Capturez Mew (#151)',            cond:g=>(g.pokedex&&g.pokedex[151]||0)>=1},
+  {id:'ul3',  em:'🌟',name:'Les Fabuleux',          desc:'Capturez Mewtwo ET Mew',         cond:g=>(g.pokedex&&g.pokedex[150]&&g.pokedex[151])},
+  // Méga Prestige
+  {id:'mp1',  em:'⭐',name:'Méga Dresseur',         desc:'Effectuez votre 1er Méga Prestige', cond:g=>(g.megaCount||0)>=1},
+  {id:'mp2',  em:'🌟',name:'Méga Légende',          desc:'Effectuez 3 Méga Prestiges',    cond:g=>(g.megaCount||0)>=3},
+  {id:'mp3',  em:'♾️',name:'Au-delà du Possible',  desc:'Effectuez 5 Méga Prestiges',    cond:g=>(g.megaCount||0)>=5},
+  // Boutique Bonbons
+  {id:'cb1',  em:'🍬',name:'Premier Achat Bonbon',  desc:'Achetez 1 item boutique',       cond:g=>(g.cs&&g.cs.size||0)>=1},
+  {id:'cb2',  em:'🍭',name:'Client Sucré',          desc:'Achetez 5 items boutique',      cond:g=>(g.cs&&g.cs.size||0)>=5},
+  {id:'cb3',  em:'💎',name:'Collectionneur Bonbon', desc:'Achetez 10 items boutique',     cond:g=>(g.cs&&g.cs.size||0)>=10},
+  {id:'cb4',  em:'👑',name:'Maître Bonbons',        desc:'Achetez tous les items boutique',cond:g=>(g.cs&&g.cs.size||0)>=14},
   // Offline
   {id:'offl1',em:'💤',name:'Gains Passifs',       desc:'Gagnez 1M ₽ hors-ligne',        cond:g=>g.offlineEarned>=1e6},
   {id:'offl2',em:'🌙',name:'Richesse en Dormant', desc:'Gagnez 1B ₽ hors-ligne',        cond:g=>g.offlineEarned>=1e9},
@@ -696,7 +905,7 @@ const ACHIEV=[
   {id:'misc4',em:'🛒',name:'Shopaholic',           desc:'Achetez 500 bâtiments au total',cond:g=>totB(g)>=500},
   {id:'misc5',em:'👛',name:'Économe',              desc:'Ayez 0 ₽ au moins 1 fois',      cond:g=>g.wentBroke>=1},
   {id:'misc6',em:'🎯',name:'Précision',            desc:'Achetez 1 amélioration exacte', cond:g=>g.bu.size>=1},
-  {id:'misc7',em:'🌠',name:'Étoile Filante',       desc:'Capturez 5 Pokémon rares',      cond:g=>g.ec>=5},
+  {id:'misc7',em:'🌠',name:'Étoile Filante',       desc:'Capturez 5 Pokémon uniques',    cond:g=>Object.keys(g.pokedex||{}).length>=5},
   {id:'misc8',em:'🔑',name:'Clé Secrète',          desc:'Importez une sauvegarde',       cond:g=>g.imported>=1},
   {id:'misc9',em:'📅',name:'Joueur Régulier',      desc:'Jouez 3 sessions différentes',  cond:g=>g.sessions>=3},
   {id:'misc10',em:'🏅',name:'Grand Total',          desc:'Achetez 150 améliorations',     cond:g=>g.bu.size>=150},
@@ -705,33 +914,172 @@ const ACHIEV=[
 // ============================================================
 // RARE EVENTS
 // ============================================================
-const EVENTS=[
-  {id:'mew',     em:'✨', name:'MEW',     mult:10,  dur:15, color:'#F48FB1', desc:'×10 prod pendant 15s !'},
-  {id:'celebi',  em:'🌿', name:'CELEBI',  mult:8,   dur:15, color:'#A5D6A7', desc:'×8 prod pendant 15s !'},
-  {id:'jirachi', em:'⭐', name:'JIRACHI', mult:15,  dur:10, color:'#FFF59D', desc:'×15 prod pendant 10s !'},
-  {id:'victini', em:'✌️', name:'VICTINI', mult:5,   dur:20, color:'#CE93D8', desc:'×5 prod pendant 20s !'},
-  {id:'shaymin', em:'🌸', name:'SHAYMIN', mult:7,   dur:15, color:'#A5D6A7', desc:'×7 prod pendant 15s !'},
-  {id:'manaphy', em:'💧', name:'MANAPHY', mult:6,   dur:20, color:'#81D4FA', desc:'×6 prod pendant 20s !'},
-  {id:'arceus',  em:'👼', name:'ARCEUS',  mult:50,  dur:5,  color:'#FFD700', desc:'×50 prod pendant 5s !'},
-  {id:'darkrai', em:'🌑', name:'DARKRAI', mult:20,  dur:8,  color:'#9C27B0', desc:'×20 prod pendant 8s !'},
-  {id:'mewtwo',  em:'💜', name:'MEWTWO',  mult:30,  dur:7,  color:'#CE93D8', desc:'×30 prod pendant 7s !'},
-  {id:'lugia',   em:'🕊️', name:'LUGIA',   mult:25,  dur:8,  color:'#B3E5FC', desc:'×25 prod pendant 8s !'},
-  {id:'hooh',    em:'🔥', name:'HO-OH',   mult:20,  dur:10, color:'#FFCC02', desc:'×20 prod pendant 10s !'},
-  {id:'deoxys',  em:'👽', name:'DEOXYS',  mult:12,  dur:12, color:'#80CBC4', desc:'×12 prod pendant 12s !'},
-];
-
-// Événements Ultra-Rares — chance par tick de 3s (indépendante du taux normal)
-const ULTRA_EVENTS=[
-  {id:'ultra_arceus',  em:'🌟', name:'ARCEUS DIVIN',          mult:777, dur:7,  color:'#FFD700',
-   chance:0.0001, desc:'×777 production pendant 7s !'},
-  {id:'ultra_dialga',  em:'⏰', name:'DISTORSION DE DIALGA',  mult:1,   dur:10, color:'#7EC8E3',
-   chance:0.0003, timeWarp:3, desc:'Accélère le temps ×3 pendant 10s !'},
-  {id:'ultra_girat',   em:'🌀', name:'PACTE DE GIRATINA',     mult:200, dur:15, color:'#9b59b6',
-   chance:0.0002, desc:'×200 production pendant 15s !'},
-  {id:'ultra_necro',   em:'💥', name:'NECROZMA ABSOLU',       mult:500, dur:5,  color:'#fff',
-   chance:0.00005, desc:'×500 production pendant 5s !'},
-  {id:'ultra_god',     em:'♾️', name:'VOLONTÉ DIVINE',        mult:1000,dur:3,  color:'#FFD700',
-   chance:0.00001, desc:'×1000 production pendant 3s !'},
+// ============================================================
+// POKEMON GEN 1 — 151 Pokémon unifiés (wild + events)
+// commun → instant_pd (1s CPS) | peu_commun → instant_pd (3s CPS)
+// rare → cps_boost +25% 30s | epique → global_mult ×5-15 8-12s
+// legendaire → global_mult ×100-200 5s | ultra → global_mult ×666-777 6-7s
+// ============================================================
+const SPAWN_RATE = {commun:0.12, peu_commun:0.06, rare:0.025, epique:0.008, legendaire:0.002, ultra:0.0004};
+const SPAWN_DUR  = {commun:12, peu_commun:12, rare:10, epique:8, legendaire:6, ultra:5};
+const POKEMON_GEN1 = [
+  // COMMUN
+  {num:10, em:'🐛',name:'Chenipan',   rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:11, em:'🫛',name:'Chrysacier', rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:12, em:'🦋',name:'Papilusion', rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:13, em:'🐝',name:'Aspicot',    rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:14, em:'🫧',name:'Coconfort',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:16, em:'🐦',name:'Roucool',    rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:19, em:'🐀',name:'Rattata',    rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:21, em:'🐦',name:'Piafabec',   rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:25, em:'⚡',name:'Pikachu',    rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:29, em:'💜',name:'Nidoran-F',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:32, em:'💙',name:'Nidoran-M',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:41, em:'🦇',name:'Nosferapti', rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:43, em:'🌸',name:'Mystherbe',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:46, em:'🍄',name:'Paras',      rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:48, em:'🐛',name:'Mimitoss',   rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:50, em:'🦔',name:'Taupiqueur', rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:52, em:'😺',name:'Miaouss',    rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:54, em:'🦆',name:'Psykokwak',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:60, em:'🐸',name:'Tetarte',    rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:72, em:'🪼',name:'Tentacool',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:74, em:'🪨',name:'Racaillou',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:96, em:'😴',name:'Soporifik',  rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:100,em:'⚡',name:'Voltorbe',   rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:118,em:'🐟',name:'Poissirene', rarity:'commun',     effect:'instant_pd',  val:1},
+  {num:129,em:'🐟',name:'Magicarpe',  rarity:'commun',     effect:'instant_pd',  val:1},
+  // PEU COMMUN
+  {num:15, em:'🐝',name:'Dardargnan', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:17, em:'🦅',name:'Roucoups',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:20, em:'🐁',name:'Rattatac',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:22, em:'🦅',name:'Rapasdepic', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:23, em:'🐍',name:'Abo',        rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:24, em:'🐍',name:'Arbok',      rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:26, em:'🐭',name:'Raichu',     rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:27, em:'🏜',name:'Sabelette',  rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:28, em:'🏜',name:'Sablaireau', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:30, em:'💜',name:'Nidorina',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:33, em:'💙',name:'Nidorino',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:35, em:'🌙',name:'Melofee',    rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:37, em:'🦊',name:'Goupix',     rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:39, em:'🎵',name:'Rondoudou',  rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:42, em:'🦇',name:'Nosferalto', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:44, em:'🌸',name:'Ortide',     rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:47, em:'🍄',name:'Parasect',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:49, em:'🦋',name:'Aeromite',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:51, em:'🦔',name:'Triopikeur', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:53, em:'🐱',name:'Persian',    rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:55, em:'🦆',name:'Akwakwak',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:56, em:'🐒',name:'Ferosinge',  rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:61, em:'🐸',name:'Tetarte II', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:73, em:'🪼',name:'Tentacruel', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:75, em:'🪨',name:'Gravalanch', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:77, em:'🐴',name:'Ponyta',     rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:79, em:'😴',name:'Ramoloss',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:81, em:'🔩',name:'Magneti',    rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:84, em:'🐦',name:'Doduo',      rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:86, em:'🦭',name:'Otaria',     rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:88, em:'☠',name:'Tadmorv',    rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:90, em:'🐚',name:'Kokiyas',    rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:92, em:'👻',name:'Spectrum',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:98, em:'🦀',name:'Krabby',     rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:101,em:'⚡',name:'Electrode',  rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:102,em:'🥚',name:'Noeunoeuf',  rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:104,em:'💀',name:'Osselait',   rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:109,em:'💨',name:'Smogo',      rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:111,em:'🦏',name:'Rhinocorne', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:116,em:'🐠',name:'Hypotrempe', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:119,em:'🐟',name:'Poissoroy',  rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:120,em:'⭐',name:'Stari',      rarity:'peu_commun', effect:'instant_pd',  val:3},
+  // RARE
+  {num:18, em:'🦅',name:'Roucarnage', rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:31, em:'👑',name:'Nidoqueen',  rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:34, em:'👑',name:'Nidoking',   rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:36, em:'🌟',name:'Melodelfe',  rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:38, em:'🦊',name:'Feunard',    rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:40, em:'🎵',name:'Grodoudou',  rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:45, em:'🌺',name:'Rafflesia',  rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:57, em:'🦍',name:'Colossinge', rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:58, em:'🐶',name:'Caninos',    rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:59, em:'🐕',name:'Arcanin',    rarity:'rare',       effect:'cps_boost',   val:.3,  dur:30},
+  {num:62, em:'🐘',name:'Elephanfant',rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:76, em:'🪨',name:'Grolem',     rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:78, em:'🐴',name:'Galopa',     rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:80, em:'😴',name:'Flagadoss',  rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:82, em:'🔩',name:'Magneton',   rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:83, em:'🦘',name:'Kangourex',  rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:85, em:'🐦',name:'Dodrio',     rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:87, em:'🦭',name:'Lamantine',  rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:89, em:'☠',name:'Grotadmorv', rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:91, em:'🦀',name:'Crustabri',  rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:99, em:'🦀',name:'Krabboss',   rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:103,em:'🥥',name:'Noadkoko',   rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:105,em:'💀',name:'Ossatueur',  rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:106,em:'🥋',name:'Kicklee',    rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:107,em:'🥊',name:'Tygnon',     rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:108,em:'👅',name:'Excelangue', rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:110,em:'💨',name:'Smogogo',    rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:112,em:'🦏',name:'Rhinoferos', rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:113,em:'💖',name:'Leveinard',  rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:114,em:'🌿',name:'Saquedeneu', rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:115,em:'🦘',name:'Kangourex',  rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:117,em:'🐠',name:'Hypocean',   rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:121,em:'⭐',name:'Staross',    rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:122,em:'🎪',name:'M. Mime',    rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:123,em:'🦗',name:'Insecateur', rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:124,em:'💋',name:'Lippoutou',  rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:125,em:'⚡',name:'Elekable',   rarity:'rare',       effect:'cps_boost',   val:.3,  dur:25},
+  {num:126,em:'🔥',name:'Magmar',     rarity:'rare',       effect:'cps_boost',   val:.3,  dur:25},
+  {num:127,em:'🦟',name:'Scarabrute', rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:128,em:'🐂',name:'Tauros',     rarity:'rare',       effect:'cps_boost',   val:.3,  dur:30},
+  {num:130,em:'🐲',name:'Leviator',   rarity:'rare',       effect:'cps_boost',   val:.3,  dur:25},
+  {num:131,em:'🐉',name:'Lokhlass',   rarity:'rare',       effect:'cps_boost',   val:.3,  dur:25},
+  {num:132,em:'💫',name:'Metamorph',  rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:137,em:'💾',name:'Porygon',    rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:138,em:'🐚',name:'Amonita',    rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:139,em:'🐚',name:'Amonistar',  rarity:'rare',       effect:'cps_boost',   val:.25, dur:30},
+  {num:140,em:'🦀',name:'Kabuto',     rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:141,em:'⚔',name:'Kabutops',   rarity:'rare',       effect:'cps_boost',   val:.3,  dur:25},
+  {num:142,em:'🦕',name:'Ptera',      rarity:'rare',       effect:'cps_boost',   val:.3,  dur:25},
+  {num:143,em:'😴',name:'Ronflex',    rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  // EPIQUE — starters + evolutions finales
+  {num:1,  em:'🌱',name:'Bulbizarre', rarity:'epique',     effect:'global_mult', val:5,   dur:12},
+  {num:2,  em:'🌿',name:'Herbizarre', rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:3,  em:'🌺',name:'Florizarre', rarity:'epique',     effect:'global_mult', val:8,   dur:10},
+  {num:4,  em:'🔥',name:'Salamèche',  rarity:'epique',     effect:'global_mult', val:5,   dur:12},
+  {num:5,  em:'🦎',name:'Reptincel',  rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:6,  em:'🐉',name:'Dracaufeu',  rarity:'epique',     effect:'global_mult', val:10,  dur:10},
+  {num:7,  em:'💦',name:'Carapuce',   rarity:'epique',     effect:'global_mult', val:5,   dur:12},
+  {num:8,  em:'🐢',name:'Carabaffe',  rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:9,  em:'💪',name:'Tortank',    rarity:'epique',     effect:'global_mult', val:10,  dur:10},
+  {num:63, em:'🔮',name:'Abra',       rarity:'epique',     effect:'global_mult', val:5,   dur:12},
+  {num:64, em:'🔮',name:'Kadabra',    rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:65, em:'✨',name:'Alakazam',   rarity:'epique',     effect:'global_mult', val:8,   dur:10},
+  {num:66, em:'💪',name:'Machoc',     rarity:'epique',     effect:'global_mult', val:5,   dur:12},
+  {num:67, em:'💪',name:'Machopeur',  rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:68, em:'🥊',name:'Mackogneur', rarity:'epique',     effect:'global_mult', val:8,   dur:10},
+  {num:69, em:'🌻',name:'Chetiflor',  rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:70, em:'🌻',name:'Boustiflor', rarity:'peu_commun', effect:'instant_pd',  val:3},
+  {num:71, em:'🌻',name:'Empiflor',   rarity:'rare',       effect:'cps_boost',   val:.2,  dur:30},
+  {num:93, em:'👻',name:'Fantominus', rarity:'epique',     effect:'global_mult', val:5,   dur:12},
+  {num:94, em:'😈',name:'Gengar',     rarity:'epique',     effect:'global_mult', val:10,  dur:10},
+  {num:95, em:'🪨',name:'Onix',       rarity:'epique',     effect:'global_mult', val:5,   dur:12},
+  {num:97, em:'😴',name:'Hypnomade',  rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:133,em:'🦊',name:'Evoli',      rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:134,em:'💧',name:'Aquali',     rarity:'epique',     effect:'global_mult', val:8,   dur:10},
+  {num:135,em:'⚡',name:'Voltali',    rarity:'epique',     effect:'global_mult', val:8,   dur:10},
+  {num:136,em:'🔥',name:'Pyroli',     rarity:'epique',     effect:'global_mult', val:8,   dur:10},
+  {num:147,em:'🐲',name:'Minidraco',  rarity:'epique',     effect:'global_mult', val:6,   dur:12},
+  {num:148,em:'🐲',name:'Draco',      rarity:'epique',     effect:'global_mult', val:8,   dur:12},
+  {num:149,em:'🦁',name:'Dracolosse', rarity:'epique',     effect:'global_mult', val:15,  dur:8},
+  // LEGENDAIRE — trio oiseaux
+  {num:144,em:'❄',name:'Artikodin',  rarity:'legendaire', effect:'global_mult', val:100, dur:5},
+  {num:145,em:'⚡',name:'Electhor',   rarity:'legendaire', effect:'global_mult', val:150, dur:5},
+  {num:146,em:'🔥',name:'Sulfura',    rarity:'legendaire', effect:'global_mult', val:200, dur:5},
+  // ULTRA — Mewtwo et Mew (fabuleux)
+  {num:150,em:'💜',name:'Mewtwo',     rarity:'ultra',      effect:'global_mult', val:666, dur:6},
+  {num:151,em:'✨',name:'Mew',        rarity:'ultra',      effect:'global_mult', val:777, dur:7},
 ];
 
 // ============================================================
@@ -752,6 +1100,13 @@ const CANDY_SHOP = [
   {id:'cs_start2',  em:'🏆', name:'Dresseur Vétéran',   cost:20, desc:'Commence avec un petit stock de ₽', type:'start_pd',   val:5000},
   {id:'cs_ultra',   em:'🌀', name:'Détecteur Ultra',    cost:15, desc:'+0.5% chance ultra-rares',       type:'ultra_rate',     val:0.005},
   {id:'cs_combo',   em:'🔥', name:'Combo Maître',       cost:7,  desc:'Le combo augmente le CPS (+1% par clic combo)', type:'combo_cps', val:0.01},
+  // --- Items avancés (late game) ---
+  {id:'cs_adv1', em:'⚡', name:'Surcharge Permanente', cost:20, desc:'+50% production globale permanente',  type:'global_flat',    val:0.5},
+  {id:'cs_adv2', em:'🌟', name:'Aura Divine',          cost:30, desc:'+100% production globale permanente', type:'global_flat',    val:1.0},
+  {id:'cs_adv3', em:'🎯', name:'Clic Divin',           cost:20, desc:'+50% puissance de clic',              type:'click_flat_pct', val:0.5},
+  {id:'cs_adv4', em:'💤', name:'Reve de Richesse',     cost:25, desc:'+25% gains hors-ligne',               type:'offline_bonus',  val:0.25},
+  {id:'cs_adv5', em:'🔴', name:'Arsenal Pokéball',     cost:15, desc:'Les Pokéballs donnent +2 ₽/clic bonus', type:'pb_flat',      val:2},
+  {id:'cs_adv6', em:'♾️', name:'Essence Cosmique',    cost:50, desc:'+200% production globale permanente',  type:'global_flat',    val:2.0},
 ];
 
 </script>
@@ -1000,6 +1355,12 @@ function calcCPS(g){
 function calcClickValue(g){
   g = g || G;
   let base = 1;
+  // Bonus Pokéball : chaque exemplaire × mult upgrades
+  let pbMult = 1;
+  for(const up of UPGRADES){
+    if(up.type==='pokeball_mult' && g.bu && g.bu.has(up.id)) pbMult *= up.val;
+  }
+  base += (g.b&&g.b.pokeball ? g.b.pokeball * pbMult : 0);
   // Flat bonuses
   for(const up of UPGRADES){
     if(up.type==='click_flat' && g.bu.has(up.id)) base += up.val;
@@ -1023,6 +1384,8 @@ function calcClickValue(g){
   // Event mult
   // Candy shop click bonus
   base *= (1 + csBonus('click_flat_pct'));
+  // Candy shop pokeball flat bonus
+  base += csBonus('pb_flat') * (G.b&&G.b.pokeball||0);
   // Wild pokemon click boost
   if(g.wildClickBoost && g.wildClickEnd && Date.now() < g.wildClickEnd) base *= (1 + g.wildClickBoost);
   if(g.evEnd > Date.now()) base *= g.evMult;
@@ -1125,7 +1488,8 @@ function gameTick(){
   const earned = cps * dt;
   G.pd += earned;
   G.te += earned;
-  G.tl += earned; // Comptabilise pour prestige
+  G.tl += earned;
+  updateDailies('earn', earned);
   G.tt += dt;
   if(cps > G.maxCps) G.maxCps = cps;
 
@@ -1136,26 +1500,15 @@ function gameTick(){
     document.getElementById('ev-popup').style.display='none';
   }
 
-  // Random event trigger (~every 90-300s on average)
-  tickAcc += dt;
-  // Wild Pokémon : tick séparé toutes les 30s
+
+  // Spawn Pokémon : toutes les 2-5 min (aléatoire)
   if(!G._wildAcc) G._wildAcc = 0;
+  if(!G._wildNext) G._wildNext = 120 + Math.random()*180; // 120-300s
   G._wildAcc += dt;
-  if(G._wildAcc >= 30){
+  if(G._wildAcc >= G._wildNext){
     G._wildAcc = 0;
-    trySpawnWild();
-  }
-  if(tickAcc >= 8){
-    tickAcc = 0;
-    if(!activeEventId){
-      // Check ultra-rares (taux propre, indépendant)
-      const ultra = ULTRA_EVENTS.find(u=>Math.random()<u.chance);
-      if(ultra){
-        triggerEvent(ultra.id);
-      } else if(Math.random() < getEventRate()){
-        triggerEvent();
-      }
-    }
+    G._wildNext = 120 + Math.random()*180; // reset pour le prochain
+    if(!activeEventId) triggerEvent();
   }
 
   checkAchievements();
@@ -1190,6 +1543,8 @@ function doClick(cx, cy){
   G.tl += val; // Clic légitime
   G.tc++;
   if(G.pd < 0.01) G.wentBroke++;
+  playSound('click');
+  updateDailies('clicks',1);
 
   // Combo
   clearTimeout(comboTimer);
@@ -1214,6 +1569,8 @@ function buyBuilding(id){
   if(G.pd < cost) return;
   G.pd -= cost;
   G.b[id] = (G.b[id]||0) + qty;
+  playSound('buy');
+  updateDailies('buys', qty);
   notif(`✅ ${qty}× ${bd.name} acheté !`, 'buy');
   renderShop();
 }
@@ -1228,6 +1585,7 @@ function buyUpgrade(id){
   if(!up.cond(G)) return;
   G.pd -= up.cost;
   G.bu.add(id);
+  updateDailies('upgrades',1);
   notif(`⬆️ ${up.name} acheté !`, 'buy');
   renderShop();
 }
@@ -1281,7 +1639,7 @@ function doPrestige(){
     maxCps:0, maxCombo:G.maxCombo, wentBroke:G.wentBroke,
     imported:G.imported, sessions:G.sessions, bestPrestige:G.bestPrestige,
     offlineEarned:G.offlineEarned, capturés:G.capturés,
-    pokedex:G.pokedex||{},
+    pokedex: POKE_RESET ? {} : (G.pokedex||{}),  // Reset si toggle ON
     megaCount:G.megaCount||0, megaMult:G.megaMult||1, megaDone:G.megaDone||false,
     b: Object.fromEntries(BLDGS.map(b=>[b.id,0])),
     bu: new Set(G.bu),     // ← Upgrades CONSERVÉES
@@ -1292,6 +1650,7 @@ function doPrestige(){
   };
   G = keep;
   saveGame();
+  POKE_RESET = false; togglePokedexReset(); // reset le toggle
   closeModal('md-pres');
   const msg = gained>1
     ? '🍬 '+gained+' Prestiges ! +'+gained+' bonbons — Bonus : ×'+Math.pow(1.02,G.rc).toFixed(3)
@@ -1304,30 +1663,34 @@ function doPrestige(){
 // ============================================================
 // RARE EVENTS
 // ============================================================
-function triggerEvent(forceId){
-  // Choisit un event normal ou ultra-rare selon la chance
+function triggerEvent(forceNum){
   let ev;
-  if(forceId){
-    ev = [...EVENTS,...ULTRA_EVENTS].find(e=>e.id===forceId);
+  if(forceNum !== undefined){
+    ev = POKEMON_GEN1.find(p=>p.num===forceNum);
   } else {
-    // Vérifier ultra-rares d'abord
-    const ultra = ULTRA_EVENTS.find(u=>Math.random()<u.chance/3);
-    ev = ultra || EVENTS[Math.floor(Math.random()*EVENTS.length)];
+    // Tirer selon les taux de rareté
+    const candidates = POKEMON_GEN1.filter(p=>{
+      const baseRate = SPAWN_RATE[p.rarity]||0;
+      const boost = POKE_RESET && !(G.pokedex&&G.pokedex[p.num]) ? (SPAWN_RATE_BOOST[p.rarity]||1) : 1;
+      return Math.random() < baseRate * boost;
+    });
+    ev = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : null;
   }
-  activeEventId = ev.id;
+  if(!ev) return;
+  activeEventId = ev.num;
   // On remet evMult à neutre — le vrai bonus n'est appliqué qu'au clic
   G.evMult = 1;
   G.evEnd = 0;
   const pop = document.getElementById('ev-popup');
-  const isUltra = ULTRA_EVENTS.some(u=>u.id===ev.id);
+  const isUltra = ev.rarity==='ultra' || ev.rarity==='legendaire';
   document.getElementById('ev-emoji').textContent = ev.em;
   document.getElementById('ev-name').textContent = (isUltra?'⭐ ':'')+ev.name;
   pop.style.display = 'block';
   pop.style.left = (15 + Math.random()*50) + '%';
   pop.style.top  = (15 + Math.random()*45) + '%';
-  pop.style.borderColor = ev.color||'var(--gold)';
+  pop.style.borderColor = RARITY_COLOR[ev.rarity]||'var(--gold)';
   if(isUltra){
-    pop.style.boxShadow = '0 0 40px '+ev.color+', 0 0 80px '+ev.color;
+    pop.style.boxShadow = '0 0 40px '+(RARITY_COLOR[ev.rarity]||'#fff')+', 0 0 80px '+(RARITY_COLOR[ev.rarity]||'#fff');
     pop.style.animation = 'evFloat 1.5s ease-in-out infinite';
   } else {
     pop.style.boxShadow = '';
@@ -1341,32 +1704,44 @@ function triggerEvent(forceId){
       document.getElementById('ev-popup').style.display='none';
       activeEventId = null;
     }
-  }, ev.dur * 1000);
+  }, (SPAWN_DUR[ev.rarity]||ev.dur||10) * 1000);
+  // Démarrer le compte à rebours affiché
+  startEventTimer(SPAWN_DUR[ev.rarity]||ev.dur||10);
   notif(ev.em+' '+(isUltra?'⭐ ULTRA-RARE ! ':'')+ev.name+' apparaît ! Cliquez vite !', 'ev');
 }
 function clickEvent(){
-  const ev = [...EVENTS,...ULTRA_EVENTS].find(e=>e.id===activeEventId);
+  const ev = POKEMON_GEN1.find(p=>p.num===activeEventId);
   if(!ev) return;
   clearTimeout(window._evTimeout);
+  stopEventTimer();
+  // Enregistrer dans le Pokédex
+  if(!G.pokedex) G.pokedex = {};
+  G.pokedex[ev.num] = (G.pokedex[ev.num]||0) + 1;
   G.ec++;
-  if(G.capturés[ev.id] !== undefined) G.capturés[ev.id]++;
-  else G.capturés[ev.id] = 1;
-  // MAINTENANT on applique le multiplicateur (au clic, pas à l'apparition)
-  G.evMult = ev.mult;
-  G.evEnd = Date.now() + ev.dur * 1000;
-  // Dialga : accélère le temps
-  if(ev.timeWarp){
-    G.timeWarpMult = ev.timeWarp;
-    G.timeWarpEnd = Date.now() + ev.dur * 1000;
+  updateDailies('events',1);
+  // Appliquer l'effet selon la rareté
+  const evDur = SPAWN_DUR[ev.rarity] || ev.dur || 10;
+  const cpsNow = calcCPS(G);
+  if(ev.effect === 'instant_pd'){
+    const gain = Math.max(cpsNow * ev.val, cpsNow * 2);
+    G.pd += gain; G.te += gain;
+    spawnParticle(window.innerWidth/2, window.innerHeight/2, '+'+fmtP(gain));
+  } else if(ev.effect === 'cps_boost'){
+    G.wildCpsBoost = (G.wildCpsBoost||0) + ev.val;
+    G.wildCpsEnd = Date.now() + evDur * 1000;
+    const bonus = cpsNow * 2;
+    G.pd += bonus; G.te += bonus;
+    spawnParticle(window.innerWidth/2, window.innerHeight/2, '+'+fmtP(bonus)+' +'+Math.round(ev.val*100)+'% CPS');
+  } else if(ev.effect === 'global_mult'){
+    G.evMult = ev.val;
+    G.evEnd = Date.now() + evDur * 1000;
+    const bonus = cpsNow * 5;
+    G.pd += bonus; G.te += bonus;
+    spawnParticle(window.innerWidth/2, window.innerHeight/2, 'x'+ev.val+' +'+fmtP(bonus));
   }
-  // Bonus instantané en plus : 8s de prod
-  const bonus = calcCPS(G) * 8;
-  G.pd += bonus;
-  G.te += bonus;
-  const isUltra = ULTRA_EVENTS.some(u=>u.id===ev.id);
-  const prefix = isUltra ? '⭐ ULTRA-RARE ! ' : '🎉 ';
-  spawnParticle(window.innerWidth/2, window.innerHeight/2, (isUltra?'⭐':'✨')+' +'+fmtP(bonus));
-  notif(prefix+ev.name+' capturé ! +'+fmtP(bonus)+' | ×'+ev.mult+' pendant '+ev.dur+'s !','ach');
+  const isUltra = ev.rarity==='ultra' || ev.rarity==='legendaire';
+  playSound(isUltra ? 'ultra' : 'event');
+  notif((isUltra?'⭐ ':'🎉 ')+'#'+ev.num+' '+ev.name+' capturé !','ach');
   document.getElementById('ev-popup').style.display='none';
   activeEventId = null;
 }
@@ -1379,6 +1754,7 @@ function checkAchievements(){
     if(!G.ach.has(ac.id)){
       try{ if(ac.cond(G)){
         G.ach.add(ac.id);
+        playSound('ach');
         notif('🏆 SUCCÈS : '+ac.em+' '+ac.name,'ach');
       }} catch(e){}
     }
@@ -1436,13 +1812,46 @@ function loadGame(){
 }
 
 function openSave(){
-  const data = {...G, bu: serializeSet(G.bu), ach: serializeSet(G.ach)};
+  const data = {
+    ...G,
+    bu: serializeSet(G.bu),
+    ach: serializeSet(G.ach),
+    cs: serializeSet(G.cs||new Set()),
+  };
+  // Exporter proprement (pokedex est un objet plain, pas de Set)
   document.getElementById('tx-exp').value = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
   document.getElementById('tx-imp').value = '';
-  // Vérifie si une ancienne save existe
   const hasOld = !!localStorage.getItem('pokeclicker_v2') || !!localStorage.getItem('pokeclicker_save');
   document.getElementById('old-save-banner').style.display = hasOld ? 'block' : 'none';
   document.getElementById('md-save').classList.add('on');
+}
+
+function importSave(){
+  try{
+    // Nettoyage robuste : retire espaces, sauts de ligne, caractères invisibles
+    const raw = document.getElementById('tx-imp').value.trim().replace(/\s+/g,'');
+    if(!raw){ notif('❌ Champ vide !','ev'); return; }
+    // Décodage base64 → JSON
+    const json = decodeURIComponent(escape(atob(raw)));
+    const data = JSON.parse(json);
+    // Reconstruction de l'état avec tous les Sets correctement désérialisés
+    G = {...newGame(), ...data};
+    G.bu       = deserializeSet(data.bu);
+    G.ach      = deserializeSet(data.ach);
+    G.cs       = deserializeSet(data.cs);   // ← candy shop
+    G.b        = {...newGame().b,        ...(data.b||{})};
+    G.capturés = {...newGame().capturés, ...(data.capturés||{})};
+    G.pokedex  = {...(data.pokedex||{})};
+    G.imported = (G.imported||0)+1;
+    saveGame();
+    closeModal('md-save');
+    notif('✅ Sauvegarde importée !','buy');
+    renderShop();
+    updateUI();
+  } catch(e){
+    console.error('Import error:', e);
+    notif('❌ Sauvegarde invalide ou corrompue','ev');
+  }
 }
 
 function recoverOldSave(){
@@ -1468,20 +1877,6 @@ function dlSave(){
   a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
   a.download='pokeclicker_v3.txt'; a.click();
 }
-function importSave(){
-  try{
-    const raw = document.getElementById('tx-imp').value.trim();
-    const data = JSON.parse(decodeURIComponent(escape(atob(raw))));
-    G = {...newGame(),...data};
-    G.bu=deserializeSet(data.bu); G.ach=deserializeSet(data.ach);
-    G.b={...newGame().b,...data.b};
-    G.capturés={...newGame().capturés,...data.capturés};
-    G.imported=(G.imported||0)+1;
-    closeModal('md-save');
-    notif('✅ Sauvegarde importée !','buy');
-    renderShop();
-  } catch(e){ notif('❌ Sauvegarde invalide !','ev'); }
-}
 function openResetConfirm(){
   closeModal('md-save');
   document.getElementById('reset-input').value = '';
@@ -1500,6 +1895,166 @@ function doReset(){
   updateUI();
 }
 function resetAll(){ openResetConfirm(); }
+
+// ── Drawer mobile ──────────────────────────────────────────
+function toggleDrawer(){
+  const d=document.getElementById('drawer');
+  const o=document.getElementById('drawer-overlay');
+  const b=document.getElementById('burger');
+  const open=d.classList.toggle('open');
+  o.classList.toggle('open',open);
+  b.classList.toggle('open',open);
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('burger').classList.remove('open');
+}
+
+// ── Qty mobile ─────────────────────────────────────────────
+const QTY_IDS=['qm-1','qm-10','qm-100','qm-max'];
+function setQtyMobile(idx){
+  QTY_IDX=idx; QTY=QTY_OPTS[idx];
+  document.getElementById('qty-lbl').textContent=QTY;
+  QTY_IDS.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.toggle('on',i===idx);
+  });
+  renderShop();
+}
+
+
+// ── Timer visible sur les events ───────────────────────────
+let _evTimerInterval = null;
+function startEventTimer(dur){
+  const el = document.getElementById('ev-timer');
+  if(!el) return;
+  el.style.display = 'block';
+  let remaining = dur;
+  el.textContent = '⏱ ' + remaining + 's';
+  clearInterval(_evTimerInterval);
+  _evTimerInterval = setInterval(()=>{
+    remaining--;
+    if(remaining <= 0){
+      clearInterval(_evTimerInterval);
+      el.style.display = 'none';
+    } else {
+      el.textContent = '⏱ ' + remaining + 's';
+      // Couleur rouge si urgent
+      el.style.color = remaining <= 3 ? 'var(--red-l)' : 'var(--gold)';
+    }
+  }, 1000);
+}
+function stopEventTimer(){
+  clearInterval(_evTimerInterval);
+  const el = document.getElementById('ev-timer');
+  if(el) el.style.display = 'none';
+}
+
+
+// ── Système de sons désactivables ──────────────────────────
+let SOUND_ON = localStorage.getItem('sound') !== 'off';
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _audioCtx = null;
+
+function getAudioCtx(){
+  if(!_audioCtx && AudioCtx){ try{ _audioCtx = new AudioCtx(); }catch(e){} }
+  return _audioCtx;
+}
+
+function playSound(type){
+  if(!SOUND_ON) return;
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  try{
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if(type==='click'){
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime+0.05);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.08);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.08);
+    } else if(type==='event'){
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime+0.1);
+      osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime+0.2);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.3);
+    } else if(type==='buy'){
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(400, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime+0.1);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.15);
+    } else if(type==='ultra'){
+      // Son spectaculaire pour les ultra-rares
+      for(let i=0;i<3;i++){
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(400+i*200, ctx.currentTime+i*0.08);
+        o2.frequency.exponentialRampToValueAtTime(800+i*300, ctx.currentTime+i*0.08+0.15);
+        g2.gain.setValueAtTime(0.12, ctx.currentTime+i*0.08);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+i*0.08+0.2);
+        o2.start(ctx.currentTime+i*0.08);
+        o2.stop(ctx.currentTime+i*0.08+0.2);
+      }
+    } else if(type==='ach'){
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime+0.1);
+      osc.frequency.setValueAtTime(784, ctx.currentTime+0.2);
+      gain.gain.setValueAtTime(0.07, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.35);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime+0.35);
+    }
+  } catch(e){}
+}
+
+function toggleSound(){
+  SOUND_ON = !SOUND_ON;
+  localStorage.setItem('sound', SOUND_ON ? 'on' : 'off');
+  const btn = document.getElementById('sound-btn');
+  if(btn){ btn.textContent = SOUND_ON ? '🔊' : '🔇'; btn.classList.toggle('on', SOUND_ON); }
+  if(SOUND_ON) playSound('buy');
+}
+
+function initSoundBtn(){
+  const btn = document.getElementById('sound-btn');
+  if(btn){ btn.textContent = SOUND_ON ? '🔊' : '🔇'; btn.classList.toggle('on', SOUND_ON); }
+}
+
+
+// ── Pokédex reset toggle ───────────────────────────────────────
+let POKE_RESET = false;
+
+function togglePokedexReset(){
+  POKE_RESET = !POKE_RESET;
+  const btn = document.getElementById('poke-reset-tog');
+  const bonus = document.getElementById('poke-reset-bonus');
+  if(btn){
+    btn.textContent = POKE_RESET ? 'ON' : 'OFF';
+    btn.className = 'tog-btn ' + (POKE_RESET ? 'on' : 'off');
+  }
+  if(bonus) bonus.style.display = POKE_RESET ? 'block' : 'none';
+}
+
+// Multiplicateurs de taux si pokédex reset activé
+const SPAWN_RATE_BOOST = {
+  commun:1.5, peu_commun:2, rare:3, epique:4, legendaire:5, ultra:6
+};
+
 function openHelp(){ document.getElementById('md-help').classList.add('on'); }
 
 function hardRefresh(){
@@ -1596,58 +2151,20 @@ function doMegaPrestige(){
 // ============================================================
 // POKÉMON SAUVAGES — Apparitions aléatoires cliquables
 // ============================================================
-const WILD_POKEMON = [
-  // Communs
-  {id:'wp_pikachu',   em:'⚡',name:'Pikachu',    rarity:'commun',    effect:'click_boost', val:0.1,  dur:30, desc:'+10% puissance de clic pendant 30s'},
-  {id:'wp_magikarp',  em:'🐟',name:'Magikarp',   rarity:'commun',    effect:'instant_pd',  val:100,  dur:0,  desc:'+100 ₽ instantanément'},
-  {id:'wp_ronflex',   em:'😴',name:'Ronflex',    rarity:'commun',    effect:'cps_boost',   val:0.05, dur:20, desc:'+5% CPS pendant 20s'},
-  {id:'wp_magicarpe', em:'🐠',name:'Tentacool',  rarity:'commun',    effect:'instant_pd',  val:500,  dur:0,  desc:'+500 ₽ instantanément'},
-  {id:'wp_chenipan',  em:'🐛',name:'Chenipan',   rarity:'commun',    effect:'instant_pd',  val:200,  dur:0,  desc:'+200 ₽ instantanément'},
-  // Peu communs
-  {id:'wp_bulbizarre',em:'🌱',name:'Bulbizarre', rarity:'peu_commun',effect:'cps_boost',   val:0.15, dur:30, desc:'+15% CPS pendant 30s'},
-  {id:'wp_carapuce',  em:'💦',name:'Carapuce',   rarity:'peu_commun',effect:'cps_boost',   val:0.15, dur:30, desc:'+15% CPS pendant 30s'},
-  {id:'wp_salameche', em:'🔥',name:'Salamèche',  rarity:'peu_commun',effect:'click_boost', val:0.2,  dur:25, desc:'+20% puissance de clic pendant 25s'},
-  {id:'wp_psykokwak', em:'🦆',name:'Psykokwak',  rarity:'peu_commun',effect:'cps_boost',   val:0.1,  dur:45, desc:'+10% CPS pendant 45s'},
-  {id:'wp_evoli',     em:'🦊',name:'Évoli',      rarity:'peu_commun',effect:'click_boost', val:0.15, dur:40, desc:'+15% clic pendant 40s'},
-  // Rares
-  {id:'wp_dracaufeu', em:'🐉',name:'Dracaufeu',  rarity:'rare',      effect:'global_mult', val:5,    dur:15, desc:'×5 production pendant 15s'},
-  {id:'wp_raichu',    em:'🐭',name:'Raichu',     rarity:'rare',      effect:'click_boost', val:0.5,  dur:20, desc:'+50% puissance de clic pendant 20s'},
-  {id:'wp_mewtwo',    em:'💜',name:'Mewtwo',     rarity:'rare',      effect:'global_mult', val:10,   dur:10, desc:'×10 production pendant 10s'},
-  {id:'wp_gengar',    em:'👻',name:'Gengar',     rarity:'rare',      effect:'cps_boost',   val:0.5,  dur:20, desc:'+50% CPS pendant 20s'},
-  {id:'wp_noctali',   em:'🌙',name:'Noctali',    rarity:'rare',      effect:'instant_cps', val:30,   dur:0,  desc:'Bonus = 30s de production'},
-  // Épiques
-  {id:'wp_dracolosse',em:'🦁',name:'Dracolosse', rarity:'epique',    effect:'global_mult', val:20,   dur:12, desc:'×20 production pendant 12s'},
-  {id:'wp_lugia',     em:'🕊️',name:'Lugia',      rarity:'epique',    effect:'global_mult', val:25,   dur:10, desc:'×25 production pendant 10s'},
-  {id:'wp_rayquaza',  em:'🐲',name:'Rayquaza',   rarity:'epique',    effect:'global_mult', val:50,   dur:8,  desc:'×50 production pendant 8s'},
-  // Légendaires
-  {id:'wp_mew',       em:'✨',name:'Mew',        rarity:'legendaire',effect:'global_mult', val:100,  dur:10, desc:'×100 production pendant 10s'},
-  {id:'wp_arceus',    em:'👼',name:'Arceus',     rarity:'legendaire',effect:'global_mult', val:500,  dur:5,  desc:'×500 production pendant 5s'},
-];
-
-const WILD_RARITY_RATE = {
-  commun:     0.0015,  // ~1 toutes les 10min (1 tick/30s × 0.15%)
-  peu_commun: 0.0008,
-  rare:       0.0003,
-  epique:     0.00008,
-  legendaire: 0.00002,
-};
+// WILD_POKEMON and GEN1_POKEDEX replaced by POKEMON_GEN1 (unified Gen1 system)
+// See POKEMON_GEN1 array in script block 1
+const WILD_POKEMON = POKEMON_GEN1; // alias for compatibility
 
 const RARITY_COLOR = {
-  commun:'#9E9E9E', peu_commun:'#4CAF50', rare:'#2196F3', epique:'#9C27B0', legendaire:'#FFD700'
+  commun:'#9E9E9E', peu_commun:'#4CAF50', rare:'#2196F3', epique:'#9C27B0', legendaire:'#FFD700', ultra:'#FFFFFF'
 };
 
 let activeWild = null;
 let wildTimeout = null;
 
 function trySpawnWild(){
-  if(activeWild || activeEventId) return;
-  // Tirer un Pokémon au hasard selon les taux de rareté
-  for(const wp of WILD_POKEMON.sort(()=>Math.random()-.5)){
-    if(Math.random() < WILD_RARITY_RATE[wp.rarity]){
-      spawnWild(wp);
-      return;
-    }
-  }
+  if(activeEventId) return;
+  triggerEvent(); // Unified: all spawns go through triggerEvent
 }
 
 function spawnWild(wp){
@@ -1673,6 +2190,7 @@ function catchWild(){
   document.getElementById('wild-popup').style.display='none';
   activeWild = null;
   // Enregistrer dans pokédex
+  updateDailies('wilds',1);
   if(!G.pokedex) G.pokedex = {};
   G.pokedex[wp.id] = (G.pokedex[wp.id]||0) + 1;
   // Appliquer l'effet
@@ -1682,11 +2200,14 @@ function catchWild(){
 
 function applyWildEffect(wp){
   const now = Date.now();
+  const cps = calcCPS(G);
   if(wp.effect==='instant_pd'){
-    G.pd += wp.val; G.te += wp.val;
-    spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(wp.val));
+    // Scale avec la production : min val, max 60s de prod
+    const scaled = Math.max(wp.val, cps * 2);
+    G.pd += scaled; G.te += scaled;
+    spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(scaled));
   } else if(wp.effect==='instant_cps'){
-    const bonus = calcCPS(G) * wp.val;
+    const bonus = cps * wp.val;
     G.pd += bonus; G.te += bonus;
     spawnParticle(window.innerWidth*.6, window.innerHeight*.5, '+'+fmtP(bonus));
   } else if(wp.effect==='cps_boost'){
@@ -1710,24 +2231,144 @@ function openPokedex(){
 function renderPokedex(){
   const el = document.getElementById('pokedex-list');
   if(!el) return;
-  const total = WILD_POKEMON.length;
-  const caught = Object.keys(G.pokedex||{}).length;
-  document.getElementById('pokedex-count').textContent = caught + ' / ' + total;
-  el.innerHTML = WILD_POKEMON.map(wp=>{
-    const count = G.pokedex&&G.pokedex[wp.id] ? G.pokedex[wp.id] : 0;
+
+  // Trier tous les Pokémon par numéro #1 → #151
+  const sorted = [...POKEMON_GEN1].sort((a,b)=>a.num-b.num);
+  const total = sorted.length;
+  const caught = sorted.filter(p=>(G.pokedex&&G.pokedex[p.num])||0).length;
+  document.getElementById('pokedex-count').textContent = caught + ' / ' + total + ' capturés';
+
+  const RARITY_LABEL = {
+    commun:'Commun', peu_commun:'Peu Commun', rare:'Rare',
+    epique:'Épique', legendaire:'Légendaire', ultra:'Ultra'
+  };
+
+  el.style.display = 'grid';
+  el.style.gridTemplateColumns = 'repeat(auto-fill, minmax(80px, 1fr))';
+  el.style.gap = '5px';
+
+  el.innerHTML = sorted.map(pk=>{
+    const count = (G.pokedex&&G.pokedex[pk.num])||0;
     const known = count > 0;
-    const col = RARITY_COLOR[wp.rarity];
-    return '<div style="background:var(--card);border:1px solid '+(known?col:'var(--border)')+';border-radius:9px;padding:9px;text-align:center;opacity:'+(known?1:.35)+'">'+
-      '<div style="font-size:26px">'+(known?wp.em:'❓')+'</div>'+
-      '<div style="font-size:9px;font-weight:900;margin-top:4px;color:'+(known?'var(--text)':'var(--dim)')+'">'+(known?wp.name:'???')+'</div>'+
-      '<div style="font-size:8px;color:'+col+';margin-top:2px">'+wp.rarity.replace('_',' ')+'</div>'+
-      (known?'<div style="font-size:8px;color:var(--dim);margin-top:2px">×'+count+' capturé'+(count>1?'s':'')+'</div>':'')+
-    '</div>';
+    const col = RARITY_COLOR[pk.rarity]||'#FFD700';
+    const spriteNum = String(pk.num).padStart(3,'0');
+    const spriteUrl = 'sprites/' + spriteNum + '.png';
+    return '<div style="background:var(--card);border:1px solid '+(known?col:'var(--border)')+';'
+      +'border-radius:8px;padding:6px 4px;text-align:center;'
+      +'opacity:'+(known?1:.45)+';position:relative">'
+      +'<div style="font-size:8px;color:var(--dim);font-weight:800;line-height:1;margin-bottom:2px">#'+pk.num+'</div>'
+      +'<div style="width:48px;height:48px;margin:0 auto;display:flex;align-items:center;justify-content:center">'
+        +(known
+          ?'<img src="'+spriteUrl+'" alt="'+pk.name+'" '
+            +'style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated" '
+            +'onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{textContent:\''+pk.em+'\',style:\'font-size:26px\'}))">'
+          :'<span style="font-size:26px">❓</span>')
+      +'</div>'
+      +'<div style="font-size:7px;font-weight:900;margin-top:3px;color:'+(known?'var(--text)':'var(--dim)')+';line-height:1.2;word-break:break-word">'+(known?pk.name:'???')+'</div>'
+      +'<div style="font-size:6px;color:'+col+';font-weight:700;margin-top:2px">'+RARITY_LABEL[pk.rarity]+'</div>'
+      +(known?'<div style="font-size:6px;color:var(--dim)">×'+count+'</div>':'')
+    +'</div>';
+  }).join('');
+}
+
+
+
+// ============================================================
+// OBJECTIFS JOURNALIERS
+// ============================================================
+const DAILY_POOL = [
+  {id:'d_click',   em:'👆', name:'Cliqueur Assidu',    desc:'Cliquez X fois',          type:'clicks',    targets:[100,500,1000,5000]},
+  {id:'d_buy',     em:'🏢', name:'Constructeur',       desc:'Achetez X bâtiments',     type:'buys',      targets:[5,15,30,50]},
+  {id:'d_earn',    em:'💰', name:'Accumulateur',       desc:'Gagnez X ₽',              type:'earn',      targets:[1e3,10e3,1e6,1e9]},
+  {id:'d_event',   em:'✨', name:'Chasseur Events', desc:'Capturez X events',       type:'events',    targets:[1,3,5,10]},
+  {id:'d_upgrade', em:'⬆️', name:'Améliorateur',       desc:'Achetez X améliorations', type:'upgrades',  targets:[1,3,5,10]},
+  {id:'d_wild',    em:'🐾', name:'Dresseur',           desc:'Capturez X Pokémon sauvages', type:'wilds', targets:[1,2,5,10]},
+];
+
+const DAILY_REWARDS = [500, 5e3, 50e3, 1e6]; // récompense en ₽ selon difficulté
+
+function getDailyKey(){
+  const d = new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+function initDailies(){
+  const key = getDailyKey();
+  const stored = localStorage.getItem('dailies_'+key);
+  if(stored){
+    G._dailies = JSON.parse(stored);
+  } else {
+    // Générer 3 objectifs aléatoires pour aujourd'hui
+    const shuffled = [...DAILY_POOL].sort(()=>Math.random()-.5).slice(0,3);
+    const diff = Math.floor(Math.random()*4); // 0-3
+    G._dailies = shuffled.map(d=>({
+      id:d.id, em:d.em, name:d.name, desc:d.desc, type:d.type,
+      target:d.targets[diff], reward:DAILY_REWARDS[diff],
+      progress:0, done:false
+    }));
+    localStorage.setItem('dailies_'+key, JSON.stringify(G._dailies));
+  }
+  G._dailyKey = key;
+}
+
+function updateDailies(type, amount){
+  if(!G._dailies) return;
+  let changed = false;
+  for(const obj of G._dailies){
+    if(obj.done) continue;
+    if(obj.type === type){
+      obj.progress = Math.min(obj.target, (obj.progress||0) + (amount||1));
+      if(obj.progress >= obj.target){
+        obj.done = true;
+        G.pd += obj.reward;
+        G.te += obj.reward;
+        playSound('ach');
+        notif('🎯 Objectif du jour complété : '+obj.name+' ! +'+fmtP(obj.reward),'ach');
+        changed = true;
+      }
+    }
+  }
+  if(changed){
+    localStorage.setItem('dailies_'+(G._dailyKey||getDailyKey()), JSON.stringify(G._dailies));
+  }
+}
+
+function openDailies(){
+  if(!G._dailies) initDailies();
+  renderDailies();
+  document.getElementById('md-daily').classList.add('on');
+}
+
+function renderDailies(){
+  const el = document.getElementById('daily-list');
+  if(!el || !G._dailies) return;
+  const key = getDailyKey();
+  // Reset si nouveau jour
+  if(G._dailyKey && G._dailyKey !== key){ initDailies(); }
+  el.innerHTML = G._dailies.map(obj=>{
+    const pct = Math.min(100,(obj.progress/obj.target)*100);
+    return '<div style="background:var(--card);border:1px solid '+(obj.done?'var(--green)':'var(--border)')+';border-radius:10px;padding:12px;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+        +'<span style="font-size:20px">'+obj.em+'</span>'
+        +'<div style="flex:1">'
+          +'<div style="font-size:11px;font-weight:900;color:'+(obj.done?'var(--green)':'var(--text)')+'">'+obj.name+(obj.done?' ✅':'')+'</div>'
+          +'<div style="font-size:9px;color:var(--dim)">'+obj.desc.replace('X', String(obj.target))+'</div>'
+        +'</div>'
+        +'<div style="font-size:10px;font-weight:800;color:var(--gold)">+'+fmtP(obj.reward)+'</div>'
+      +'</div>'
+      +'<div style="background:var(--bg);border-radius:4px;height:6px;overflow:hidden">'
+        +'<div style="height:100%;width:'+pct+'%;background:'+(obj.done?'var(--green)':'linear-gradient(90deg,var(--purp-d),var(--gold))')+';border-radius:4px;transition:width .3s"></div>'
+      +'</div>'
+      +'<div style="font-size:9px;color:var(--dim);margin-top:3px;text-align:right">'+Math.min(obj.progress,obj.target)+' / '+obj.target+'</div>'
+    +'</div>';
   }).join('');
 }
 
 function openStats(){
   const cps=calcCPS(G), cv=calcClickValue(G);
+  const pokedex = G.pokedex||{};
+  const uniqueCaught = Object.keys(pokedex).length;
+  const totalCaught  = Object.values(pokedex).reduce((a,b)=>a+b, 0);
   document.getElementById('stats-tbl').innerHTML=`
     <div><span class="lbl">₽ actuels</span><span class="val">${fmtP(G.pd)}</span></div>
     <div><span class="lbl">Total gagné</span><span class="val">${fmtP(G.te)}</span></div>
@@ -1736,12 +2377,12 @@ function openStats(){
     <div><span class="lbl">Total clics</span><span class="val">${fmt(G.tc)}</span></div>
     <div><span class="lbl">Bâtiments</span><span class="val">${totB()}</span></div>
     <div><span class="lbl">Types possédés</span><span class="val">${uniqB()}</span></div>
-    <div><span class="lbl">Améliorations</span><span class="val">${G.bu.size}</span></div>
+    <div><span class="lbl">Améliorations achetées</span><span class="val">${G.bu.size}</span></div>
     <div><span class="lbl">Succès</span><span class="val">${G.ach.size} / ${ACHIEV.length}</span></div>
     <div><span class="lbl">Niveau Prestige</span><span class="val">${G.pc||0}</span></div>
-    <div><span class="lbl">Bonus Prestige</span><span class="val">x${(1+(G.pc||0)*0.01).toFixed(2)}</span></div>
-    <div><span class="lbl">Nombre de Prestige</span><span class="val">${G.pc}</span></div>
-    <div><span class="lbl">Pokémon capturés</span><span class="val">${G.ec}</span></div>
+    <div><span class="lbl">Bonbons Rares</span><span class="val">${G.rc||0} 🍬</span></div>
+    <div><span class="lbl">Pokémon uniques capturés</span><span class="val">${uniqueCaught} / ${POKEMON_GEN1.length}</span></div>
+    <div><span class="lbl">Pokémon total capturés</span><span class="val">${totalCaught}</span></div>
     <div><span class="lbl">Temps de jeu</span><span class="val">${fmtT(G.tt)}</span></div>
     <div><span class="lbl">Meilleur CPS</span><span class="val">${fmtP(G.maxCps)}/s</span></div>
     <div><span class="lbl">Meilleur combo</span><span class="val">×${G.maxCombo}</span></div>
@@ -1837,7 +2478,7 @@ function renderShopItems(){
 function renderBuildings(){
   let html = '';
   const tiers = [
-    {label:'⭐ DÉBUTANT',    ids:['centre','boutique','labo','arene','garderie']},
+    {label:'⭐ DÉBUTANT',    ids:['pokeball','centre','boutique','labo','arene','garderie']},
     {label:'🌿 EXPLORATION', ids:['safari','tour','casino','ssanne','ligue']},
     {label:'🚀 AVANCÉ',      ids:['exchange','rocket','iledawn','square','magma','aqua']},
     {label:'🌌 COSMIQUE',    ids:['espace','meteor','honte','unys','plasma','pwt','cristal']},
@@ -1860,9 +2501,20 @@ function renderBuildings(){
       const currentCps = bd.cps * owned * mult;
       const gainCps    = bd.cps * qty * mult;
       const qtyLabel   = QTY==='max' ? 'max' : qty;
-      const cpsLine    = owned > 0
-        ? `${fmtP(currentCps)}/s &bull; <span style="color:var(--green)">+${fmtP(gainCps)}/s</span> (x${qtyLabel})`
-        : `<span style="color:var(--green)">+${fmtP(gainCps)}/s</span> par achat (x${qtyLabel})`;
+      // Affichage spécial PokéBall : montre le bonus/clic, pas le CPS
+      let cpsLine;
+      if(bd.id === 'pokeball'){
+        let pbMult = 1;
+        for(const up of UPGRADES){ if(up.type==='pokeball_mult' && G.bu.has(up.id)) pbMult *= up.val; }
+        const perBall = 1 * pbMult;
+        cpsLine = owned > 0
+          ? fmtP(owned*perBall)+'/clic total &bull; <span style="color:var(--green)">+'+fmtP(qty*perBall)+'/clic</span> (x'+qtyLabel+')'
+          : '<span style="color:var(--green)">+'+fmtP(perBall)+'/clic</span> par achat (x'+qtyLabel+')';
+      } else {
+        cpsLine = owned > 0
+          ? fmtP(currentCps)+'/s &bull; <span style="color:var(--green)">+'+fmtP(gainCps)+'/s</span> (x'+qtyLabel+')'
+          : '<span style="color:var(--green)">+'+fmtP(gainCps)+'/s</span> par achat (x'+qtyLabel+')';
+      }
       html += '<div class="bcard '+(canAfford?'':'na')+'" onclick="buyBuilding(\''+bd.id+'\')">'
         +'<div class="bem">'+bd.em+'</div>'
         +'<div class="binfo">'
@@ -1973,7 +2625,9 @@ function notif(msg, type=''){
 // INIT
 // ============================================================
 loadGame();
-acCheckBan(); // Restaure un éventuel ban actif après refresh
+acCheckBan();
+initSoundBtn();
+initDailies(); // Restaure un éventuel ban actif après refresh
 renderShop();
 updateUI();
 
@@ -2033,9 +2687,20 @@ if(G.tc===0 && G.te===0){
     <div class="modal-title" style="color:var(--red-l)">📖 POKÉDEX<button class="mcls" onclick="closeModal('md-pokedex')">✕</button></div>
     <div style="font-size:10px;color:var(--dim);margin-bottom:10px;text-align:center">
       Capturez des Pokémon sauvages pour compléter votre Pokédex !<br>
-      <span id="pokedex-count" style="color:var(--gold);font-weight:800">0 / 20</span> Pokémon découverts
+      <span id="pokedex-count" style="color:var(--gold);font-weight:800">0 / 151</span> Pokémon capturés
     </div>
-    <div id="pokedex-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px"></div>
+    <div id="pokedex-list"></div>
+  </div>
+</div>
+
+<!-- Daily Objectives Modal -->
+<div class="overlay" id="md-daily">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title" style="color:var(--blue)">🎯 OBJECTIFS DU JOUR<button class="mcls" onclick="closeModal('md-daily')">✕</button></div>
+    <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:12px">
+      3 défis renouvelés chaque jour à minuit. Complétez-les pour des récompenses !
+    </div>
+    <div id="daily-list"></div>
   </div>
 </div>
 </body>
