@@ -822,7 +822,7 @@ const UPGRADES=[
   {id:'bm_om2',em:'🔮',name:'Ultime Noirceur',     cost:120e36, type:'bldg_mult',bId:'omega',     val:2,cond:g=>g.b.omega>=50,   desc:'encore x2 Omega'},
   {id:'bm_gi2',em:'👼',name:'Au-delà du Dieu',   cost:1e39,   type:'bldg_mult',bId:'godiarceus',val:2,cond:g=>g.b.godiarceus>=50,desc:'encore x2 DIEU ARCEUS'},
   // Pokéball upgrade pour cohérence
-  {id:'bm_pb1',em:'🔴',name:'Alliage Spécial',  cost:200,    type:'bldg_mult',bId:'pokeball',  val:1, cond:g=>g.b.pokeball>=10, desc:'Augmente la valeur de base des Pokéballs'},
+  {id:'bm_pb1',em:'🔴',name:'Alliage Spécial',  cost:200,    type:'pokeball_mult', val:2, cond:g=>g.b.pokeball>=10, desc:'×2 bonus clic par Pokéball'},
 
   // --- Upgrades Prestige ---
   {id:'pm01',em:'🍬',name:'Sucre de Prestige', cost:20e6,   type:'prestige_mult',val:2, desc:'Double le bonus Prestige',   cond:g=>g.rc>=5},
@@ -1425,11 +1425,16 @@ function calcCPS(g){
   }
   total *= gm;
   // Prestige bonus: +2% par bonbon rare (rc) multiplicatif
-  const candyRate = 0.02 + csBonus('candy_bonus');
+  // prestige_mult upgrades (pm01-pm04) multiplient le taux de base
+  let prestigeMultUpg = 1;
+  for(const up of UPGRADES){
+    if(up.type==='prestige_mult' && g.bu.has(up.id)) prestigeMultUpg *= up.val;
+  }
+  const candyRate = (0.02 * prestigeMultUpg) + csBonus('candy_bonus');
   const presBonus = Math.pow(1 + candyRate, g.rc||0);
   total *= presBonus;
-  // Achievement bonus: +1% per achievement
-  total *= (1 + g.ach.size * 0.005); // +0.5% par succès
+  // Achievement bonus: +0.5% per achievement
+  total *= (1 + g.ach.size * 0.005);
   // Méga Prestige bonus permanent
   if(g.megaMult && g.megaMult > 1) total *= g.megaMult;
   // Items Pearl Shop
@@ -1437,6 +1442,11 @@ function calcCPS(g){
   // Candy shop global bonus
   const csGlobal = 1 + csBonus('global_flat');
   total *= csGlobal;
+  // Candy shop combo CPS bonus (+1% par clic combo actif)
+  const comboCpsBonus = csBonus('combo_cps');
+  if(comboCpsBonus > 0 && typeof comboCount !== 'undefined' && comboCount > 0){
+    total *= (1 + comboCpsBonus * comboCount);
+  }
   // Wild pokemon boosts
   const wNow = Date.now();
   if(g.wildCpsBoost && g.wildCpsEnd && wNow < g.wildCpsEnd) total *= (1 + g.wildCpsBoost);
@@ -1472,9 +1482,13 @@ function calcClickValue(g){
     if(up.type==='click_ratio' && g.bu.has(up.id)) ratio += up.val;
   }
   if(ratio > 0) base += calcCPS(g) * ratio;
-  // Prestige bonus: +2% par bonbon rare
-  const candyRate = 0.02 + csBonus('candy_bonus');
-  const presBonus = Math.pow(1 + candyRate, G.rc||0);
+  // Prestige bonus: +2% par bonbon rare (prestige_mult upgrades appliquées ici aussi)
+  let prestigeMultUpg2 = 1;
+  for(const up of UPGRADES){
+    if(up.type==='prestige_mult' && g.bu.has(up.id)) prestigeMultUpg2 *= up.val;
+  }
+  const candyRate = (0.02 * prestigeMultUpg2) + csBonus('candy_bonus');
+  const presBonus = Math.pow(1 + candyRate, g.rc||0);
   base *= presBonus;
   // Event mult
   if(g.evEnd > Date.now()) base *= g.evMult;
@@ -1486,7 +1500,6 @@ function calcClickValue(g){
   base += csBonus('pb_flat') * (G.b&&G.b.pokeball||0);
   // Wild pokemon click boost
   if(g.wildClickBoost && g.wildClickEnd && Date.now() < g.wildClickEnd) base *= (1 + g.wildClickBoost);
-  if(g.evEnd > Date.now()) base *= g.evMult;
   // Wild global mult affecte aussi les clics
   if(g.wildMult && g.wildMultEnd && Date.now() < g.wildMultEnd) base *= g.wildMult;
   return Math.max(1, base);
@@ -1599,6 +1612,10 @@ function gameTick(){
     activeEventId = null;
     document.getElementById('ev-popup').style.display='none';
   }
+  // Expire boosts sauvages
+  if(G.wildCpsEnd   && now > G.wildCpsEnd)   { G.wildCpsBoost   = 0; G.wildCpsEnd   = 0; }
+  if(G.wildClickEnd && now > G.wildClickEnd) { G.wildClickBoost = 0; G.wildClickEnd = 0; }
+  if(G.wildMultEnd  && now > G.wildMultEnd)  { G.wildMult       = 1; G.wildMultEnd  = 0; }
 
 
   // Spawn Pokémon : toutes les 2-5 min (aléatoire)
@@ -1699,8 +1716,11 @@ function openPrestige(){
   const gained  = presAvailable(G);
   const newPc   = (G.pc||0) + gained;
   const prog    = presProgressInCycle(G);
-  const curBonus = (G.pc * 0.01 * 100).toFixed(0);
-  const newBonus = (newPc * 0.01 * 100).toFixed(0);
+  // Vrai bonus compound basé sur rc (bonbons) et non sur pc (niveaux)
+  let pmDisp=1; for(const up of UPGRADES){ if(up.type==='prestige_mult'&&G.bu.has(up.id)) pmDisp*=up.val; }
+  const crDisp = (0.02*pmDisp) + csBonus('candy_bonus');
+  const curBonus = ((Math.pow(1+crDisp, G.rc||0)-1)*100).toFixed(1);
+  const newBonus = ((Math.pow(1+crDisp, (G.rc||0)+gained)-1)*100).toFixed(1);
   // Gain affiché
   document.getElementById('pres-gain').textContent =
     gained > 0
@@ -1711,8 +1731,8 @@ function openPrestige(){
   let html = '';
   if(gained > 0){
     html += '<div style="color:var(--green);font-weight:900;margin-bottom:6px">✅ +'+gained+' niveau'+(gained>1?'x':'')+' disponible'+(gained>1?'s':'')+'</div>';
-    html += 'Production totale cette run : <strong>'+fmtP(G.te)+'</strong><br>';
-    html += 'Formule : cbrt('+fmtP(G.te)+' / 1T) = <strong>'+gained+'</strong><br><br>';
+    html += 'Production légitime : <strong>'+fmtP(G.tl)+'</strong><br>';
+    html += 'Seuil prestige #'+(G.pc+1)+' : <strong>'+fmtP(presThreshold(G.pc+1))+'</strong><br><br>';
   } else {
     const nextGoal = presThreshold((G.pc||0) + (presAvailable(G)||0) + 1);
     html += 'Prochain niveau à : <strong>'+fmtP(nextGoal)+'</strong> prod totale<br>';
@@ -1747,7 +1767,7 @@ function doPrestige(){
     pearlBar:G.pearlBar||0, itemEnd:G.itemEnd||{}, lastMissed:G.lastMissed||null,
     megaCount:G.megaCount||0, megaMult:G.megaMult||1, megaDone:G.megaDone||false,
     b: Object.fromEntries(BLDGS.map(b=>[b.id,0])),
-    bu: new Set(G.bu),     // ← Upgrades CONSERVÉES
+    bu: new Set(),          // ← Upgrades RÉINITIALISÉES au prestige
     cs: new Set(G.cs||new Set()), // ← Candy shop CONSERVÉ
     ach: new Set(G.ach),
     evMult:1, evEnd:0, timeWarpMult:1, timeWarpEnd:0,
@@ -1755,12 +1775,22 @@ function doPrestige(){
   };
   stopLegitAutoClick();
   G = keep;
+  // Réappliquer les bonus de départ du candy shop (conservé après prestige)
+  for(const item of CANDY_SHOP){
+    if(G.cs.has(item.id)){
+      if(item.type==='start_bldg') G.b.centre = (G.b.centre||0) + item.val;
+      if(item.type==='start_pd')   G.pd += item.val;
+    }
+  }
   saveGame();
-  POKE_RESET = false; togglePokedexReset(); // reset le toggle
+  POKE_RESET = false; togglePokedexReset();
   closeModal('md-pres');
+  let pmN=1; for(const up of UPGRADES){ if(up.type==='prestige_mult'&&G.bu.has(up.id)) pmN*=up.val; }
+  const crN=(0.02*pmN)+csBonus('candy_bonus');
+  const bonusDisp='×'+Math.pow(1+crN,G.rc).toFixed(3);
   const msg = gained>1
-    ? '🍬 '+gained+' Prestiges ! +'+gained+' bonbons — Bonus : ×'+Math.pow(1.02,G.rc).toFixed(3)
-    : '🍬 Prestige #'+G.pc+' ! +1 bonbon — Bonus : ×'+Math.pow(1.02,G.rc).toFixed(3);
+    ? '🍬 '+gained+' Prestiges ! +'+gained+' bonbons — Bonus : '+bonusDisp
+    : '🍬 Prestige #'+G.pc+' ! +1 bonbon — Bonus : '+bonusDisp;
   notif(msg,'ev');
   renderShop();
   updateUI();
@@ -1785,7 +1815,9 @@ function triggerEvent(forceNum){
     const candidates = POKEMON_GEN1.filter(p=>{
       const baseRate = SPAWN_RATE[p.rarity]||0;
       const resetBoost = POKE_RESET && !(G.pokedex&&G.pokedex[p.num]) ? (SPAWN_RATE_BOOST[p.rarity]||1) : 1;
-      return Math.random() < baseRate * resetBoost;
+      // cs_ultra : +0.5% chance pour les ultra/légendaires
+      const ultraBoost = (p.rarity==='ultra'||p.rarity==='legendaire') ? (1 + csBonus('ultra_rate') / (SPAWN_RATE[p.rarity]||0.001)) : 1;
+      return Math.random() < baseRate * resetBoost * ultraBoost;
     });
     ev = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : null;
   }
@@ -2310,6 +2342,8 @@ function openCandyShop(){
 function renderCandyShop(){
   const el = document.getElementById('candy-shop-list');
   if(!el) return;
+  const cc = document.getElementById('candy-count');
+  if(cc) cc.textContent = (G.rc||0)+' 🍬';
   el.innerHTML = CANDY_SHOP.map(item=>{
     const bought = G.cs&&G.cs.has(item.id);
     const canAfford = G.rc >= item.cost;
@@ -2941,9 +2975,17 @@ function updateUI(){
   const prog = presProgressInCycle(G);
   const pct = prog.goal > 0 ? Math.min(100, (prog.current / prog.goal) * 100) : 100;
 
-  // Ligne niveaux + bonus
+  // Ligne niveaux + bonus — vrai calcul compound : (1+taux)^rc − 1
   document.getElementById('pbar-candy').textContent = (G.pc||0);
-  document.getElementById('pbar-mult').textContent = G.pc > 0 ? '+'+((G.pc)*1).toFixed(0)+'%' : '';
+  if(G.rc > 0){
+    let prestigeMultUpgDisp = 1;
+    for(const up of UPGRADES){ if(up.type==='prestige_mult' && G.bu.has(up.id)) prestigeMultUpgDisp *= up.val; }
+    const candyRateDisp = (0.02 * prestigeMultUpgDisp) + csBonus('candy_bonus');
+    const realPct = ((Math.pow(1 + candyRateDisp, G.rc) - 1) * 100).toFixed(1);
+    document.getElementById('pbar-mult').textContent = '+'+realPct+'%';
+  } else {
+    document.getElementById('pbar-mult').textContent = '';
+  }
 
   // Barre 1 : prestige disponible
   const availWrap = document.getElementById('pbar-avail-wrap');
@@ -2961,7 +3003,12 @@ function updateUI(){
   document.getElementById('pbar-next-lbl').textContent = 'Prestige #'+nextLvl+' ('+fmtP(presThreshold(nextLvl))+')';
   document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal);
   document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
-  if(G.pc>0){ document.getElementById('b-candy').style.display=''; document.getElementById('b-pmult').textContent=(1+(G.pc||0)*0.01).toFixed(2);}
+  if(G.rc>0){
+    let pmDisp=1; for(const up of UPGRADES){ if(up.type==='prestige_mult'&&G.bu.has(up.id)) pmDisp*=up.val; }
+    const crDisp=(0.02*pmDisp)+csBonus('candy_bonus');
+    document.getElementById('b-candy').style.display='';
+    document.getElementById('b-pmult').textContent='×'+Math.pow(1+crDisp,G.rc).toFixed(3);
+  }
   // Upgrade / achievement badge counts
   const avail = UPGRADES.filter(u=>!G.bu.has(u.id)&&u.cond&&u.cond(G)&&G.pd>=u.cost).length;
   const newAch = ACHIEV.filter(a=>!G.ach.has(a.id)&&a.cond&&a.cond(G)).length;
