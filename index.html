@@ -481,7 +481,8 @@ function fmtT(s){s=Math.floor(s);const h=Math.floor(s/3600),m=Math.floor((s%3600
 // BUILDINGS (50)
 // ============================================================
 const BLDGS=[
-  // Coût remboursé en ~5-10 min pour le 1er exemplaire
+  // ★ BÂTIMENT DE BASE — chaque Pokéball = +1 ₽ par clic (pas de CPS)
+  {id:'pokeball',  em:'🔴',name:'Pokéball',                cost:50,      cps:0,      desc:'+1 ₽ par clic — la base de tout dresseur'},
   {id:'centre',    em:'🏥',name:'Centre Pokémon',           cost:300,     cps:1,      desc:'Soigne les Pokémon et génère des ₽'},
   {id:'boutique',  em:'🛍️',name:'Boutique Pokémon',          cost:2500,    cps:6,      desc:'Vend potions et Pokéballs'},
   {id:'labo',      em:'🔬',name:'Laboratoire du Professeur', cost:15e3,    cps:22,     desc:'Le Prof. Oak analyse vos Pokémon'},
@@ -539,9 +540,9 @@ const BLDGS=[
 // ============================================================
 const UPGRADES=[
   // --- Click flat ---
-  {id:'cf01',em:'⚡',name:'Pikachu',        cost:1500,   type:'click_flat',  val:1,    desc:'+1 ₽/clic',         cond:g=>g.tc>=50},
-  {id:'cf02',em:'🐭',name:'Raichu',         cost:8e3,    type:'click_flat',  val:5,    desc:'+5 ₽/clic',         cond:g=>g.tc>=300},
-  {id:'cf03',em:'💛',name:'Voltali',         cost:40e3,   type:'click_flat',  val:15,   desc:'+15 ₽/clic',        cond:g=>g.tc>=1e3},
+  {id:'cf01',em:'⚡',name:'Pikachu',        cost:5e3,    type:'click_flat',  val:5,    desc:'+5 ₽/clic',         cond:g=>g.tc>=200},
+  {id:'cf02',em:'🐭',name:'Raichu',         cost:25e3,   type:'click_flat',  val:15,   desc:'+15 ₽/clic',        cond:g=>g.tc>=800},
+  {id:'cf03',em:'💛',name:'Voltali',         cost:120e3,  type:'click_flat',  val:40,   desc:'+40 ₽/clic',        cond:g=>g.tc>=2e3},
   {id:'cf04',em:'🔩',name:'Magneton',        cost:200e3,  type:'click_flat',  val:50,   desc:'+50 ₽/clic',        cond:g=>g.tc>=3e3},
   {id:'cf05',em:'🟡',name:'Élekable',        cost:1e6,    type:'click_flat',  val:150,  desc:'+150 ₽/clic',       cond:g=>g.tc>=8e3},
   {id:'cf06',em:'🦅',name:'Électhor',        cost:5e6,    type:'click_flat',  val:500,  desc:'+500 ₽/clic',       cond:g=>g.tc>=25e3},
@@ -551,6 +552,11 @@ const UPGRADES=[
   {id:'cf10',em:'⚡',name:'Zekrom',          cost:3e9,    type:'click_flat',  val:50e3, desc:'+50 000 ₽/clic',    cond:g=>g.tc>=5e6},
   {id:'cf11',em:'🌩️',name:'Xurkitree',       cost:15e9,   type:'click_flat',  val:200e3,desc:'+200k ₽/clic',      cond:g=>g.tc>=20e6},
   {id:'cf12',em:'⚡',name:'Zeraora',         cost:80e9,   type:'click_flat',  val:1e6,  desc:'+1M ₽/clic',        cond:g=>g.tc>=100e6},
+  // --- Upgrades Pokéball (multiplient le +₽/clic par Pokéball) ---
+  // Sans upgrade: 1 Pokéball = +1₽/clic  Avec tout: 1 Pokéball = +8₽/clic
+  {id:'pb01',em:'🔴',name:'Pokéball Renforcée',    cost:500,    type:'pokeball_mult', val:2,   desc:'×2 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=5},
+  {id:'pb02',em:'⚪',name:'Superball',             cost:15e3,   type:'pokeball_mult', val:2,   desc:'×2 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=20},
+  {id:'pb03',em:'🟡',name:'Hyperball',             cost:200e3,  type:'pokeball_mult', val:2,   desc:'×2 bonus clic par Pokéball',  cond:g=>g.b.pokeball>=50},
   // --- Click multiplier (valeurs modérées, conditions sévères) ---
   {id:'cm01',em:'✌️',name:'Double Énergie',  cost:50e3,   type:'click_mult',  val:1.5,  desc:'x1.5 puissance clic',cond:g=>g.tc>=500},
   {id:'cm02',em:'💪',name:'Frappe Soutenue', cost:800e3,  type:'click_mult',  val:1.5,  desc:'encore x1.5 clic',   cond:g=>g.bu.has('cm01')&&g.tc>=5e3},
@@ -1085,6 +1091,12 @@ function calcCPS(g){
 function calcClickValue(g){
   g = g || G;
   let base = 1;
+  // Bonus Pokéball : chaque exemplaire × mult upgrades
+  let pbMult = 1;
+  for(const up of UPGRADES){
+    if(up.type==='pokeball_mult' && g.bu && g.bu.has(up.id)) pbMult *= up.val;
+  }
+  base += (g.b&&g.b.pokeball ? g.b.pokeball * pbMult : 0);
   // Flat bonuses
   for(const up of UPGRADES){
     if(up.type==='click_flat' && g.bu.has(up.id)) base += up.val;
@@ -1969,7 +1981,7 @@ function renderShopItems(){
 function renderBuildings(){
   let html = '';
   const tiers = [
-    {label:'⭐ DÉBUTANT',    ids:['centre','boutique','labo','arene','garderie']},
+    {label:'⭐ DÉBUTANT',    ids:['pokeball','centre','boutique','labo','arene','garderie']},
     {label:'🌿 EXPLORATION', ids:['safari','tour','casino','ssanne','ligue']},
     {label:'🚀 AVANCÉ',      ids:['exchange','rocket','iledawn','square','magma','aqua']},
     {label:'🌌 COSMIQUE',    ids:['espace','meteor','honte','unys','plasma','pwt','cristal']},
@@ -1992,9 +2004,20 @@ function renderBuildings(){
       const currentCps = bd.cps * owned * mult;
       const gainCps    = bd.cps * qty * mult;
       const qtyLabel   = QTY==='max' ? 'max' : qty;
-      const cpsLine    = owned > 0
-        ? `${fmtP(currentCps)}/s &bull; <span style="color:var(--green)">+${fmtP(gainCps)}/s</span> (x${qtyLabel})`
-        : `<span style="color:var(--green)">+${fmtP(gainCps)}/s</span> par achat (x${qtyLabel})`;
+      // Affichage spécial PokéBall : montre le bonus/clic, pas le CPS
+      let cpsLine;
+      if(bd.id === 'pokeball'){
+        let pbMult = 1;
+        for(const up of UPGRADES){ if(up.type==='pokeball_mult' && G.bu.has(up.id)) pbMult *= up.val; }
+        const perBall = 1 * pbMult;
+        cpsLine = owned > 0
+          ? fmtP(owned*perBall)+'/clic total &bull; <span style="color:var(--green)">+'+fmtP(qty*perBall)+'/clic</span> (x'+qtyLabel+')'
+          : '<span style="color:var(--green)">+'+fmtP(perBall)+'/clic</span> par achat (x'+qtyLabel+')';
+      } else {
+        cpsLine = owned > 0
+          ? fmtP(currentCps)+'/s &bull; <span style="color:var(--green)">+'+fmtP(gainCps)+'/s</span> (x'+qtyLabel+')'
+          : '<span style="color:var(--green)">+'+fmtP(gainCps)+'/s</span> par achat (x'+qtyLabel+')';
+      }
       html += '<div class="bcard '+(canAfford?'':'na')+'" onclick="buyBuilding(\''+bd.id+'\')">'
         +'<div class="bem">'+bd.em+'</div>'
         +'<div class="binfo">'
