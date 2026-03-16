@@ -251,6 +251,45 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 }
 .tog-btn.off{background:var(--card);color:var(--dim);border:1px solid var(--border)}
 .tog-btn.on{background:var(--red-l);color:#fff;box-shadow:0 0 10px rgba(229,57,53,.4)}
+
+/* ── TUTORIAL ─────────────────────────────────────────────────── */
+#md-tuto .modal{ max-width:420px; text-align:center; }
+.tuto-slide{ display:none; }
+.tuto-slide.active{ display:block; }
+.tuto-icon{ font-size:56px; margin-bottom:12px; line-height:1; }
+.tuto-title{
+  font-family:var(--fn-px); font-size:10px; color:var(--gold);
+  text-shadow:var(--glow-g); margin-bottom:10px;
+}
+.tuto-body{
+  font-size:11px; color:var(--dim); line-height:1.7;
+  background:var(--card); border-radius:10px;
+  padding:12px 14px; margin-bottom:14px;
+  border:1px solid var(--border);
+}
+.tuto-body strong{ color:var(--text); }
+.tuto-body em{ color:var(--gold); font-style:normal; font-weight:800; }
+.tuto-dots{
+  display:flex; gap:6px; justify-content:center; margin-bottom:14px;
+}
+.tuto-dot{
+  width:8px; height:8px; border-radius:50%;
+  background:var(--border); transition:.2s;
+}
+.tuto-dot.on{ background:var(--gold); transform:scale(1.3); }
+.tuto-nav{ display:flex; gap:8px; }
+.tuto-btn{
+  flex:1; padding:10px; border-radius:9px; border:1px solid var(--border);
+  background:var(--card); color:var(--dim); cursor:pointer;
+  font-family:var(--fn-px); font-size:8px; transition:var(--ease);
+}
+.tuto-btn.next{
+  background:linear-gradient(135deg,var(--purp-d),var(--blue));
+  border-color:var(--blue); color:#fff;
+}
+.tuto-btn:hover{ opacity:.85; }
+#tuto-skip{ font-size:9px; color:var(--dim); margin-top:10px;
+  cursor:pointer; text-decoration:underline; }
 </style>
 </head>
 <body>
@@ -1144,6 +1183,7 @@ function newGame(){
     evMult:1,         // Current event multiplier
     timeWarpMult:1,   // Dialga time warp multiplier
     timeWarpEnd:0,    // Dialga time warp end timestamp
+    tutoDone:false,   // Tuto vu
     megaCount:0,      // Nombre de Méga Prestiges
     megaMult:1,       // Multiplicateur permanent Méga Prestige
     megaDone:false,
@@ -2060,6 +2100,42 @@ const SPAWN_RATE_BOOST = {
   commun:1.5, peu_commun:2, rare:3, epique:4, legendaire:5, ultra:6
 };
 
+
+// ── Tutoriel ───────────────────────────────────────────────────────
+const TUTO_SLIDES = 5;
+let tutoStep = 1;
+
+function openTuto(){
+  tutoStep = 1;
+  updateTutoSlide();
+  document.getElementById('md-tuto').classList.add('on');
+}
+
+function closeTuto(){
+  document.getElementById('md-tuto').classList.remove('on');
+  G.tutoDone = true;
+  saveGame();
+}
+
+function tutoNav(dir){
+  tutoStep = Math.max(1, Math.min(TUTO_SLIDES, tutoStep + dir));
+  updateTutoSlide();
+  if(tutoStep === TUTO_SLIDES) closeTuto(); // Dernier slide → ferme
+}
+
+function updateTutoSlide(){
+  for(let i=1; i<=TUTO_SLIDES; i++){
+    const slide = document.getElementById('tuto-s'+i);
+    const dot   = document.getElementById('td'+i);
+    if(slide) slide.classList.toggle('active', i===tutoStep);
+    if(dot)   dot.classList.toggle('on', i===tutoStep);
+  }
+  const prev = document.getElementById('tuto-prev');
+  const next = document.getElementById('tuto-next');
+  if(prev) prev.style.display = tutoStep > 1 ? '' : 'none';
+  if(next) next.textContent = tutoStep === TUTO_SLIDES ? 'Commencer ! ⚡' : 'Suivant →';
+}
+
 function openHelp(){ document.getElementById('md-help').classList.add('on'); }
 
 function hardRefresh(){
@@ -2637,8 +2713,8 @@ renderShop();
 updateUI();
 
 // First launch greeting
-if(G.tc===0 && G.te===0){
-  setTimeout(()=>notif('⚡ Bienvenue dans Pokémon Clicker ! Cliquez sur la Pokéball !','ach'),500);
+if(G.tc===0 && G.te===0 && !G.tutoDone){
+  setTimeout(()=>openTuto(), 800);
 }
 </script>
 
@@ -2706,6 +2782,96 @@ if(G.tc===0 && G.te===0){
       3 défis renouvelés chaque jour à minuit. Complétez-les pour des récompenses !
     </div>
     <div id="daily-list"></div>
+  </div>
+</div>
+
+<!-- Tutorial Modal -->
+<div class="overlay" id="md-tuto" style="z-index:700">
+  <div class="modal">
+    <div class="modal-title" style="justify-content:center;color:var(--gold)">
+      ⚡ BIENVENUE DANS POKÉMON CLICKER !
+    </div>
+
+    <!-- Slide 1 : Cliquer -->
+    <div class="tuto-slide active" id="tuto-s1">
+      <div class="tuto-icon">🔴</div>
+      <div class="tuto-title">1 — CLIQUEZ SUR LA POKÉBALL !</div>
+      <div class="tuto-body">
+        Cliquez (ou tapez) sur la <strong>Pokéball</strong> pour gagner des
+        <em>Poké Dollars ₽</em>.<br><br>
+        Plus vous cliquez, plus vous gagnez ! Achetez des
+        <strong>Pokéballs</strong> pour augmenter la valeur de chaque clic.
+      </div>
+    </div>
+
+    <!-- Slide 2 : Bâtiments -->
+    <div class="tuto-slide" id="tuto-s2">
+      <div class="tuto-icon">🏢</div>
+      <div class="tuto-title">2 — ACHETEZ DES BÂTIMENTS</div>
+      <div class="tuto-body">
+        Les bâtiments produisent des <em>₽/seconde</em> automatiquement.<br><br>
+        Commencez par le <strong>Centre Pokémon</strong>, puis débloquez
+        des bâtiments de plus en plus puissants.<br><br>
+        Les <strong>Améliorations</strong> (onglet Amélios) multiplient
+        votre production.
+      </div>
+    </div>
+
+    <!-- Slide 3 : Pokémon events -->
+    <div class="tuto-slide" id="tuto-s3">
+      <div class="tuto-icon">✨</div>
+      <div class="tuto-title">3 — CAPTUREZ DES POKÉMON !</div>
+      <div class="tuto-body">
+        Des Pokémon apparaissent aléatoirement sur l'écran.
+        <em>Cliquez dessus vite</em> avant qu'ils disparaissent !<br><br>
+        Les <strong>Communs</strong> donnent des ₽ instantanés.<br>
+        Les <strong>Épiques</strong> boostent votre production ×5 à ×15.<br>
+        Les <strong>Légendaires</strong> et <em>Ultra</em> déclenchent
+        des multiplicateurs massifs ! 🌟
+      </div>
+    </div>
+
+    <!-- Slide 4 : Prestige -->
+    <div class="tuto-slide" id="tuto-s4">
+      <div class="tuto-icon">✨</div>
+      <div class="tuto-title">4 — LE SYSTÈME DE PRESTIGE</div>
+      <div class="tuto-body">
+        Une fois assez de ₽ gagnés légitimement, le bouton
+        <strong>✨ Prestige</strong> s'allume.<br><br>
+        Repartir de zéro vous donne un <em>Bonbon Rare 🍬</em>
+        qui augmente définitivement votre production de +2%.<br><br>
+        Plus vous prestigez, plus vous allez vite !
+      </div>
+    </div>
+
+    <!-- Slide 5 : Pokédex -->
+    <div class="tuto-slide" id="tuto-s5">
+      <div class="tuto-icon">📖</div>
+      <div class="tuto-title">5 — LE POKÉDEX</div>
+      <div class="tuto-body">
+        Chaque Pokémon capturé s'ajoute à votre <strong>Pokédex</strong>
+        (bouton 📖 dans le menu).<br><br>
+        <em>151 Pokémon de la Génération 1</em> à découvrir,
+        du Bulbizarre au Mew légendaire.<br><br>
+        Bonne chance, Dresseur ! <strong>⚡</strong>
+      </div>
+    </div>
+
+    <!-- Dots de progression -->
+    <div class="tuto-dots">
+      <div class="tuto-dot on" id="td1"></div>
+      <div class="tuto-dot" id="td2"></div>
+      <div class="tuto-dot" id="td3"></div>
+      <div class="tuto-dot" id="td4"></div>
+      <div class="tuto-dot" id="td5"></div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="tuto-nav">
+      <button class="tuto-btn" id="tuto-prev" onclick="tutoNav(-1)" style="display:none">← Précédent</button>
+      <button class="tuto-btn next" id="tuto-next" onclick="tutoNav(1)">Suivant →</button>
+    </div>
+    <div id="tuto-skip" onclick="closeTuto()">Passer le tutoriel</div>
   </div>
 </div>
 </body>
