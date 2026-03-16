@@ -1232,6 +1232,7 @@ function newGame(){
     megaCount:0,
     megaMult:1,
     megaDone:false,
+    buSanitized:false, // Flag migration one-shot nettoyage upgrades invalides
     lastSave: Date.now(),
     startTime: Date.now(),
   };
@@ -1946,6 +1947,19 @@ function loadGame(){
       if(gained > 0) notif('💤 Gains hors-ligne : +'+fmtP(gained)+' ('+Math.floor(offlineSecs)+'s)','buy');
     }
     G.sessions = (G.sessions||0)+1;
+    // Sanitisation des upgrades invalides (bug pre-fix : upgrades conservées au prestige)
+    // On retire toute upgrade dont la condition n'est plus remplie avec l'état actuel
+    if(!G.buSanitized){
+      const before = G.bu.size;
+      for(const up of UPGRADES){
+        if(G.bu.has(up.id)){
+          try{ if(!up.cond(G)) G.bu.delete(up.id); } catch(e){ G.bu.delete(up.id); }
+        }
+      }
+      G.buSanitized = true;
+      const removed = before - G.bu.size;
+      if(removed > 0) notif('🔧 '+removed+' amélioration(s) invalide(s) retirée(s) (correction bug prestige)','buy');
+    }
     // Migre immédiatement vers v3
     saveGame();
     // Forcer la mise à jour de l'UI perles après chargement
