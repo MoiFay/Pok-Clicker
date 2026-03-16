@@ -2228,24 +2228,30 @@ let _autoClickInterval = null;
 function startLegitAutoClick(durationSec){
   stopLegitAutoClick(); // annule si déjà actif
   G._autoClickEnd = Date.now() + durationSec * 1000;
-  const rate = 6; // 6 clics/s — naturel, pas suspect
+  const rate = 15; // 15 clics/s
   _autoClickInterval = setInterval(()=>{
     if(!G._autoClickEnd || Date.now() > G._autoClickEnd){
       stopLegitAutoClick();
       return;
     }
-    // Clic légit : même valeur que le vrai clic mais sans anti-AC
     const val = calcClickValue(G);
     G.pd += val;
     G.te += val;
     G.tl += val;
     G.tc++;
     updateDailies('clicks', 1);
-    spawnParticle(
-      window.innerWidth * 0.35 + Math.random() * 60 - 30,
-      window.innerHeight * 0.42 + Math.random() * 60 - 30,
-      '+' + fmtP(val)
-    );
+    // Particules centrées sur la Pokéball
+    const pb = document.getElementById('pb');
+    let cx, cy;
+    if(pb){
+      const rect = pb.getBoundingClientRect();
+      cx = rect.left + rect.width/2  + (Math.random()*40 - 20);
+      cy = rect.top  + rect.height/2 + (Math.random()*40 - 20);
+    } else {
+      cx = window.innerWidth * 0.2;
+      cy = window.innerHeight * 0.4;
+    }
+    spawnParticle(cx, cy, '+' + fmtP(val));
   }, Math.round(1000/rate));
 }
 
