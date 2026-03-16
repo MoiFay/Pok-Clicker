@@ -451,21 +451,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="modal-title">✨ PRESTIGE ✨<button class="mcls" onclick="closeModal('md-pres')">✕</button></div>
     <div class="pres-box">
       <div style="font-size:11px">Vous allez gagner :</div>
-      <div class="gain" id="pres-gain">0 🍬</div>
-      <p>Chaque <strong>niveau de prestige ⭐</strong> donne <strong>+1% de production permanente</strong> (additif).<br>Vous perdrez vos ₽, bâtiments et améliorations, mais gardez vos <em>niveaux de prestige</em>.</p>
+      <div class="gain" id="pres-gain">+1 niveau ⭐</div>
+      <p>Chaque <strong>niveau de prestige ⭐</strong> donne <strong>+1% de production permanente</strong> (additif).<br>Vous perdrez vos ₽, bâtiments, améliorations et pokédex (avant prestige 10), mais gardez vos <em>niveaux de prestige</em> et votre <em>Boutique Bonbons</em>.</p>
     </div>
     <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:8px" id="pres-info">
       <!-- rempli dynamiquement par openPrestige() -->
     </div>
-    <div class="poke-toggle">
-      <div class="tog-lbl">
-        🗑️ <strong>Réinitialiser le Pokédex</strong><br>
-        <small>OFF → Pokédex conservé après prestige<br>ON → Pokédex remis à 0 + <span style="color:var(--gold)">taux de rareté boostés</span></small>
-      </div>
-      <button class="tog-btn off" id="poke-reset-tog" onclick="togglePokedexReset()">OFF</button>
-    </div>
-    <div id="poke-reset-bonus" style="display:none;font-size:9px;color:var(--gold);text-align:center;margin-bottom:8px">
-      ⬆️ Commun ×1.5 · Peu commun ×2 · Rare ×3 · Épique ×4 · Légendaire ×5 · Ultra ×6
+    <div style="font-size:9px;color:var(--gold);text-align:center;margin-bottom:8px">
+      ⬆️ Pokédex réinitialisé · Commun ×1.5 · Peu commun ×2 · Rare ×3 · Épique ×4 · Légendaire ×5 · Ultra ×6
     </div>
     <button class="pres-go" id="pres-btn" onclick="doPrestige()">⭐ EFFECTUER LE PRESTIGE</button>
   </div>
@@ -824,11 +817,11 @@ const UPGRADES=[
   // Pokéball upgrade pour cohérence
   {id:'bm_pb1',em:'🔴',name:'Alliage Spécial',  cost:200,    type:'pokeball_mult', val:2, cond:g=>g.b.pokeball>=10, desc:'×2 bonus clic par Pokéball'},
 
-  // --- Upgrades Prestige ---
-  {id:'pm01',em:'🍬',name:'Sucre de Prestige', cost:20e6,   type:'prestige_mult',val:2, desc:'Double le bonus Prestige',   cond:g=>g.rc>=5},
-  {id:'pm02',em:'🍭',name:'Essence Rare',   cost:200e6,  type:'prestige_mult',val:3, desc:'Triple le bonus Prestige',   cond:g=>g.rc>=20},
-  {id:'pm03',em:'🌈',name:'Néctar Légendaire', cost:2e9,    type:'prestige_mult',val:5, desc:'Quintuple le bonus Prestige', cond:g=>g.rc>=50},
-  {id:'pm04',em:'♾️',name:'Ambroisie Divine', cost:50e9,   type:'prestige_mult',val:10,desc:'x10 bonus Prestige',         cond:g=>g.rc>=200},
+  // --- Upgrades Production Prestige (débloquées par niveaux de prestige) ---
+  {id:'pm01',em:'🍬',name:'Élan de Prestige',    cost:20e6,   type:'global_mult', val:1.10, desc:'+10% production globale',  cond:g=>(g.pc||0)>=1},
+  {id:'pm02',em:'🍭',name:'Vague de Prestige',   cost:200e6,  type:'global_mult', val:1.15, desc:'+15% production globale',  cond:g=>(g.pc||0)>=3},
+  {id:'pm03',em:'🌈',name:'Flux de Prestige',    cost:2e9,    type:'global_mult', val:1.25, desc:'+25% production globale',  cond:g=>(g.pc||0)>=5},
+  {id:'pm04',em:'♾️',name:'Maîtrise du Prestige',cost:50e9,   type:'global_mult', val:1.50, desc:'+50% production globale',  cond:g=>(g.pc||0)>=10},
 ];
 
 // ============================================================
@@ -1179,7 +1172,7 @@ const CANDY_SHOP = [
   {id:'cs_cps3',    em:'💎', name:'Puissance Ancestrale',cost:25,desc:'+30% production globale',        type:'global_flat',    val:0.30},
   {id:'cs_click',   em:'👆', name:'Dresseur Renforcé',  cost:5,  desc:'+10% puissance de clic',         type:'click_flat_pct', val:0.1},
   {id:'cs_click2',  em:'💥', name:'Frappe Légendaire',  cost:12, desc:'+25% puissance de clic',         type:'click_flat_pct', val:0.25},
-  {id:'cs_prestige',em:'🍬', name:'Bonus Bonbon',       cost:10, desc:'+0.5% bonus par bonbon (au lieu de 2%)', type:'candy_bonus', val:0.005},
+  {id:'cs_prestige',em:'🍬', name:'Mémoire de Prestige', cost:10, desc:'+10% production globale permanente', type:'global_flat', val:0.10},
   {id:'cs_start',   em:'🚀', name:'Départ Boosté',      cost:8,  desc:'Commence avec 1 Centre Pokémon', type:'start_bldg',     val:1},
   {id:'cs_start2',  em:'🏆', name:'Dresseur Vétéran',   cost:20, desc:'Commence avec un petit stock de ₽', type:'start_pd',   val:5000},
   {id:'cs_ultra',   em:'🌀', name:'Détecteur Ultra',    cost:15, desc:'+0.5% chance ultra-rares',       type:'ultra_rate',     val:0.005},
@@ -1236,8 +1229,8 @@ function newGame(){
     timeWarpMult:1,   // Dialga time warp multiplier
     timeWarpEnd:0,    // Dialga time warp end timestamp
     tutoDone:false,   // Tuto vu
-    megaCount:0,      // Nombre de Méga Prestiges
-    megaMult:1,       // Multiplicateur permanent Méga Prestige
+    megaCount:0,
+    megaMult:1,
     megaDone:false,
     lastSave: Date.now(),
     startTime: Date.now(),
@@ -1424,14 +1417,8 @@ function calcCPS(g){
     if(up.type==='global_mult' && g.bu.has(up.id)) gm *= up.val;
   }
   total *= gm;
-  // Prestige bonus: +2% par bonbon rare (rc) multiplicatif
-  // prestige_mult upgrades (pm01-pm04) multiplient le taux de base
-  let prestigeMultUpg = 1;
-  for(const up of UPGRADES){
-    if(up.type==='prestige_mult' && g.bu.has(up.id)) prestigeMultUpg *= up.val;
-  }
-  const candyRate = (0.02 * prestigeMultUpg) + csBonus('candy_bonus');
-  const presBonus = Math.pow(1 + candyRate, g.rc||0);
+  // Prestige bonus: +1% additif par niveau de prestige (prestige 20 = +20%)
+  const presBonus = 1 + (g.pc||0) * 0.01;
   total *= presBonus;
   // Achievement bonus: +0.5% per achievement
   total *= (1 + g.ach.size * 0.005);
@@ -1482,13 +1469,8 @@ function calcClickValue(g){
     if(up.type==='click_ratio' && g.bu.has(up.id)) ratio += up.val;
   }
   if(ratio > 0) base += calcCPS(g) * ratio;
-  // Prestige bonus: +2% par bonbon rare (prestige_mult upgrades appliquées ici aussi)
-  let prestigeMultUpg2 = 1;
-  for(const up of UPGRADES){
-    if(up.type==='prestige_mult' && g.bu.has(up.id)) prestigeMultUpg2 *= up.val;
-  }
-  const candyRate = (0.02 * prestigeMultUpg2) + csBonus('candy_bonus');
-  const presBonus = Math.pow(1 + candyRate, g.rc||0);
+  // Prestige bonus: +1% additif par niveau de prestige
+  const presBonus = 1 + (g.pc||0) * 0.01;
   base *= presBonus;
   // Event mult
   if(g.evEnd > Date.now()) base *= g.evMult;
@@ -1716,11 +1698,10 @@ function openPrestige(){
   const gained  = presAvailable(G);
   const newPc   = (G.pc||0) + gained;
   const prog    = presProgressInCycle(G);
-  // Vrai bonus compound basé sur rc (bonbons) et non sur pc (niveaux)
-  let pmDisp=1; for(const up of UPGRADES){ if(up.type==='prestige_mult'&&G.bu.has(up.id)) pmDisp*=up.val; }
-  const crDisp = (0.02*pmDisp) + csBonus('candy_bonus');
-  const curBonus = ((Math.pow(1+crDisp, G.rc||0)-1)*100).toFixed(1);
-  const newBonus = ((Math.pow(1+crDisp, (G.rc||0)+gained)-1)*100).toFixed(1);
+  // Bonus: +1% additif par niveau de prestige
+  const curBonus = ((G.pc||0) * 1).toFixed(0);
+  const newBonus = (newPc * 1).toFixed(0);
+  const willResetDex = newPc < 10;
   // Gain affiché
   document.getElementById('pres-gain').textContent =
     gained > 0
@@ -1740,7 +1721,10 @@ function openPrestige(){
     html += '<em style="color:var(--dim)">Encore '+fmtP(Math.max(0,nextGoal - G.te))+' à produire</em><br><br>';
   }
   html += 'Niveau prestige actuel : <strong>'+(G.pc||0)+'</strong> — Bonus : <strong>+'+curBonus+'%</strong><br>';
-  html += 'Après prestige : <strong>'+newPc+'</strong> — Bonus : <strong>+'+newBonus+'%</strong>';
+  html += 'Après prestige : <strong>'+newPc+'</strong> — Bonus : <strong>+'+newBonus+'%</strong><br>';
+  html += willResetDex
+    ? '<em style="color:var(--dim)">Pokédex remis à 0 (boosts spawn actifs)</em>'
+    : '<em style="color:var(--green)">✅ Pokédex conservé (prestige ≥ 10)</em>';
   document.getElementById('pres-info').innerHTML = html;
   document.getElementById('pres-btn').disabled = gained <= 0;
   document.getElementById('md-pres').classList.add('on');
@@ -1762,20 +1746,20 @@ function doPrestige(){
     maxCps:0, maxCombo:G.maxCombo, wentBroke:G.wentBroke,
     imported:G.imported, sessions:G.sessions, bestPrestige:G.bestPrestige,
     offlineEarned:G.offlineEarned, capturés:G.capturés,
-    pokedex: POKE_RESET ? {} : (G.pokedex||{}),  // Reset si toggle ON
+    // Pokédex reset uniquement si pc < 10 — conservé à partir du prestige 10
+    pokedex: G.pc < 10 ? {} : (G.pokedex||{}),
     pearls:G.pearls||0, triplets:G.triplets||0, grandes:G.grandes||0,
     pearlBar:G.pearlBar||0, itemEnd:G.itemEnd||{}, lastMissed:G.lastMissed||null,
     megaCount:G.megaCount||0, megaMult:G.megaMult||1, megaDone:G.megaDone||false,
     b: Object.fromEntries(BLDGS.map(b=>[b.id,0])),
-    bu: new Set(),          // ← Upgrades RÉINITIALISÉES au prestige
-    cs: new Set(G.cs||new Set()), // ← Candy shop CONSERVÉ
+    bu: new Set(),
+    cs: new Set(G.cs||new Set()),
     ach: new Set(G.ach),
     evMult:1, evEnd:0, timeWarpMult:1, timeWarpEnd:0,
     lastSave:Date.now(), startTime:Date.now(),
   };
   stopLegitAutoClick();
   G = keep;
-  // Réappliquer les bonus de départ du candy shop (conservé après prestige)
   for(const item of CANDY_SHOP){
     if(G.cs.has(item.id)){
       if(item.type==='start_bldg') G.b.centre = (G.b.centre||0) + item.val;
@@ -1783,14 +1767,11 @@ function doPrestige(){
     }
   }
   saveGame();
-  POKE_RESET = false; togglePokedexReset();
   closeModal('md-pres');
-  let pmN=1; for(const up of UPGRADES){ if(up.type==='prestige_mult'&&G.bu.has(up.id)) pmN*=up.val; }
-  const crN=(0.02*pmN)+csBonus('candy_bonus');
-  const bonusDisp='×'+Math.pow(1+crN,G.rc).toFixed(3);
+  const bonusPct = G.pc; // +1% par niveau
   const msg = gained>1
-    ? '🍬 '+gained+' Prestiges ! +'+gained+' bonbons — Bonus : '+bonusDisp
-    : '🍬 Prestige #'+G.pc+' ! +1 bonbon — Bonus : '+bonusDisp;
+    ? '⭐ '+gained+' Prestiges ! Bonus total : +'+bonusPct+'%'
+    : '⭐ Prestige #'+G.pc+' ! Bonus total : +'+bonusPct+'%';
   notif(msg,'ev');
   renderShop();
   updateUI();
@@ -1814,7 +1795,7 @@ function triggerEvent(forceNum){
     }
     const candidates = POKEMON_GEN1.filter(p=>{
       const baseRate = SPAWN_RATE[p.rarity]||0;
-      const resetBoost = POKE_RESET && !(G.pokedex&&G.pokedex[p.num]) ? (SPAWN_RATE_BOOST[p.rarity]||1) : 1;
+      const resetBoost = (G.pc||0) >= 1 && !(G.pokedex&&G.pokedex[p.num]) ? (SPAWN_RATE_BOOST[p.rarity]||1) : 1;
       // cs_ultra : +0.5% chance pour les ultra/légendaires
       const ultraBoost = (p.rarity==='ultra'||p.rarity==='legendaire') ? (1 + csBonus('ultra_rate') / (SPAWN_RATE[p.rarity]||0.001)) : 1;
       return Math.random() < baseRate * resetBoost * ultraBoost;
@@ -2023,9 +2004,11 @@ function recoverOldSave(){
     G = {...newGame(), ...data};
     G.bu = deserializeSet(data.bu);
     G.ach = deserializeSet(data.ach);
+    G.cs = deserializeSet(data.cs||[]);
     G.b = {...newGame().b, ...data.b};
     G.capturés = {...newGame().capturés, ...data.capturés};
-    saveGame(); // Sauvegarde dans v3
+    G.pokedex = {...(data.pokedex||{})};
+    saveGame();
     closeModal('md-save');
     notif('✅ Ancienne progression récupérée !','buy');
     renderShop(); updateUI();
@@ -2198,20 +2181,7 @@ function initSoundBtn(){
 
 
 // ── Pokédex reset toggle ───────────────────────────────────────
-let POKE_RESET = false;
-
-function togglePokedexReset(){
-  POKE_RESET = !POKE_RESET;
-  const btn = document.getElementById('poke-reset-tog');
-  const bonus = document.getElementById('poke-reset-bonus');
-  if(btn){
-    btn.textContent = POKE_RESET ? 'ON' : 'OFF';
-    btn.className = 'tog-btn ' + (POKE_RESET ? 'on' : 'off');
-  }
-  if(bonus) bonus.style.display = POKE_RESET ? 'block' : 'none';
-}
-
-// Multiplicateurs de taux si pokédex reset activé
+// Multiplicateurs de taux actifs après prestige (pokédex toujours reset)
 const SPAWN_RATE_BOOST = {
   commun:1.5, peu_commun:2, rare:3, epique:4, legendaire:5, ultra:6
 };
@@ -2975,17 +2945,9 @@ function updateUI(){
   const prog = presProgressInCycle(G);
   const pct = prog.goal > 0 ? Math.min(100, (prog.current / prog.goal) * 100) : 100;
 
-  // Ligne niveaux + bonus — vrai calcul compound : (1+taux)^rc − 1
+  // Ligne niveaux + bonus — +1% additif par niveau
   document.getElementById('pbar-candy').textContent = (G.pc||0);
-  if(G.rc > 0){
-    let prestigeMultUpgDisp = 1;
-    for(const up of UPGRADES){ if(up.type==='prestige_mult' && G.bu.has(up.id)) prestigeMultUpgDisp *= up.val; }
-    const candyRateDisp = (0.02 * prestigeMultUpgDisp) + csBonus('candy_bonus');
-    const realPct = ((Math.pow(1 + candyRateDisp, G.rc) - 1) * 100).toFixed(1);
-    document.getElementById('pbar-mult').textContent = '+'+realPct+'%';
-  } else {
-    document.getElementById('pbar-mult').textContent = '';
-  }
+  document.getElementById('pbar-mult').textContent = G.pc > 0 ? '+'+(G.pc)+'%' : '';
 
   // Barre 1 : prestige disponible
   const availWrap = document.getElementById('pbar-avail-wrap');
@@ -3003,11 +2965,9 @@ function updateUI(){
   document.getElementById('pbar-next-lbl').textContent = 'Prestige #'+nextLvl+' ('+fmtP(presThreshold(nextLvl))+')';
   document.getElementById('pbar-txt').textContent = fmtP(prog.current) + ' / ' + fmtP(prog.goal);
   document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
-  if(G.rc>0){
-    let pmDisp=1; for(const up of UPGRADES){ if(up.type==='prestige_mult'&&G.bu.has(up.id)) pmDisp*=up.val; }
-    const crDisp=(0.02*pmDisp)+csBonus('candy_bonus');
+  if(G.pc>0){
     document.getElementById('b-candy').style.display='';
-    document.getElementById('b-pmult').textContent='×'+Math.pow(1+crDisp,G.rc).toFixed(3);
+    document.getElementById('b-pmult').textContent='×'+(1+G.pc*0.01).toFixed(2);
   }
   // Upgrade / achievement badge counts
   const avail = UPGRADES.filter(u=>!G.bu.has(u.id)&&u.cond&&u.cond(G)&&G.pd>=u.cost).length;
@@ -3335,9 +3295,9 @@ if(G.tc===0 && G.te===0 && !G.tutoDone){
       <div class="tuto-body">
         Une fois assez de ₽ gagnés légitimement, le bouton
         <strong>✨ Prestige</strong> s'allume.<br><br>
-        Repartir de zéro vous donne un <em>Bonbon Rare 🍬</em>
-        qui augmente définitivement votre production de +2%.<br><br>
-        Plus vous prestigez, plus vous allez vite !
+        Repartir de zéro vous donne <strong>+1% de production permanente</strong> par niveau de prestige.<br>
+        Prestige 10 = <strong>+10%</strong>, prestige 20 = <strong>+20%</strong>…<br><br>
+        Le Pokédex se remet à 0 (avant prestige 10) et des <em>taux de rencontre boostés</em> s'activent pour les Pokémon non capturés ! 🌟
       </div>
     </div>
 
