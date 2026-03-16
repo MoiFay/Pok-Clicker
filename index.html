@@ -1806,16 +1806,15 @@ function triggerEvent(forceNum){
     pop.style.boxShadow = '';
     pop.style.animation = 'evFloat 2.2s ease-in-out infinite';
   }
-  // Timer de disparition si pas cliqué
+  // Timer de disparition si pas cliqué — 30s fixe
+  const evDurFinal = 30 * getItemStayMult();
   clearTimeout(window._evTimeout);
   window._evTimeout = setTimeout(()=>{
     if(activeEventId===ev.num){
-      // Disparaît sans bonus
-      G.lastMissed = ev.num; // Mémoriser pour le Rappel
+      G.lastMissed = ev.num;
       document.getElementById('ev-popup').style.display='none';
       activeEventId = null;
     }
-  const evDurFinal = (SPAWN_DUR[ev.rarity]||ev.dur||10) * getItemStayMult();
   }, evDurFinal * 1000);
   startEventTimer(evDurFinal);
   notif(ev.em+' '+(isUltra?'⭐ ULTRA-RARE ! ':'')+ev.name+' apparaît ! Cliquez vite !', 'ev');
@@ -2042,8 +2041,9 @@ let _evTimerInterval = null;
 function startEventTimer(dur){
   const el = document.getElementById('ev-timer');
   if(!el) return;
+  let remaining = Math.floor(dur);
   el.style.display = 'block';
-  let remaining = dur;
+  el.style.color = 'var(--gold)';
   el.textContent = '⏱ ' + remaining + 's';
   clearInterval(_evTimerInterval);
   _evTimerInterval = setInterval(()=>{
@@ -2053,8 +2053,7 @@ function startEventTimer(dur){
       el.style.display = 'none';
     } else {
       el.textContent = '⏱ ' + remaining + 's';
-      // Couleur rouge si urgent
-      el.style.color = remaining <= 3 ? 'var(--red-l)' : 'var(--gold)';
+      el.style.color = remaining <= 5 ? 'var(--red-l)' : 'var(--gold)';
     }
   }, 1000);
 }
