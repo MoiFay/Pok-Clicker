@@ -452,7 +452,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
     <div class="pres-box">
       <div style="font-size:11px">Vous allez gagner :</div>
       <div class="gain" id="pres-gain">+1 niveau ⭐</div>
-      <p>Chaque <strong>niveau de prestige ⭐</strong> donne <strong>+1% de production permanente</strong> (additif).<br>Vous perdrez vos ₽, bâtiments, améliorations et pokédex (avant prestige 10), mais gardez vos <em>niveaux de prestige</em> et votre <em>Boutique Bonbons</em>.</p>
+      <p>Chaque <strong>niveau de prestige ⭐</strong> donne <strong>+2% de production permanente</strong> (additif).<br>Vous perdrez vos ₽, bâtiments, améliorations et pokédex (avant prestige 10), mais gardez vos <em>niveaux de prestige</em> et votre <em>Boutique Bonbons</em>.</p>
     </div>
     <div style="font-size:10px;color:var(--dim);text-align:center;margin-bottom:8px" id="pres-info">
       <!-- rempli dynamiquement par openPrestige() -->
@@ -1418,7 +1418,7 @@ function calcCPS(g){
   }
   total *= gm;
   // Prestige bonus: +1% additif par niveau de prestige (prestige 20 = +20%)
-  const presBonus = 1 + (g.pc||0) * 0.01;
+  const presBonus = 1 + (g.pc||0) * 0.02;
   total *= presBonus;
   // Achievement bonus: +0.5% per achievement
   total *= (1 + g.ach.size * 0.005);
@@ -1470,7 +1470,7 @@ function calcClickValue(g){
   }
   if(ratio > 0) base += calcCPS(g) * ratio;
   // Prestige bonus: +1% additif par niveau de prestige
-  const presBonus = 1 + (g.pc||0) * 0.01;
+  const presBonus = 1 + (g.pc||0) * 0.02;
   base *= presBonus;
   // Event mult
   if(g.evEnd > Date.now()) base *= g.evMult;
@@ -1699,8 +1699,8 @@ function openPrestige(){
   const newPc   = (G.pc||0) + gained;
   const prog    = presProgressInCycle(G);
   // Bonus: +1% additif par niveau de prestige
-  const curBonus = ((G.pc||0) * 1).toFixed(0);
-  const newBonus = (newPc * 1).toFixed(0);
+  const curBonus = ((G.pc||0) * 2).toFixed(0);
+  const newBonus = (newPc * 2).toFixed(0);
   const willResetDex = newPc < 10;
   // Gain affiché
   document.getElementById('pres-gain').textContent =
@@ -1768,7 +1768,7 @@ function doPrestige(){
   }
   saveGame();
   closeModal('md-pres');
-  const bonusPct = G.pc; // +1% par niveau
+  const bonusPct = G.pc * 2; // +2% par niveau
   const msg = gained>1
     ? '⭐ '+gained+' Prestiges ! Bonus total : +'+bonusPct+'%'
     : '⭐ Prestige #'+G.pc+' ! Bonus total : +'+bonusPct+'%';
@@ -3058,7 +3058,7 @@ function updateUI(){
 
   // Ligne niveaux + bonus — +1% additif par niveau
   document.getElementById('pbar-candy').textContent = (G.pc||0);
-  document.getElementById('pbar-mult').textContent = G.pc > 0 ? '+'+(G.pc)+'%' : '';
+  document.getElementById('pbar-mult').textContent = G.pc > 0 ? '+'+(G.pc*2)+'%' : '';
 
   // Barre 1 : prestige disponible
   const availWrap = document.getElementById('pbar-avail-wrap');
@@ -3090,7 +3090,7 @@ function updateUI(){
   document.getElementById('pbar-pct').textContent = pct.toFixed(1)+'%';
   if(G.pc>0){
     document.getElementById('b-candy').style.display='';
-    document.getElementById('b-pmult').textContent='×'+(1+G.pc*0.01).toFixed(2);
+    document.getElementById('b-pmult').textContent='×'+(1+G.pc*0.02).toFixed(2);
   }
   // Upgrade / achievement badge counts
   const avail = UPGRADES.filter(u=>!G.bu.has(u.id)&&u.cond&&u.cond(G)&&G.pd>=u.cost).length;
@@ -3418,8 +3418,8 @@ if(G.tc===0 && G.te===0 && !G.tutoDone){
       <div class="tuto-body">
         Une fois assez de ₽ gagnés légitimement, le bouton
         <strong>✨ Prestige</strong> s'allume.<br><br>
-        Repartir de zéro vous donne <strong>+1% de production permanente</strong> par niveau de prestige.<br>
-        Prestige 10 = <strong>+10%</strong>, prestige 20 = <strong>+20%</strong>…<br><br>
+        Repartir de zéro vous donne <strong>+2% de production permanente</strong> par niveau de prestige.<br>
+        Prestige 10 = <strong>+20%</strong>, prestige 20 = <strong>+40%</strong>…<br><br>
         Le Pokédex se remet à 0 (avant prestige 10) et des <em>taux de rencontre boostés</em> s'activent pour les Pokémon non capturés ! 🌟
       </div>
     </div>
