@@ -391,7 +391,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
         <img src="Items/perle.png"><span id="pearl-count">0</span>
         <img src="Items/perle_triple.png"><span id="triple-count">0</span>
         <img src="Items/grande_perle.png"><span id="grande-count">0</span>
-        <button onclick="convertPearls()" style="margin-left:auto;padding:2px 6px;background:var(--card);border:1px solid var(--blue);border-radius:5px;color:var(--blue);font-size:7px;cursor:pointer">Convertir</button>
+        <button onclick="openConvertModal()" style="margin-left:auto;padding:2px 6px;background:var(--card);border:1px solid var(--blue);border-radius:5px;color:var(--blue);font-size:7px;cursor:pointer">Convertir</button>
       </div>
     </div>
     <div id="badge-row">
@@ -701,7 +701,7 @@ const UPGRADES=[
   {id:'gm07',em:'🌟',name:'Nexus Cosmique',      cost:800e9,  type:'global_mult', val:1.30, desc:'+30% production',  cond:g=>(g.tl||0)>=200e9},
   {id:'gm08',em:'💥',name:'Résonance Ultra',     cost:8e12,   type:'global_mult', val:1.40, desc:'+40% production',  cond:g=>(g.tl||0)>=2e12},
   {id:'gm09',em:'✨',name:'Puissance Divine',    cost:80e12,  type:'global_mult', val:1.50, desc:'+50% production',  cond:g=>(g.tl||0)>=20e12},
-  {id:'gm10',em:'♾️',name:'Infini',              cost:1e15,   type:'global_mult', val:1.75, desc:'+75% production',  cond:g=>(g.tl||0)>=200e12},
+  {id:'gm10',em:'♾️',name:'Infini',              cost:1e15,   type:'global_mult', val:1.50, desc:'+50% production',  cond:g=>(g.tl||0)>=200e12},
   // --- Multiplicateurs par batiment (besoin 15 puis 50) ---
   {id:'bm_ce1',em:'🏥',name:'Soins Renforcés',    cost:5e3,    type:'bldg_mult',bId:'centre',    val:1.5,cond:g=>g.b.centre>=25,   desc:'+50% Centres Pokemon'},
   {id:'bm_ce2',em:'🏥',name:'Réseau de Soins',    cost:30e3,   type:'bldg_mult',bId:'centre',    val:1.3,cond:g=>g.b.centre>=75,   desc:'+30% Centres'},
@@ -793,7 +793,7 @@ const UPGRADES=[
   {id:'bm_mi2',em:'✨',name:'Double Reflet',   cost:6e21,   type:'bldg_mult',bId:'miroir',    val:1.3,cond:g=>g.b.miroir>=50,   desc:'+30% Miroir'},
   {id:'bm_zo2',em:'🌑',name:'Ténèbres Profondes',      cost:40e21,  type:'bldg_mult',bId:'zone',      val:1.3,cond:g=>g.b.zone>=50,    desc:'+30% Zone Obscure'},
   {id:'bm_pa2',em:'🏯',name:'Palais Impérial',    cost:250e21, type:'bldg_mult',bId:'palais',    val:1.3,cond:g=>g.b.palais>=50,  desc:'+30% Palais'},
-  {id:'bm_ga2',em:'🛰️',name:'Quartier Général +',     cost:1.5e24, type:'bldg_mult',bId:'galactic',  val:1.3,cond:g=>g.b.galactic>=50,desc:'+30% Galactique'},
+  {id:'bm_gl2',em:'🛰️',name:'Quartier Général +',     cost:1.5e24, type:'bldg_mult',bId:'galactic',  val:1.3,cond:g=>g.b.galactic>=50,desc:'+30% Galactique'},
   {id:'bm_st2',em:'⌛',name:'Distorsion Totale',       cost:10e24,  type:'bldg_mult',bId:'spacetime', val:1.3,cond:g=>g.b.spacetime>=50,desc:'+30% Espace-Temps'},
   {id:'bm_di2',em:'💫',name:'Distorsion Extrême',       cost:65e24,  type:'bldg_mult',bId:'distort',   val:1.3,cond:g=>g.b.distort>=50, desc:'+30% Distorsion'},
   {id:'bm_dr2',em:'💤',name:'Monde Onirique',        cost:400e24, type:'bldg_mult',bId:'dream',     val:1.3,cond:g=>g.b.dream>=50,   desc:'+30% Reves'},
@@ -2393,9 +2393,9 @@ const PEARL_POINTS = {
 };
 const PEARL_BAR_MAX = 100; // 100 points = 1 Perle
 
-// Conversion : 30 perles → 1 perle triple | 10 triples → 1 grande perle
-const PEARL_TO_TRIPLE = 30;
-const TRIPLE_TO_GRANDE = 10;
+// Conversion : 3 perles → 1 perle triple | 5 triples → 1 grande perle
+const PEARL_TO_TRIPLE = 3;
+const TRIPLE_TO_GRANDE = 5;
 
 // Boutique perles
 const PEARL_SHOP = [
@@ -2701,36 +2701,135 @@ function addPearlPoints(rarity){
     G.pearls = (G.pearls||0) + gained;
     updateDailies('pearls', gained);
     notif('🔵 +'+gained+' Perle'+(gained>1?'s':'')+' gagnée'+(gained>1?'s':'')+' ! ('+G.pearls+' total)','buy');
-    autoConvertPearls();
-    saveGame(); // Sauvegarder immédiatement quand on gagne une perle
+    saveGame();
   }
   updatePearlUI();
 }
 
-function autoConvertPearls(){
-  // Auto-convert : pas automatique, le joueur choisit
-  // On ne fait que mettre à jour l'UI
-  updatePearlUI();
+function openConvertModal(){
+  renderConvertPanel();
+  document.getElementById('md-convert').classList.add('on');
 }
 
-function convertPearls(){
-  // Perles → Triples
-  const t = Math.floor((G.pearls||0) / PEARL_TO_TRIPLE);
-  if(t > 0){
-    G.pearls -= t * PEARL_TO_TRIPLE;
-    G.triplets = (G.triplets||0) + t;
-    notif('💎 +'+t+' Perle'+(t>1?'s':'')+' Triple'+(t>1?'s':'')+'  !','buy');
-  }
-  // Triples → Grande
-  const g = Math.floor((G.triplets||0) / TRIPLE_TO_GRANDE);
-  if(g > 0){
-    G.triplets -= g * TRIPLE_TO_GRANDE;
-    G.grandes = (G.grandes||0) + g;
-    notif('✨ +'+g+' Grande'+(g>1?'s':'')+' Perle'+(g>1?'s':'')+'  !','buy');
-  }
-  updatePearlUI();
-  renderPearlShop();
+function renderConvertPanel(){
+  const el = document.getElementById('convert-panel');
+  if(!el) return;
+  const p = G.pearls||0, t = G.triplets||0;
+  const maxPtoT = Math.floor(p / PEARL_TO_TRIPLE);
+  const maxTtoG = Math.floor(t / TRIPLE_TO_GRANDE);
+  el.innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;color:var(--dim);margin-bottom:8px;text-align:center">
+        <strong style="color:var(--blue)">${PEARL_TO_TRIPLE} Perles</strong> → 1 Perle Triple &nbsp;|&nbsp;
+        <strong style="color:var(--purple)">${TRIPLE_TO_GRANDE} Perles Triples</strong> → 1 Grande Perle
+      </div>
+
+      <!-- Perle → Triple -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <img src="Items/perle.png" style="width:20px;image-rendering:pixelated">
+          <span style="font-size:10px;font-weight:800;flex:1">Perles → Triples</span>
+          <span style="font-size:9px;color:var(--dim)">Stock : <strong style="color:var(--blue)">${p}</strong> perles</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="number" id="conv-pt-qty" min="1" max="${maxPtoT||1}" value="${maxPtoT||1}"
+            style="flex:1;background:var(--bg);border:1px solid var(--border-b);border-radius:6px;color:var(--text);padding:5px 8px;font-size:11px;font-family:var(--fn)"
+            oninput="updateConvPreview('pt')">
+          <span style="font-size:9px;color:var(--dim);white-space:nowrap">× ${PEARL_TO_TRIPLE} =</span>
+          <span id="conv-pt-cost" style="font-size:11px;font-weight:800;color:var(--blue);min-width:36px">${(maxPtoT||1)*PEARL_TO_TRIPLE}</span>
+          <span style="font-size:9px;color:var(--dim)">perles</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span id="conv-pt-msg" style="font-size:9px;color:var(--dim)">→ obtiendrez <strong id="conv-pt-get" style="color:var(--purple)">${maxPtoT||1}</strong> Perle${(maxPtoT||1)>1?'s':''} Triple${(maxPtoT||1)>1?'s':''}</span>
+          <button onclick="doConvert('pt')"
+            style="padding:5px 12px;background:${maxPtoT>0?'var(--purp-d)':'var(--card)'};border:1px solid ${maxPtoT>0?'var(--purp-d)':'var(--border)'};border-radius:7px;color:${maxPtoT>0?'#fff':'var(--dim)'};font-size:9px;cursor:${maxPtoT>0?'pointer':'not-allowed'};font-family:var(--fn);font-weight:800">
+            Convertir
+          </button>
+        </div>
+        ${maxPtoT===0?'<div style="font-size:9px;color:var(--red-l);margin-top:4px">❌ Pas assez de perles (besoin de '+PEARL_TO_TRIPLE+')</div>':''}
+      </div>
+
+      <!-- Triple → Grande -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;padding:10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <img src="Items/perle_triple.png" style="width:20px;image-rendering:pixelated">
+          <span style="font-size:10px;font-weight:800;flex:1">Triples → Grandes</span>
+          <span style="font-size:9px;color:var(--dim)">Stock : <strong style="color:var(--purple)">${t}</strong> triples</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="number" id="conv-tg-qty" min="1" max="${maxTtoG||1}" value="${maxTtoG||1}"
+            style="flex:1;background:var(--bg);border:1px solid var(--border-b);border-radius:6px;color:var(--text);padding:5px 8px;font-size:11px;font-family:var(--fn)"
+            oninput="updateConvPreview('tg')">
+          <span style="font-size:9px;color:var(--dim);white-space:nowrap">× ${TRIPLE_TO_GRANDE} =</span>
+          <span id="conv-tg-cost" style="font-size:11px;font-weight:800;color:var(--purple);min-width:36px">${(maxTtoG||1)*TRIPLE_TO_GRANDE}</span>
+          <span style="font-size:9px;color:var(--dim)">triples</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span id="conv-tg-msg" style="font-size:9px;color:var(--dim)">→ obtiendrez <strong id="conv-tg-get" style="color:var(--gold)">${maxTtoG||1}</strong> Grande${(maxTtoG||1)>1?'s':''} Perle${(maxTtoG||1)>1?'s':''}</span>
+          <button onclick="doConvert('tg')"
+            style="padding:5px 12px;background:${maxTtoG>0?'var(--gold)':'var(--card)'};border:1px solid ${maxTtoG>0?'var(--gold)':'var(--border)'};border-radius:7px;color:${maxTtoG>0?'#111':'var(--dim)'};font-size:9px;cursor:${maxTtoG>0?'pointer':'not-allowed'};font-family:var(--fn);font-weight:800">
+            Convertir
+          </button>
+        </div>
+        ${maxTtoG===0?'<div style="font-size:9px;color:var(--red-l);margin-top:4px">❌ Pas assez de triples (besoin de '+TRIPLE_TO_GRANDE+')</div>':''}
+      </div>
+    </div>`;
 }
+
+function updateConvPreview(type){
+  if(type==='pt'){
+    const qty = parseInt(document.getElementById('conv-pt-qty')?.value)||1;
+    const cost = qty * PEARL_TO_TRIPLE;
+    const enough = (G.pearls||0) >= cost;
+    const costEl = document.getElementById('conv-pt-cost');
+    const getEl  = document.getElementById('conv-pt-get');
+    const msgEl  = document.getElementById('conv-pt-msg');
+    if(costEl) costEl.textContent = cost;
+    if(costEl) costEl.style.color = enough ? 'var(--blue)' : 'var(--red-l)';
+    if(getEl)  getEl.textContent  = qty;
+    if(msgEl)  msgEl.innerHTML    = enough
+      ? '→ obtiendrez <strong style="color:var(--purple)">' + qty + '</strong> Perle' + (qty>1?'s':'') + ' Triple' + (qty>1?'s':'')
+      : '<span style="color:var(--red-l)">❌ Pas assez (tu as '+(G.pearls||0)+', besoin de '+cost+')</span>';
+  } else {
+    const qty = parseInt(document.getElementById('conv-tg-qty')?.value)||1;
+    const cost = qty * TRIPLE_TO_GRANDE;
+    const enough = (G.triplets||0) >= cost;
+    const costEl = document.getElementById('conv-tg-cost');
+    const getEl  = document.getElementById('conv-tg-get');
+    const msgEl  = document.getElementById('conv-tg-msg');
+    if(costEl) costEl.textContent = cost;
+    if(costEl) costEl.style.color = enough ? 'var(--purple)' : 'var(--red-l)';
+    if(getEl)  getEl.textContent  = qty;
+    if(msgEl)  msgEl.innerHTML    = enough
+      ? '→ obtiendrez <strong style="color:var(--gold)">' + qty + '</strong> Grande' + (qty>1?'s':'') + ' Perle' + (qty>1?'s':'')
+      : '<span style="color:var(--red-l)">❌ Pas assez (tu as '+(G.triplets||0)+', besoin de '+cost+')</span>';
+  }
+}
+
+function doConvert(type){
+  if(type==='pt'){
+    const qty = parseInt(document.getElementById('conv-pt-qty')?.value)||0;
+    const cost = qty * PEARL_TO_TRIPLE;
+    if(qty <= 0) return;
+    if((G.pearls||0) < cost){ notif('❌ Pas assez de perles !','ev'); return; }
+    G.pearls   -= cost;
+    G.triplets  = (G.triplets||0) + qty;
+    notif('💎 +'+qty+' Perle'+(qty>1?'s':'')+' Triple'+(qty>1?'s':'')+' !','buy');
+  } else {
+    const qty = parseInt(document.getElementById('conv-tg-qty')?.value)||0;
+    const cost = qty * TRIPLE_TO_GRANDE;
+    if(qty <= 0) return;
+    if((G.triplets||0) < cost){ notif('❌ Pas assez de perles triples !','ev'); return; }
+    G.triplets -= cost;
+    G.grandes   = (G.grandes||0) + qty;
+    notif('✨ +'+qty+' Grande'+(qty>1?'s':'')+' Perle'+(qty>1?'s':'')+' !','buy');
+  }
+  saveGame();
+  updatePearlUI();
+  renderConvertPanel();
+}
+
+function convertPearls(){ openConvertModal(); }
 
 function updatePearlUI(){
   const pct = Math.min(100, ((G.pearlBar||0)/PEARL_BAR_MAX)*100);
@@ -3398,11 +3497,24 @@ if(G.tc===0 && G.te===0 && !G.tutoDone){
         <img src="Items/grande_perle.png" style="width:20px;image-rendering:pixelated"><br>
         <span style="font-size:10px;font-weight:800" id="grande-count-modal">0</span>
       </div>
-      <button onclick="convertPearls();renderPearlShop()" style="padding:6px 12px;background:var(--card);border:1px solid #1E88E5;border-radius:7px;color:#1E88E5;font-size:9px;cursor:pointer;align-self:center">
+      <button onclick="convertPearls()" style="padding:6px 12px;background:var(--card);border:1px solid #1E88E5;border-radius:7px;color:#1E88E5;font-size:9px;cursor:pointer;align-self:center">
         🔄 Convertir
       </button>
     </div>
     <div id="pearl-shop-list"></div>
+  </div>
+</div>
+<!-- Conversion Perles Modal -->
+<div class="overlay" id="md-convert">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title" style="color:var(--blue)">
+      🔄 CONVERTIR DES PERLES
+      <button class="mcls" onclick="closeModal('md-convert')">✕</button>
+    </div>
+    <div style="font-size:9px;color:var(--dim);text-align:center;margin-bottom:12px">
+      Conversion manuelle · Les perles ne se convertissent jamais automatiquement
+    </div>
+    <div id="convert-panel"></div>
   </div>
 </div>
 </body>
